@@ -200,9 +200,9 @@ void FinalPlots
     if (suffix == "png" or suffix == "pdf" or suffix == "eps")
     {
         TCanvas c1("c1", "c1", 600, 600);
-        h_num_vs_eta->Draw(); c1.Print(Form("plots_looper/%s.%s", h_num_vs_eta->GetName(), suffix.c_str()));
-        h_den_vs_eta->Draw(); c1.Print(Form("plots_looper/%s.%s", h_den_vs_eta->GetName(), suffix.c_str()));
-        h_eff_vs_eta->Draw(); c1.Print(Form("plots_looper/%s.%s", h_eff_vs_eta->GetName(), suffix.c_str()));
+        h_num_vs_eta->Draw(); c1.Print(Form("plots/%s_looper.%s", h_num_vs_eta->GetName(), suffix.c_str()));
+        h_den_vs_eta->Draw(); c1.Print(Form("plots/%s_looper.%s", h_den_vs_eta->GetName(), suffix.c_str()));
+        h_eff_vs_eta->Draw(); c1.Print(Form("plots/%s_looper.%s", h_eff_vs_eta->GetName(), suffix.c_str()));
     }
 
     // save to root file
