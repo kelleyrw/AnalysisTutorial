@@ -1,16 +1,14 @@
 #include <iostream>
 #include <string>
-// #include <vector> 
-// #include <cstdlib>
-// #include <limits>
-// #include <algorithm>
 #include "TFile.h"
 #include "TChain.h"
 #include "TH1.h"
 #include "TCanvas.h"
 #include "TROOT.h"
-/* #include "Math/LorentzVector.h" */
-/* typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > LorentzVectorD; */
+#include "TBenchmark.h"
+#include "TTreeCache.h"
+#include "Math/LorentzVector.h"
+typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > LorentzVectorD;
 
 // automatically generated class type
 #include "TRKEFF.h"
@@ -59,16 +57,17 @@ TrackingEfficiencyAnalysis::TrackingEfficiencyAnalysis
     : m_output_file_name(output_file_name)
     , m_suffix(suffix)
     , m_verbose(verbose)
+    , m_hist_map()
 {
     // run begin job when object is constructed
     BeginJob();
    
     if (m_verbose)
     {
-        std::cout << "[TrackingEfficiencyAnalysis] TrackingEfficiencyAnalysis has been initialized with the following parameters:" << std::endl;
-        std::cout << "output_file_name = " << m_output_file_name << std::endl;
-        std::cout << "suffix           = " << m_suffix           << std::endl;
-        std::cout << "verbose          = " << m_verbose          << std::endl;
+        std::cout << "[TrackingEfficiencyAnalysis::TrackingEfficiencyAnalysis] TrackingEfficiencyAnalysis has been initialized with the following parameters:\n";
+        std::cout << "output_file_name = " << m_output_file_name << "\n";
+        std::cout << "suffix           = " << m_suffix           << "\n";
+        std::cout << "verbose          = " << m_verbose          << "\n\n";
     }
 }
 
@@ -78,7 +77,7 @@ TrackingEfficiencyAnalysis::~TrackingEfficiencyAnalysis()
     // run end job when object is destroyed 
     EndJob();
 
-    if (m_verbose) {std::cout << "[TrackingEfficiencyAnalysis] TrackingEfficiencyAnalysis is complete." << std::endl;}
+    if (m_verbose) {std::cout << "[TrackingEfficiencyAnalysis::~TrackingEfficiencyAnalysis] TrackingEfficiencyAnalysis is complete." << std::endl;}
 }
 
 
@@ -89,10 +88,11 @@ void TrackingEfficiencyAnalysis::BeginJob()
     TH1Map& hc = m_hist_map;
 
     // book all the histograms
+    TH1::SetDefaultSumw2(true);
     AddHist(hc, new TH1F("h_num_vs_eta", "Numerator Count vs |#eta|;|#eta|;Numerator Count"    , 50, -2.5, 2.5));
     AddHist(hc, new TH1F("h_den_vs_eta", "Denominator Count vs |#eta|;|#eta|;Denominator Count", 50, -2.5, 2.5));
 
-    if (m_verbose) {std::cout << "[TrackingEfficiencyAnalysis] The following histgrams are booked: " << std::endl;}
+    if (m_verbose) {std::cout << "[TrackingEfficiencyAnalysis::BeginJob] The following histgrams are booked: " << std::endl;}
 }
 
 // operations performed at the end of the job
@@ -101,7 +101,7 @@ void TrackingEfficiencyAnalysis::EndJob()
     // convenience alias
     TH1Map& hc = m_hist_map;
 
-    if (m_verbose) {std::cout << "[TrackingEfficiencyAnalysis] TrackingEfficiencyAnalysis saving histograms." << std::endl;}
+    if (m_verbose) {std::cout << "[TrackingEfficiencyAnalysis::EndJob] TrackingEfficiencyAnalysis saving histograms." << std::endl;}
 
     // divide to make the efficiency hists
     AddHist(hc, MakeEfficiencyPlot(hc["h_num_vs_eta"], hc["h_den_vs_eta"], "h_eff_vs_eta", "Tracking Efficiency vs |#eta|;|#eta|;Efficiency"));
@@ -112,7 +112,7 @@ void TrackingEfficiencyAnalysis::EndJob()
     // print the plots
     if (not m_suffix.empty())
     {
-        if (m_verbose) {std::cout << "[TrackingEfficiencyAnalysis] printing histograms:" << std::endl;}
+        if (m_verbose) {std::cout << "[TrackingEfficiencyAnalysis::EndJob] printing histograms:" << std::endl;}
         PrintHists(hc, "plots", m_suffix);
     }
 
@@ -123,11 +123,157 @@ void TrackingEfficiencyAnalysis::EndJob()
 // operations performed per event 
 void TrackingEfficiencyAnalysis::Analyze()
 {
+    using namespace std;
+    using namespace trkeff;
+
+    // convenience alias
+    TH1Map& hc = m_hist_map;
+        
+    if (m_verbose) {cout << Form("TrackingEfficiencyAnalysis::Analyze] Running on run %d, ls %d, event %d: ", run(), ls(), event()) << endl;}
+
+    // loop over tracking particles 
+    if (m_verbose) {cout << "number of tps = " << tps_p4().size() << "\n\n";}
+
+    for (size_t tp_idx = 0; tp_idx < tps_p4().size(); tp_idx++)
+    {
+        const double tp_pt      = tps_p4().at(tp_idx).pt();
+        const double tp_eta     = tps_p4().at(tp_idx).eta();
+        const double tp_d0      = tps_d0().at(tp_idx);
+        const double tp_dz      = tps_dz().at(tp_idx);
+        const bool   tp_matched = tps_matched().at(tp_idx);
+        const int    tp_nhits   = tps_nhits().at(tp_idx);
+        const int    tp_charge  = tps_charge().at(tp_idx);
+
+        if (m_verbose) {cout << "Looping on Tracking Particle: " << tp_idx << endl;}
+
+        // apply slection //
+        // -------------- // 
+        // TCut tps_sel = "tps_charge!=0 && tps_p4.pt()>1.0 && fabs(tps_p4.eta())<2.5 && tps_nhits>=3 && fabs(tps_dz)<30.0 && fabs(tps_d0)<3.5";
+
+        // only charged 
+        if (tp_charge==0)
+        {
+            if (m_verbose) {cout << "\tfailing charge requirement" << endl;}
+            continue;
+        }
+
+        // min pt
+        if (tp_pt < 1.0/*GeV*/)
+        {
+            if (m_verbose) {cout << "\tfailing pt requirement" << endl;}
+            continue;
+        }
+
+        // max eta 
+        if (fabs(tp_eta) > 2.5)
+        {
+            if (m_verbose) {cout << "\tfailing eta requirement" << endl;}
+            continue;
+        }
+
+        // max d0 
+        if (fabs(tp_d0) > 3.5/*cm*/)
+        {
+            if (m_verbose) {cout << "\tfailing d0 requirement" << endl;}
+            continue;
+        }
+
+        // max dz 
+        if (fabs(tp_dz) > 30/*cm*/)
+        {
+            if (m_verbose) {cout << "\tfailing dz requirement" << endl;}
+            continue;
+        }
+
+        // min # hits 
+        if (fabs(tp_nhits) < 3)
+        {
+            if (m_verbose) {cout << "\tfailing nhits requirement" << endl;}
+            continue;
+        }
+
+        // fill histograms 
+        // -------------- // 
+
+        // deonminator selection has passed
+        hc["h_den_vs_eta"]->Fill(tp_eta);
+        if (m_verbose) {cout << "\tpasses denomiantor" << endl;}
+
+        // numerator
+        if (tp_matched)
+        {
+            hc["h_num_vs_eta"]->Fill(tp_eta);
+            if (m_verbose) {cout << "\tpasses numerator" << endl;}
+        }
+        else
+        {
+            if (m_verbose) {cout << "\tfails numerator" << endl;}
+        }
+
+        if (m_verbose) {cout << "End loop over Tracking Particle: " << tp_idx << endl;}
+    }
+
 }
 
 // loop over the chain and call analyze per event
 void TrackingEfficiencyAnalysis::ScanChain(TChain& chain, long long num_events)
 {
+    using namespace std;
+
+    // benchmark
+    TBenchmark bmark;
+    bmark.Start("benchmark");
+
+    // optimize
+    TTreeCache::SetLearnEntries(10);
+    chain.SetCacheSize(128*1024*1024);
+
+    // events counts and max events
+    int per_mille_old = 0;
+    long long num_events_processed = 0;
+    num_events = (num_events > 0 ? std::min(chain.GetEntries(), num_events) : chain.GetEntries());
+    trkeff_obj.Init(chain);
+
+    // Event Loop
+    for (long long entry = 0; entry < num_events; entry++)
+    {
+        if (m_verbose)
+        {
+            cout << "[TrackingEfficiencyAnalysis::ScanChain] Processing entry " << entry << "\n";
+            cout << "--------------------------\n" << endl;
+        }
+
+        // pogress
+        int per_mille = static_cast<int>(floor(1000.0 * static_cast<float>(num_events_processed)/static_cast<float>(num_events)));
+        cout << per_mille << "\t" << per_mille_old;
+        if (per_mille != per_mille_old)
+        {
+            printf("  \015\033[32m ---> \033[1m\033[31m%4.1f%%" "\033[0m\033[32m <---\033[0m\015", per_mille/10.0);
+            fflush(stdout);
+            per_mille_old = per_mille;
+        }
+
+        // load the current event 
+        trkeff_obj.GetEntry(entry);
+
+        // analyze the event
+        Analyze();
+
+        // increment counter
+        num_events_processed++;
+    }
+
+    // the benchmark results 
+    // -------------------------------------------------------------------------------------------------//
+
+    // done
+    bmark.Stop("benchmark");
+    fflush(stdout);
+    cout << "[TrackingEfficiencyAnalysis::ScanChain] finished processing " << num_events << " events" << endl;
+    cout << "------------------------------" << endl;
+    cout << "CPU  Time: " << Form("%.01f", bmark.GetCpuTime("benchmark" )) << endl;
+    cout << "Real Time: " << Form("%.01f", bmark.GetRealTime("benchmark")) << endl;
+    cout << endl;
 }
 
 #ifndef __CINT__
@@ -138,9 +284,8 @@ try
     chain.Add("../data/tracking_ntuple.root");
     const std::string& output_file_name = "plots/counts_vs_eta_looper.root";
     const std::string& suffix = "png";
-/*     const long long num_events = std::numeric_limits<long>::max(); */
-    const long long num_events = 1;
-    const bool verbose = true;
+    const long long num_events = -1;
+    const bool verbose = false;
     TrackingEfficiencyAnalysis analysis(output_file_name, suffix, verbose);
     analysis.ScanChain(chain, num_events);
     return 0;
