@@ -45,12 +45,6 @@ void CreatePlots
     std::vector<bool>*          tps_matched_ptr = new std::vector<bool>;
     std::vector<int>*           tps_nhits_ptr   = new std::vector<int>;
     std::vector<int>*           tps_charge_ptr  = new std::vector<int>;
-/*     std::vector<LorentzVector> tps_p4; */
-/*     std::vector<double>        tps_dz; */
-/*     std::vector<double>        tps_d0; */
-/*     std::vector<bool>          tps_matched; */
-/*     std::vector<int>           tps_nhits; */
-/*     std::vector<int>           tps_charge; */
 
     // toggle branches
     chain.SetBranchAddress("tps_p4"     , &tps_p4_ptr     );
@@ -59,12 +53,6 @@ void CreatePlots
     chain.SetBranchAddress("tps_matched", &tps_matched_ptr);
     chain.SetBranchAddress("tps_nhits"  , &tps_nhits_ptr  );
     chain.SetBranchAddress("tps_charge" , &tps_charge_ptr );
-/*     chain.SetBranchAddress("tps_p4"     , &tps_p4      );  */
-/*     chain.SetBranchAddress("tps_dz"     , &tps_dz      );  */
-/*     chain.SetBranchAddress("tps_d0"     , &tps_d0      );  */
-/*     chain.SetBranchAddress("tps_matched", &tps_matched );  */
-/*     chain.SetBranchAddress("tps_nhits"  , &tps_nhits   );  */
-/*     chain.SetBranchAddress("tps_charge" , &tps_charge  );  */
 
     // set the status
     chain.SetBranchStatus("*"    , /*toggle = */false);
