@@ -40,11 +40,17 @@ void CreatePlots
 
     // branch pointers
     std::vector<LorentzVector>* tps_p4_ptr      = new std::vector<LorentzVector>;
-    std::vector<double>*        tps_dz_ptr      = new std::vector<double>;      
-    std::vector<double>*        tps_d0_ptr      = new std::vector<double>;      
-    std::vector<bool>*          tps_matched_ptr = new std::vector<bool>;        
-    std::vector<int>*           tps_nhits_ptr   = new std::vector<int>;         
-    std::vector<int>*           tps_charge_ptr  = new std::vector<int>;         
+    std::vector<double>*        tps_dz_ptr      = new std::vector<double>;
+    std::vector<double>*        tps_d0_ptr      = new std::vector<double>;
+    std::vector<bool>*          tps_matched_ptr = new std::vector<bool>;
+    std::vector<int>*           tps_nhits_ptr   = new std::vector<int>;
+    std::vector<int>*           tps_charge_ptr  = new std::vector<int>;
+/*     std::vector<LorentzVector> tps_p4; */
+/*     std::vector<double>        tps_dz; */
+/*     std::vector<double>        tps_d0; */
+/*     std::vector<bool>          tps_matched; */
+/*     std::vector<int>           tps_nhits; */
+/*     std::vector<int>           tps_charge; */
 
     // toggle branches
     chain.SetBranchAddress("tps_p4"     , &tps_p4_ptr     );
@@ -53,6 +59,12 @@ void CreatePlots
     chain.SetBranchAddress("tps_matched", &tps_matched_ptr);
     chain.SetBranchAddress("tps_nhits"  , &tps_nhits_ptr  );
     chain.SetBranchAddress("tps_charge" , &tps_charge_ptr );
+/*     chain.SetBranchAddress("tps_p4"     , &tps_p4      );  */
+/*     chain.SetBranchAddress("tps_dz"     , &tps_dz      );  */
+/*     chain.SetBranchAddress("tps_d0"     , &tps_d0      );  */
+/*     chain.SetBranchAddress("tps_matched", &tps_matched );  */
+/*     chain.SetBranchAddress("tps_nhits"  , &tps_nhits   );  */
+/*     chain.SetBranchAddress("tps_charge" , &tps_charge  );  */
 
     // set the status
     chain.SetBranchStatus("*"    , /*toggle = */false);
@@ -193,7 +205,7 @@ void FinalPlots
     // create efficiency histogram
     TH1* h_eff_vs_eta = dynamic_cast<TH1*>(h_num_vs_eta->Clone("h_eff_vs_eta"));
     h_eff_vs_eta->SetTitle("Efficiency vs |#eta|;|#eta|;Efficiency");
-    h_eff_vs_eta->Divide(h_den_vs_eta);
+    h_eff_vs_eta->Divide(h_num_vs_eta, h_den_vs_eta, 1.0, 1.0, "B");
     h_eff_vs_eta->GetYaxis()->SetRangeUser(0.1, 1.1);
 
     // write the output
@@ -217,7 +229,7 @@ void FinalPlots
 int main()
 try
 {
-    CreatePlots("trees/tracking_ntuple.root", "plots/eff_vs_eta_looper.root", 1, true);
+    CreatePlots("trees/tracking_ntuple.root", "plots/eff_vs_eta_looper.root", 1000, false);
     return 0;
 }
 catch (std::exception& e)
