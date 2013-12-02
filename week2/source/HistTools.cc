@@ -3,6 +3,9 @@
 #include "TSystem.h"
 #include "TCanvas.h"
 #include "TROOT.h"
+#include "TStyle.h"
+#include "TH1.h"
+#include "TGaxis.h"
 #include <stdexcept>
 #include <iostream>
 #include <string>
@@ -120,6 +123,51 @@ void ListHists(const TH1Map& hist_map)
     {
         std::cout << hm_iter->first << "\t" << hm_iter->second->GetTitle() << std::endl; 
     }
+}
+
+// set style
+void SetStyle(const std::string& option)
+{
+    TStyle *myStyle = gROOT->GetStyle("Plain");
+    TGaxis::SetMaxDigits(5);
+    myStyle->SetPaintTextFormat("1.3f");
+    myStyle->SetOptStat(option.c_str());
+    myStyle->SetOptFit(1111);
+    myStyle->SetTitleBorderSize(0);
+    myStyle->SetTitleFillColor(0);
+    myStyle->SetTitleStyle(0);
+    //myStyle->SetTitleX( 0.5 - 2.0*myStyle->GetTitleXSize() );
+    //myStyle->SetTitleX( 0.05 );
+    //myStyle->SetTitleY( 0.96 );
+    //myStyle->SetTitleAlign(22);
+    myStyle->SetLegendBorderSize(0);
+#if ROOT_VERSION_CODE >= ROOT_VERSION(5,30,0)
+    myStyle->SetLegendFillColor(0);
+#endif
+
+    //myStyle->SetTitleY(0.985);
+    myStyle->SetHistLineColor(kBlue);
+    myStyle->SetHistLineWidth(1);
+    myStyle->SetPadGridX(1);
+    myStyle->SetPadGridY(1);
+    myStyle->SetGridColor(kGray+1);
+    myStyle->SetCanvasDefW(600);
+    myStyle->SetCanvasDefH(600);
+    myStyle->SetStatH(0.09);
+    myStyle->SetStatW(0.2);
+    myStyle->SetStatX(0.99);
+    myStyle->SetStatY(0.99);
+    myStyle->SetStatBorderSize(myStyle->GetHistLineWidth());
+    myStyle->SetStatTextColor(kBlack);
+    myStyle->SetStatColor(0);
+    //myStyle->SetStatStyle(Style_t style = 1001);
+    //void SetStatBoxPosition(TH1* hist_ptr, float x1 = 0.8, float y1 = 0.8, float x2 = 1.0, float y2 = 1.0);
+
+    myStyle->SetTitleOffset(1.2, "Y");
+    myStyle->SetLabelSize(0.035, "Y");
+    myStyle->SetLabelSize(0.035, "X");
+    myStyle->cd();
+    gStyle = myStyle;
 }
 
 // make an efficiency plot by dividing the two histograms 

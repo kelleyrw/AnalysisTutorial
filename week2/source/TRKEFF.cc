@@ -27,6 +27,8 @@ TRKEFF::TRKEFF()
     , tps_p4_handle("tps_p4")
     , tps_d0_handle("tps_d0")
     , tps_dz_handle("tps_dz")
+    , tps_tip_handle("tps_tip")
+    , tps_lip_handle("tps_lip")
     , tps_charge_handle("tps_charge")
     , tps_nhits_handle("tps_nhits")
 {
@@ -52,6 +54,8 @@ void TRKEFF::Init(TTree& tree)
     tps_p4_handle.Init(tree);
     tps_d0_handle.Init(tree);
     tps_dz_handle.Init(tree);
+    tps_tip_handle.Init(tree);
+    tps_lip_handle.Init(tree);
     tps_charge_handle.Init(tree);
     tps_nhits_handle.Init(tree);
 
@@ -82,6 +86,8 @@ void TRKEFF::GetEntry(const unsigned int entry)
     tps_p4_handle.GetEntry(entry);
     tps_d0_handle.GetEntry(entry);
     tps_dz_handle.GetEntry(entry);
+    tps_tip_handle.GetEntry(entry);
+    tps_lip_handle.GetEntry(entry);
     tps_charge_handle.GetEntry(entry);
     tps_nhits_handle.GetEntry(entry);
 
@@ -107,6 +113,8 @@ void TRKEFF::LoadAllBranches()
     tps_p4_handle.Load();
     tps_d0_handle.Load();
     tps_dz_handle.Load();
+    tps_tip_handle.Load();
+    tps_lip_handle.Load();
     tps_charge_handle.Load();
     tps_nhits_handle.Load();
 
@@ -131,6 +139,8 @@ const std::vector<int>& TRKEFF::tps_pdgid() {return tps_pdgid_handle.get();}
 const std::vector<LorentzVectorD >& TRKEFF::tps_p4() {return tps_p4_handle.get();}
 const std::vector<double>& TRKEFF::tps_d0() {return tps_d0_handle.get();}
 const std::vector<double>& TRKEFF::tps_dz() {return tps_dz_handle.get();}
+const std::vector<double>& TRKEFF::tps_tip() {return tps_tip_handle.get();}
+const std::vector<double>& TRKEFF::tps_lip() {return tps_lip_handle.get();}
 const std::vector<int>& TRKEFF::tps_charge() {return tps_charge_handle.get();}
 const std::vector<int>& TRKEFF::tps_nhits() {return tps_nhits_handle.get();}
 
@@ -180,6 +190,8 @@ namespace trkeff
     const std::vector<LorentzVectorD >& tps_p4() {return trkeff_obj.tps_p4();}
     const std::vector<double>& tps_d0() {return trkeff_obj.tps_d0();}
     const std::vector<double>& tps_dz() {return trkeff_obj.tps_dz();}
+    const std::vector<double>& tps_tip() {return trkeff_obj.tps_tip();}
+    const std::vector<double>& tps_lip() {return trkeff_obj.tps_lip();}
     const std::vector<int>& tps_charge() {return trkeff_obj.tps_charge();}
     const std::vector<int>& tps_nhits() {return trkeff_obj.tps_nhits();}
 

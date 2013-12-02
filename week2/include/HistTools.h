@@ -3,7 +3,10 @@
 
 #include <map>
 #include <string>
-#include "TH1.h" 
+
+// forward declarations
+class TStyle;
+class TH1;
 
 // convenenice typedef for a simple histogram container
 typedef std::map<std::string, TH1*> TH1Map;
@@ -25,6 +28,9 @@ void ListHists(const TH1Map& hist_map);
 
 // delete the histogram pointers in the map
 void DeleteHists(const TH1Map& hist_map);
+
+// Set style
+void SetStyle(const std::string& value = "emrou");
 
 // make an efficiency plot by dividing the two histograms 
 TH1* MakeEfficiencyPlot

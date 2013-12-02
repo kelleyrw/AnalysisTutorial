@@ -33,7 +33,7 @@ void eff_compiled
     TH1* h_den_vs_eta = new TH1F("h_den_vs_eta", "Denominator Count vs |#eta|;|#eta|;Denominator Count", 50, -2.5, 2.5);
 
     // define selection
-    TCut tps_sel     = "tps_charge!=0 && tps_p4.pt()>1.0 && fabs(tps_p4.eta())<2.5 && tps_nhits>=3 && fabs(tps_dz)<30.0 && fabs(tps_d0)<3.5";
+    TCut tps_sel     = "tps_charge!=0 && tps_p4.pt()>0.9 && fabs(tps_p4.eta())<2.5 && fabs(tps_lip)<30.0 && fabs(tps_tip)<3.5";
     TCut tps_matched = "tps_matched";
 
     // fill the histograms with TTree::Draw
@@ -43,17 +43,20 @@ void eff_compiled
     // make the efficiency plot
     TH1* h_eff_vs_eta = dynamic_cast<TH1*>(h_num_vs_eta->Clone("h_eff_vs_eta"));
     h_eff_vs_eta->SetTitle("Efficiency vs |#eta|;|#eta|;Efficiency");
-    h_eff_vs_eta->Divide(h_den_vs_eta);
+    h_eff_vs_eta->Divide(h_num_vs_eta, h_den_vs_eta, 1.0, 1.0, "B");
     h_eff_vs_eta->GetYaxis()->SetRangeUser(0.1, 1.1);
+    h_eff_vs_eta->SetMarkerSize(0.75);
+    h_eff_vs_eta->SetMarkerStyle(20);
+    h_eff_vs_eta->SetMarkerColor(kBlack);
 
     // write the output
     if (suffix == "png" or suffix == "pdf" or suffix == "eps")
     {
         if (verbose) {cout << "[eff_compiled] printing plots to plots directory." << endl;}
         TCanvas c1("c1", "c1", 600, 600);
-        h_num_vs_eta->Draw(); c1.Print(Form("plots/%s.%s", h_num_vs_eta->GetName(), suffix.c_str()));
-        h_den_vs_eta->Draw(); c1.Print(Form("plots/%s.%s", h_den_vs_eta->GetName(), suffix.c_str()));
-        h_eff_vs_eta->Draw(); c1.Print(Form("plots/%s.%s", h_eff_vs_eta->GetName(), suffix.c_str()));
+        h_num_vs_eta->Draw(); c1.Print(Form("plots/%s_compiled.%s", h_num_vs_eta->GetName(), suffix.c_str()));
+        h_den_vs_eta->Draw(); c1.Print(Form("plots/%s_compiled.%s", h_den_vs_eta->GetName(), suffix.c_str()));
+        h_eff_vs_eta->Draw(); c1.Print(Form("plots/%s_compiled.%s", h_eff_vs_eta->GetName(), suffix.c_str()));
     }
 
     // output the file

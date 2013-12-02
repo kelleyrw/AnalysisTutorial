@@ -241,6 +241,8 @@ class TRKEFF
         const std::vector<LorentzVectorD >& tps_p4();
         const std::vector<double>& tps_d0();
         const std::vector<double>& tps_dz();
+        const std::vector<double>& tps_tip();
+        const std::vector<double>& tps_lip();
         const std::vector<int>& tps_charge();
         const std::vector<int>& tps_nhits();
 
@@ -265,6 +267,8 @@ class TRKEFF
         trkeff::Handle< std::vector<LorentzVectorD > > tps_p4_handle;
         trkeff::Handle< std::vector<double> > tps_d0_handle;
         trkeff::Handle< std::vector<double> > tps_dz_handle;
+        trkeff::Handle< std::vector<double> > tps_tip_handle;
+        trkeff::Handle< std::vector<double> > tps_lip_handle;
         trkeff::Handle< std::vector<int> > tps_charge_handle;
         trkeff::Handle< std::vector<int> > tps_nhits_handle;
 
@@ -295,6 +299,8 @@ namespace trkeff
     const std::vector<LorentzVectorD >& tps_p4();
     const std::vector<double>& tps_d0();
     const std::vector<double>& tps_dz();
+    const std::vector<double>& tps_tip();
+    const std::vector<double>& tps_lip();
     const std::vector<int>& tps_charge();
     const std::vector<int>& tps_nhits();
 

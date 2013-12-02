@@ -5,6 +5,7 @@
 #include "TH1.h"
 #include "TCanvas.h"
 #include "TROOT.h"
+#include "TStyle.h"
 #include "TBenchmark.h"
 #include "TTreeCache.h"
 #include "Math/LorentzVector.h"
@@ -84,6 +85,9 @@ TrackingEfficiencyAnalysis::~TrackingEfficiencyAnalysis()
 // operations performed at the beginning of the job
 void TrackingEfficiencyAnalysis::BeginJob()
 {
+    // set the style
+    SetStyle();
+
     // convenience alias
     TH1Map& hc = m_hist_map;
 
@@ -91,8 +95,18 @@ void TrackingEfficiencyAnalysis::BeginJob()
     TH1::SetDefaultSumw2(true);
     AddHist(hc, new TH1F("h_num_vs_eta", "Numerator Count vs |#eta|;|#eta|;Numerator Count"    , 50, -2.5, 2.5));
     AddHist(hc, new TH1F("h_den_vs_eta", "Denominator Count vs |#eta|;|#eta|;Denominator Count", 50, -2.5, 2.5));
+    TH1::SetDefaultSumw2(false);
 
     if (m_verbose) {std::cout << "[TrackingEfficiencyAnalysis::BeginJob] The following histgrams are booked: " << std::endl;}
+
+    // set histogram styles
+    for (TH1Map::const_iterator hm_iter = m_hist_map.begin(); hm_iter != m_hist_map.end(); hm_iter++)
+    {
+        TH1& h = *hm_iter->second; 
+        h.SetMarkerSize(0.75);
+        h.SetMarkerStyle(20);
+        h.SetMarkerColor(kBlack);
+    }
 }
 
 // operations performed at the end of the job
@@ -105,6 +119,7 @@ void TrackingEfficiencyAnalysis::EndJob()
 
     // divide to make the efficiency hists
     AddHist(hc, MakeEfficiencyPlot(hc["h_num_vs_eta"], hc["h_den_vs_eta"], "h_eff_vs_eta", "Tracking Efficiency vs |#eta|;|#eta|;Efficiency"));
+    hc["h_eff_vs_eta"]->GetYaxis()->SetRangeUser(0.1, 1.1);
 
     // save the plots
     SaveHists(hc, m_output_file_name, "RECREATE");
@@ -138,8 +153,8 @@ void TrackingEfficiencyAnalysis::Analyze()
     {
         const double tp_pt      = tps_p4().at(tp_idx).pt();
         const double tp_eta     = tps_p4().at(tp_idx).eta();
-        const double tp_d0      = tps_d0().at(tp_idx);
-        const double tp_dz      = tps_dz().at(tp_idx);
+        const double tp_lip     = tps_lip().at(tp_idx);
+        const double tp_tip     = tps_tip().at(tp_idx);
         const bool   tp_matched = tps_matched().at(tp_idx);
         const int    tp_nhits   = tps_nhits().at(tp_idx);
         const int    tp_charge  = tps_charge().at(tp_idx);
@@ -158,7 +173,7 @@ void TrackingEfficiencyAnalysis::Analyze()
         }
 
         // min pt
-        if (tp_pt < 1.0/*GeV*/)
+        if (tp_pt < 0.9/*GeV*/)
         {
             if (m_verbose) {cout << "\tfailing pt requirement" << endl;}
             continue;
@@ -171,22 +186,22 @@ void TrackingEfficiencyAnalysis::Analyze()
             continue;
         }
 
-        // max d0 
-        if (fabs(tp_d0) > 3.5/*cm*/)
+        // max transverse impact parameter 
+        if (fabs(tp_tip) > 3.5/*cm*/)
         {
             if (m_verbose) {cout << "\tfailing d0 requirement" << endl;}
             continue;
         }
 
-        // max dz 
-        if (fabs(tp_dz) > 30/*cm*/)
+        // max longitudinal impact parameter 
+        if (fabs(tp_lip) > 30/*cm*/)
         {
             if (m_verbose) {cout << "\tfailing dz requirement" << endl;}
             continue;
         }
 
         // min # hits 
-        if (fabs(tp_nhits) < 3)
+        if (fabs(tp_nhits) < 0)
         {
             if (m_verbose) {cout << "\tfailing nhits requirement" << endl;}
             continue;

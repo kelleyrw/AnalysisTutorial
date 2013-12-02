@@ -40,16 +40,16 @@ void CreatePlots
 
     // branch pointers
     std::vector<LorentzVector>* tps_p4_ptr      = new std::vector<LorentzVector>;
-    std::vector<double>*        tps_dz_ptr      = new std::vector<double>;
-    std::vector<double>*        tps_d0_ptr      = new std::vector<double>;
+    std::vector<double>*        tps_lip_ptr     = new std::vector<double>;
+    std::vector<double>*        tps_tip_ptr     = new std::vector<double>;
     std::vector<bool>*          tps_matched_ptr = new std::vector<bool>;
     std::vector<int>*           tps_nhits_ptr   = new std::vector<int>;
     std::vector<int>*           tps_charge_ptr  = new std::vector<int>;
 
     // toggle branches
     chain.SetBranchAddress("tps_p4"     , &tps_p4_ptr     );
-    chain.SetBranchAddress("tps_dz"     , &tps_dz_ptr     );
-    chain.SetBranchAddress("tps_d0"     , &tps_d0_ptr     );
+    chain.SetBranchAddress("tps_lip"    , &tps_lip_ptr    );
+    chain.SetBranchAddress("tps_tip"    , &tps_tip_ptr    );
     chain.SetBranchAddress("tps_matched", &tps_matched_ptr);
     chain.SetBranchAddress("tps_nhits"  , &tps_nhits_ptr  );
     chain.SetBranchAddress("tps_charge" , &tps_charge_ptr );
@@ -60,8 +60,8 @@ void CreatePlots
 
     // convenience (so i dont' have to use pointer syntax)
     std::vector<LorentzVector>& tps_p4      = *tps_p4_ptr;
-    std::vector<double>&        tps_dz      = *tps_dz_ptr;
-    std::vector<double>&        tps_d0      = *tps_d0_ptr;
+    std::vector<double>&        tps_lip     = *tps_lip_ptr;
+    std::vector<double>&        tps_tip     = *tps_tip_ptr;
     std::vector<bool>&          tps_matched = *tps_matched_ptr;
     std::vector<int>&           tps_nhits   = *tps_nhits_ptr;
     std::vector<int>&           tps_charge  = *tps_charge_ptr;
@@ -87,8 +87,8 @@ void CreatePlots
         {
             const double tp_pt      = tps_p4.at(tp_idx).pt();
             const double tp_eta     = tps_p4.at(tp_idx).eta();
-            const double tp_d0      = tps_d0.at(tp_idx);
-            const double tp_dz      = tps_dz.at(tp_idx);
+            const double tp_lip     = tps_lip.at(tp_idx);
+            const double tp_tip     = tps_tip.at(tp_idx);
             const bool   tp_matched = tps_matched.at(tp_idx);
             const int    tp_nhits   = tps_nhits.at(tp_idx);
             const int    tp_charge  = tps_charge.at(tp_idx);
@@ -97,7 +97,7 @@ void CreatePlots
 
             // apply slection //
             // -------------- // 
-            // TCut tps_sel = "tps_charge!=0 && tps_p4.pt()>1.0 && fabs(tps_p4.eta())<2.5 && tps_nhits>=3 && fabs(tps_dz)<30.0 && fabs(tps_d0)<3.5";
+            // TCut tps_sel = "tps_charge!=0 && tps_p4.pt()>0.9 && fabs(tps_p4.eta())<2.5 && fabs(tps_lip)<30.0 && fabs(tps_tip)<3.5"
 
             // only charged 
             if (tp_charge==0)
@@ -107,7 +107,7 @@ void CreatePlots
             }
 
             // min pt
-            if (tp_pt < 1.0/*GeV*/)
+            if (tp_pt < 0.9/*GeV*/)
             {
                 if (verbose) {cout << "\tfailing pt requirement" << endl;}
                 continue;
@@ -120,22 +120,22 @@ void CreatePlots
                 continue;
             }
 
-            // max d0 
-            if (fabs(tp_d0) > 3.5/*cm*/)
+            // max transverse impact parameter 
+            if (fabs(tp_tip) > 3.5/*cm*/)
             {
                 if (verbose) {cout << "\tfailing d0 requirement" << endl;}
                 continue;
             }
 
-            // max dz 
-            if (fabs(tp_dz) > 30/*cm*/)
+            // max longitudinal impact parameter 
+            if (fabs(tp_lip) > 30/*cm*/)
             {
                 if (verbose) {cout << "\tfailing dz requirement" << endl;}
                 continue;
             }
 
             // min # hits 
-            if (fabs(tp_nhits) < 3)
+            if (fabs(tp_nhits) < 0)
             {
                 if (verbose) {cout << "\tfailing nhits requirement" << endl;}
                 continue;
@@ -195,6 +195,9 @@ void FinalPlots
     h_eff_vs_eta->SetTitle("Efficiency vs |#eta|;|#eta|;Efficiency");
     h_eff_vs_eta->Divide(h_num_vs_eta, h_den_vs_eta, 1.0, 1.0, "B");
     h_eff_vs_eta->GetYaxis()->SetRangeUser(0.1, 1.1);
+    h_eff_vs_eta->SetMarkerSize(0.75);
+    h_eff_vs_eta->SetMarkerStyle(20);
+    h_eff_vs_eta->SetMarkerColor(kBlack);
 
     // write the output
     if (suffix == "png" or suffix == "pdf" or suffix == "eps")
