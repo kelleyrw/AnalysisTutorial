@@ -31,9 +31,6 @@ process.load('Configuration.StandardSequences.Validation_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
-process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1000)
-)
 
 # Input source
 process.source = cms.Source("EmptySource")
@@ -50,7 +47,6 @@ process.configurationMetadata = cms.untracked.PSet(
 )
 
 # Output definition
-
 process.FEVTDEBUGHLToutput = cms.OutputModule("PoolOutputModule",
     splitLevel = cms.untracked.int32(0),
     eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
@@ -64,6 +60,11 @@ process.FEVTDEBUGHLToutput = cms.OutputModule("PoolOutputModule",
         SelectEvents = cms.vstring('generation_step')
     )
 )
+
+# output info
+process.MessageLogger.cerr.FwkReport.reportEvery = 1
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
+process.FEVTDEBUGHLToutput.fileName = cms.untracked.string('TTbar_Tauola_8TeV_cfi_py_GEN_SIM_DIGI_L1_DIGI2RAW_HLT_RAW2DIGI_L1Reco_RECO_VALIDATION_1k.root')
 
 # Additional output definition
 

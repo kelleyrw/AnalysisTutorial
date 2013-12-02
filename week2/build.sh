@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [[ `uname` -eq "Darwin" ]]
+if [[ `uname` == "Darwin" ]]
 then
     CC="clang++"
 else

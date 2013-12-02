@@ -27,6 +27,9 @@ Created:         Fri Nov 22 09:32:25 PST 2013
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "SimTracker/Records/interface/TrackAssociatorRecord.h"
 #include "SimTracker/TrackAssociation/interface/TrackAssociatorByHits.h"
+#include "SimDataFormats/TrackingAnalysis/interface/TrackingParticle.h"
+#include "SimDataFormats/TrackingAnalysis/interface/TrackingVertex.h"
+#include "SimDataFormats/TrackingAnalysis/interface/TrackingVertexContainer.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
 #include "MagneticField/Engine/interface/MagneticField.h"
@@ -195,7 +198,7 @@ class SimpleNtuple : public edm::EDAnalyzer
         // input parameters
         const std::string m_output_file_name;
         const edm::InputTag m_reco_tracks_label;
-        const edm::InputTag m_primary_vertex_label;
+        const edm::InputTag m_reco_vertex_label;
         edm::ESHandle<TrackAssociatorBase> assoc_handle;
 
         // members
@@ -209,7 +212,7 @@ class SimpleNtuple : public edm::EDAnalyzer
 SimpleNtuple::SimpleNtuple(const edm::ParameterSet& iConfig)
     : m_output_file_name(iConfig.getUntrackedParameter<std::string>("output_file_name"))
     , m_reco_tracks_label(iConfig.getUntrackedParameter<edm::InputTag>("reco_tracks_label"))
-    , m_primary_vertex_label(iConfig.getUntrackedParameter<edm::InputTag>("primary_vertex_label"))
+    , m_reco_vertex_label(iConfig.getUntrackedParameter<edm::InputTag>("reco_vertex_label"))
     , m_output_file(NULL)
     , m_tree(NULL)
     , m_evt()
@@ -285,11 +288,17 @@ void SimpleNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     edm::Handle<View<reco::Track> > track_handle;
     iEvent.getByLabel(m_reco_tracks_label, track_handle);
 
-    // Get the primary vertices
+    // Get the reco vertices
     Handle<reco::VertexCollection> vertex_handle;
-    iEvent.getByLabel(m_primary_vertex_label, vertex_handle);
-    const reco::VertexCollection& vertices = *vertex_handle;
-    const GlobalPoint pv = (vertices.empty() ? GlobalPoint(0,0,0) : GlobalPoint(vertices.front().x(), vertices.front().y(), vertices.front().z())); 
+    iEvent.getByLabel(m_reco_vertex_label, vertex_handle);
+    const reco::VertexCollection& trks_vtxs = *vertex_handle;
+//     const GlobalPoint trks_vtx = (trks_vtxs.empty() ? GlobalPoint(0,0,0) : GlobalPoint(trks_vtxs.front().x(), trks_vtxs.front().y(), trks_vtxs.front().z())); 
+
+    // Get the tracking vertices
+    Handle<TrackingVertexCollection> tracking_vertex_handle;
+    iEvent.getByLabel("mergedtruth", "MergedTrackTruth", tracking_vertex_handle);
+    const TrackingVertexCollection& tps_vtxs = *tracking_vertex_handle;
+    const GlobalPoint tps_vtx = (tps_vtxs.empty() ? GlobalPoint(0,0,0) : GlobalPoint(tps_vtxs.front().position().x(), tps_vtxs.front().position().y(), tps_vtxs.front().position().z())); 
 
 	// Get the TrackingParicles (simulated particle tracks)
 	edm::Handle<TrackingParticleCollection>  tracking_particle_handle;
@@ -305,7 +314,7 @@ void SimpleNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     iSetup.get<IdealMagneticFieldRecord>().get(magnetic_field_handle);
     const MagneticField& magnetic_field = *magnetic_field_handle;
         
-    //get the builder:
+    // get the builder:
 
     // loop over tracking particles
     for(size_t tp_idx = 0; tp_idx < tracking_particle_handle->size(); ++tp_idx)
@@ -321,7 +330,7 @@ void SimpleNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
             const GlobalVector tp_p3(tp.px(), tp.py(), tp.pz()); 
             FreeTrajectoryState fts(tp_vtx, tp_p3, tp.charge(), &magnetic_field);
             TSCPBuilderNoMaterial tscp_builder;
-            TrajectoryStateClosestToPoint ts = tscp_builder(fts, pv);
+            TrajectoryStateClosestToPoint ts = tscp_builder(fts, tps_vtx);
             double d0 = ts.perigeeParameters().transverseImpactParameter();
             double dz = ts.perigeeParameters().longitudinalImpactParameter();
 
@@ -347,8 +356,8 @@ void SimpleNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
             // fill reco track variables
             m_evt.trks_p4.push_back(LorentzVector(assoc_trk.px(), assoc_trk.py(), assoc_trk.pz(), assoc_trk.p()));
-            m_evt.trks_d0.push_back(vertices.empty() ? assoc_trk.d0() : -1.0*assoc_trk.dxy(vertices.front().position()));
-            m_evt.trks_dz.push_back(vertices.empty() ? assoc_trk.dz() : -1.0*assoc_trk.dz(vertices.front().position()));
+            m_evt.trks_d0.push_back(trks_vtxs.empty() ? assoc_trk.d0() : -1.0*assoc_trk.dxy(trks_vtxs.front().position()));
+            m_evt.trks_dz.push_back(trks_vtxs.empty() ? assoc_trk.dz() : assoc_trk.dz(trks_vtxs.front().position()));
             m_evt.trks_pterr.push_back(assoc_trk.ptError());
             m_evt.trks_d0err.push_back(assoc_trk.d0Error());
             m_evt.trks_dzerr.push_back(assoc_trk.dzError());
