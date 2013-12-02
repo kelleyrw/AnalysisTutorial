@@ -123,14 +123,14 @@ void CreatePlots
             // max transverse impact parameter 
             if (fabs(tp_tip) > 3.5/*cm*/)
             {
-                if (verbose) {cout << "\tfailing d0 requirement" << endl;}
+                if (verbose) {cout << "\tfailing tip requirement" << endl;}
                 continue;
             }
 
             // max longitudinal impact parameter 
             if (fabs(tp_lip) > 30/*cm*/)
             {
-                if (verbose) {cout << "\tfailing dz requirement" << endl;}
+                if (verbose) {cout << "\tfailing lip requirement" << endl;}
                 continue;
             }
 

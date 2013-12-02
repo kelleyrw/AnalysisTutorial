@@ -227,7 +227,6 @@ void TrackingEfficiencyAnalysis::Analyze()
 
         if (m_verbose) {cout << "End loop over Tracking Particle: " << tp_idx << endl;}
     }
-
 }
 
 // loop over the chain and call analyze per event
