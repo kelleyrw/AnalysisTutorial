@@ -24,7 +24,7 @@ process.GlobalTag.globaltag = 'START53_V7A::All'
 process.simple = cms.EDAnalyzer('SimpleNtuple'
     , output_file_name = cms.untracked.string('output/tracking_ntuple.root')
     , reco_tracks_label = cms.untracked.InputTag('generalTracks')
-    , primary_vertex_label = cms.untracked.InputTag("offlinePrimaryVertices")
+    , reco_vertex_label = cms.untracked.InputTag("offlinePrimaryVertices")
 )
 
 
