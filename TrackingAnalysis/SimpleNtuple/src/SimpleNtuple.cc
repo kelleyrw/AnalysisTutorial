@@ -86,6 +86,8 @@ struct EventInfo
     std::vector<LorentzVector> tps_p4;
     std::vector<double> tps_d0;
     std::vector<double> tps_dz;
+    std::vector<double> tps_tip;
+    std::vector<double> tps_lip;
     std::vector<int> tps_charge;
     std::vector<int> tps_nhits;
 };
@@ -112,6 +114,8 @@ EventInfo::EventInfo()
     tps_p4.reserve(num_reserve);
     tps_d0.reserve(num_reserve);
     tps_dz.reserve(num_reserve);
+    tps_tip.reserve(num_reserve);
+    tps_lip.reserve(num_reserve);
     tps_charge.reserve(num_reserve);
     tps_nhits.reserve(num_reserve);
 }
@@ -137,6 +141,8 @@ void EventInfo::Reset()
     tps_p4.clear();
     tps_d0.clear();
     tps_dz.clear();
+    tps_tip.clear();
+    tps_lip.clear();
     tps_charge.clear();
     tps_nhits.clear();
 }
@@ -165,6 +171,8 @@ void EventInfo::SetBranches(TTree* const tree)
     tree->Branch("tps_p4"           , "vecLorentzVector"    , &tps_p4          ); 
     tree->Branch("tps_d0"           , "std::vector<double>" , &tps_d0          ); 
     tree->Branch("tps_dz"           , "std::vector<double>" , &tps_dz          ); 
+    tree->Branch("tps_tip"          , "std::vector<double>" , &tps_tip         ); 
+    tree->Branch("tps_lip"          , "std::vector<double>" , &tps_lip         ); 
     tree->Branch("tps_charge"       , "std::vector<int>"    , &tps_charge      ); 
     tree->Branch("tps_nhits"        , "std::vector<int>"    , &tps_nhits       ); 
 }
@@ -338,6 +346,8 @@ void SimpleNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
             m_evt.tps_pdgid.push_back(tp.pdgId());
             m_evt.tps_d0.push_back(d0);
             m_evt.tps_dz.push_back(dz);
+            m_evt.tps_tip.push_back(tp.vertex().rho()); // according to CommonTools/RecoAlgos/interface/TrackingParticleSelector.h 
+            m_evt.tps_lip.push_back(tp.vertex().z());   // according to CommonTools/RecoAlgos/interface/TrackingParticleSelector.h 
             m_evt.tps_charge.push_back(tp.charge());
             m_evt.tps_nhits.push_back(static_cast<int>(tp.trackPSimHit().size()));
         }

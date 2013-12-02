@@ -62,9 +62,9 @@ process.FEVTDEBUGHLToutput = cms.OutputModule("PoolOutputModule",
 )
 
 # output info
-process.MessageLogger.cerr.FwkReport.reportEvery = 1
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
-process.FEVTDEBUGHLToutput.fileName = cms.untracked.string('TTbar_Tauola_8TeV_cfi_py_GEN_SIM_DIGI_L1_DIGI2RAW_HLT_RAW2DIGI_L1Reco_RECO_VALIDATION_1k.root')
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10000))
+process.FEVTDEBUGHLToutput.fileName = cms.untracked.string('TTbar_Tauola_8TeV_cfi_py_GEN_SIM_DIGI_L1_DIGI2RAW_HLT_RAW2DIGI_L1Reco_RECO_VALIDATION_10k.root')
 
 # Additional output definition
 
