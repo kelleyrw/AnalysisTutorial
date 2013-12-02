@@ -33,7 +33,7 @@ void eff_compiled
     TH1* h_den_vs_eta = new TH1F("h_den_vs_eta", "Denominator Count vs |#eta|;|#eta|;Denominator Count", 50, -2.5, 2.5);
 
     // define selection
-    TCut tps_sel     = "tps_charge!=0 && tps_p4.pt()>0.9 && fabs(tps_p4.eta())<2.5 && fabs(tps_lip)<30.0 && fabs(tps_tip)<3.5";
+    TCut tps_sel     = "tps_charge!=0 && tps_p4.pt()>0.9 && fabs(tps_p4.eta())<2.5 && tps_nhits>=3 && fabs(tps_lip)<30.0 && fabs(tps_tip)<3.5";
     TCut tps_matched = "tps_matched";
 
     // fill the histograms with TTree::Draw

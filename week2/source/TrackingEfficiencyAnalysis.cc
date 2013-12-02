@@ -201,7 +201,7 @@ void TrackingEfficiencyAnalysis::Analyze()
         }
 
         // min # hits 
-        if (fabs(tp_nhits) < 0)
+        if (fabs(tp_nhits) < 3)
         {
             if (m_verbose) {cout << "\tfailing nhits requirement" << endl;}
             continue;

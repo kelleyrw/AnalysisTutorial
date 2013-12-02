@@ -97,7 +97,7 @@ void CreatePlots
 
             // apply slection //
             // -------------- // 
-            // TCut tps_sel = "tps_charge!=0 && tps_p4.pt()>0.9 && fabs(tps_p4.eta())<2.5 && fabs(tps_lip)<30.0 && fabs(tps_tip)<3.5"
+            // TCut tps_sel = "tps_charge!=0 && tps_p4.pt()>0.9 && fabs(tps_p4.eta())<2.5 && tps_nhits>=3 && fabs(tps_lip)<30.0 && fabs(tps_tip)<3.5"
 
             // only charged 
             if (tp_charge==0)
@@ -135,7 +135,7 @@ void CreatePlots
             }
 
             // min # hits 
-            if (fabs(tp_nhits) < 0)
+            if (fabs(tp_nhits) < 3)
             {
                 if (verbose) {cout << "\tfailing nhits requirement" << endl;}
                 continue;
