@@ -81,6 +81,12 @@ TrackingEfficiencyAnalysis::~TrackingEfficiencyAnalysis()
     if (m_verbose) {std::cout << "[TrackingEfficiencyAnalysis::~TrackingEfficiencyAnalysis] TrackingEfficiencyAnalysis is complete." << std::endl;}
 }
 
+// variable pt bins
+const float pt_bins[] = {0.1 , 0.126   , 0.158   , 0.200   , 0.251   , 0.316   , 0.398   , 0.501   , 0.631   , 0.794   , 
+                         1.0 , 1.259   , 1.585   , 1.995   , 2.512   , 3.162   , 3.981   , 5.012   , 6.310   , 7.943   , 
+                         10  , 12.589  , 15.849  , 19.953  , 25.119  , 31.623  , 39.811  , 50.119  , 63.096  , 79.433  , 
+                         100 , 125.893 , 158.489 , 199.526 , 251.189 , 316.228 , 398.107 , 501.187 , 630.957 , 794.328 , 1000};
+const unsigned int npt_bins = sizeof(pt_bins)/sizeof(float)-1;
 
 // operations performed at the beginning of the job
 void TrackingEfficiencyAnalysis::BeginJob()
@@ -93,8 +99,10 @@ void TrackingEfficiencyAnalysis::BeginJob()
 
     // book all the histograms
     TH1::SetDefaultSumw2(true);
-    AddHist(hc, new TH1F("h_num_vs_eta", "Numerator Count vs |#eta|;|#eta|;Numerator Count"    , 50, -2.5, 2.5));
-    AddHist(hc, new TH1F("h_den_vs_eta", "Denominator Count vs |#eta|;|#eta|;Denominator Count", 50, -2.5, 2.5));
+    AddHist(hc, new TH1F("h_num_vs_eta", "Numerator Count vs |#eta|;|#eta|;Numerator Count"        , 50, -2.5, 2.5));
+    AddHist(hc, new TH1F("h_den_vs_eta", "Denominator Count vs |#eta|;|#eta|;Denominator Count"    , 50, -2.5, 2.5));
+    AddHist(hc, new TH1F("h_num_vs_pt" , "Numerator Count vs p_{T};p_{T} (GeV);Numerator Count"    , npt_bins, pt_bins));
+    AddHist(hc, new TH1F("h_den_vs_pt" , "Denominator Count vs p_{T};p_{T} (GeV);Denominator Count", npt_bins, pt_bins));
     TH1::SetDefaultSumw2(false);
 
     if (m_verbose) {std::cout << "[TrackingEfficiencyAnalysis::BeginJob] The following histgrams are booked: " << std::endl;}
@@ -118,8 +126,11 @@ void TrackingEfficiencyAnalysis::EndJob()
     if (m_verbose) {std::cout << "[TrackingEfficiencyAnalysis::EndJob] TrackingEfficiencyAnalysis saving histograms." << std::endl;}
 
     // divide to make the efficiency hists
-    AddHist(hc, MakeEfficiencyPlot(hc["h_num_vs_eta"], hc["h_den_vs_eta"], "h_eff_vs_eta", "Tracking Efficiency vs |#eta|;|#eta|;Efficiency"));
+    AddHist(hc, MakeEfficiencyPlot(hc["h_num_vs_eta"], hc["h_den_vs_eta"], "h_eff_vs_eta", "Tracking Efficiency vs |#eta|;|#eta|;Efficiency"   ));
+    AddHist(hc, MakeEfficiencyPlot(hc["h_num_vs_pt" ], hc["h_den_vs_pt" ], "h_eff_vs_pt" , "Tracking Efficiency vs p_{T};p_{T}(GeV);Efficiency"));
+
     hc["h_eff_vs_eta"]->GetYaxis()->SetRangeUser(0.1, 1.1);
+    hc["h_eff_vs_pt" ]->GetYaxis()->SetRangeUser(0.1, 1.1);
 
     // save the plots
     SaveHists(hc, m_output_file_name, "RECREATE");
@@ -173,7 +184,7 @@ void TrackingEfficiencyAnalysis::Analyze()
         }
 
         // min pt
-        if (tp_pt < 0.9/*GeV*/)
+        if (tp_pt < 0.1/*GeV*/)
         {
             if (m_verbose) {cout << "\tfailing pt requirement" << endl;}
             continue;
@@ -211,13 +222,15 @@ void TrackingEfficiencyAnalysis::Analyze()
         // -------------- // 
 
         // deonminator selection has passed
-        hc["h_den_vs_eta"]->Fill(tp_eta);
+        if (tp_pt > 0.9) {hc["h_den_vs_eta"]->Fill(tp_eta);}
+        if (tp_pt > 0.1) {hc["h_den_vs_pt" ]->Fill(tp_pt );}
         if (m_verbose) {cout << "\tpasses denomiantor" << endl;}
 
         // numerator
         if (tp_matched)
         {
-            hc["h_num_vs_eta"]->Fill(tp_eta);
+            if (tp_pt > 0.9) {hc["h_num_vs_eta"]->Fill(tp_eta);}
+            if (tp_pt > 0.1) {hc["h_num_vs_pt" ]->Fill(tp_pt );}
             if (m_verbose) {cout << "\tpasses numerator" << endl;}
         }
         else
