@@ -35,10 +35,10 @@ class TrackingEfficiencyAnalysis
         void BeginJob();
         void EndJob();
         void Analyze();
-        void ScanChain(TChain& chain, long long num_events = std::numeric_limits<long>::max());
+        void ScanChain(TChain& chain, long long num_events = std::numeric_limits<long long>::max());
 
     private:
-        // members
+        // members:
         const std::string m_output_file_name;
         const std::string m_suffix;
         const bool m_verbose;
