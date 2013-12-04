@@ -38,13 +38,10 @@ class TrackingEfficiencyAnalysis
         void ScanChain(TChain& chain, long long num_events = std::numeric_limits<long>::max());
 
     private:
-
         // members
         const std::string m_output_file_name;
         const std::string m_suffix;
         const bool m_verbose;
-
-        // member functions
         TH1Map m_hist_map;
 };
 
@@ -65,7 +62,8 @@ TrackingEfficiencyAnalysis::TrackingEfficiencyAnalysis
    
     if (m_verbose)
     {
-        std::cout << "[TrackingEfficiencyAnalysis::TrackingEfficiencyAnalysis] TrackingEfficiencyAnalysis has been initialized with the following parameters:\n";
+        std::cout << "[TrackingEfficiencyAnalysis::TrackingEfficiencyAnalysis] "
+                     "TrackingEfficiencyAnalysis has been initialized with the following parameters:\n";
         std::cout << "output_file_name = " << m_output_file_name << "\n";
         std::cout << "suffix           = " << m_suffix           << "\n";
         std::cout << "verbose          = " << m_verbose          << "\n\n";
@@ -78,7 +76,8 @@ TrackingEfficiencyAnalysis::~TrackingEfficiencyAnalysis()
     // run end job when object is destroyed 
     EndJob();
 
-    if (m_verbose) {std::cout << "[TrackingEfficiencyAnalysis::~TrackingEfficiencyAnalysis] TrackingEfficiencyAnalysis is complete." << std::endl;}
+    if (m_verbose) {std::cout << "[TrackingEfficiencyAnalysis::~TrackingEfficiencyAnalysis] "
+                                 "TrackingEfficiencyAnalysis is complete." << std::endl;}
 }
 
 // variable pt bins
@@ -174,7 +173,6 @@ void TrackingEfficiencyAnalysis::Analyze()
 
         // apply slection //
         // -------------- // 
-        // TCut tps_sel = "tps_charge!=0 && tps_p4.pt()>1.0 && fabs(tps_p4.eta())<2.5 && tps_nhits>=3 && fabs(tps_dz)<30.0 && fabs(tps_d0)<3.5";
 
         // only charged 
         if (tp_charge==0)
@@ -221,16 +219,19 @@ void TrackingEfficiencyAnalysis::Analyze()
         // fill histograms 
         // -------------- // 
 
+        const float min_tp_for_eta_eff = 0.9;
+        const float min_tp_for_pt_eff  = 0.1;
+
         // deonminator selection has passed
-        if (tp_pt > 0.9) {hc["h_den_vs_eta"]->Fill(tp_eta);}
-        if (tp_pt > 0.1) {hc["h_den_vs_pt" ]->Fill(tp_pt );}
+        if (tp_pt > min_tp_for_eta_eff) {hc["h_den_vs_eta"]->Fill(tp_eta);}
+        if (tp_pt > min_tp_for_pt_eff ) {hc["h_den_vs_pt" ]->Fill(tp_pt );}
         if (m_verbose) {cout << "\tpasses denomiantor" << endl;}
 
         // numerator
         if (tp_matched)
         {
-            if (tp_pt > 0.9) {hc["h_num_vs_eta"]->Fill(tp_eta);}
-            if (tp_pt > 0.1) {hc["h_num_vs_pt" ]->Fill(tp_pt );}
+            if (tp_pt > min_tp_for_eta_eff) {hc["h_num_vs_eta"]->Fill(tp_eta);}
+            if (tp_pt > min_tp_for_pt_eff ) {hc["h_num_vs_pt" ]->Fill(tp_pt );}
             if (m_verbose) {cout << "\tpasses numerator" << endl;}
         }
         else
