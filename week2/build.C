@@ -10,9 +10,9 @@ bool build(const std::string& option = "")
     }
 
     // compile and load the source 
-    if (gSystem->CompileMacro("source/TRKEFF.cc"                    , (option + "k-").c_str(), "libTRKEFF"                    , "lib") == 0) {return false;}
-    if (gSystem->CompileMacro("source/HistTools.cc"                 , (option + "k-").c_str(), "libHistTools"                 , "lib") == 0) {return false;}
-    if (gSystem->CompileMacro("source/TrackingEfficiencyAnalysis.cc", (option + "k-").c_str(), "libTrackingEfficiencyAnalysis", "lib") == 0) {return false;}
+    if (gSystem->CompileMacro("source/TRKEFF.cc"                    , (option + "k-" ).c_str(), "libTRKEFF"                    , "lib") == 0) {return false;}
+    if (gSystem->CompileMacro("source/HistTools.cc"                 , (option + "k-" ).c_str(), "libHistTools"                 , "lib") == 0) {return false;}
+    if (gSystem->CompileMacro("source/TrackingEfficiencyAnalysis.cc", (option + "kf-").c_str(), "libTrackingEfficiencyAnalysis", "lib") == 0) {return false;}
 
     // if here, then succeeded
     return true;

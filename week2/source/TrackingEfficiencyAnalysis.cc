@@ -1,8 +1,10 @@
 #include <iostream>
 #include <string>
+#include <cmath>
 #include "TFile.h"
 #include "TChain.h"
 #include "TH1.h"
+#include "TH2.h"
 #include "TCanvas.h"
 #include "TROOT.h"
 #include "TStyle.h"
@@ -97,23 +99,47 @@ void TrackingEfficiencyAnalysis::BeginJob()
     TH1Map& hc = m_hist_map;
 
     // book all the histograms
+
+    // set sumw2
     TH1::SetDefaultSumw2(true);
+
+    // eff plots
     AddHist(hc, new TH1F("h_num_vs_eta", "Numerator Count vs |#eta|;|#eta|;Numerator Count"        , 50, -2.5, 2.5));
     AddHist(hc, new TH1F("h_den_vs_eta", "Denominator Count vs |#eta|;|#eta|;Denominator Count"    , 50, -2.5, 2.5));
     AddHist(hc, new TH1F("h_num_vs_pt" , "Numerator Count vs p_{T};p_{T} (GeV);Numerator Count"    , npt_bins, pt_bins));
     AddHist(hc, new TH1F("h_den_vs_pt" , "Denominator Count vs p_{T};p_{T} (GeV);Denominator Count", npt_bins, pt_bins));
+
+    // residual vs |eta|
+    AddHist(hc , new TH2F("h_phires_vs_eta"     , "#phi residual vs |#eta|;|#eta|;#delta#phi [rad]"                , 50, -2.5, 2.5, 100, -0.01, 0.01));
+    AddHist(hc , new TH2F("h_cotthetares_vs_eta", "cot(#theta) residual vs |#eta|;|#eta|;#delta(cot(#theta)) [rad]", 50, -2.5, 2.5, 100, -0.02, 0.02));
+    AddHist(hc , new TH2F("h_d0res_vs_eta"      , "d_{0} residual vs |#eta|;|#eta|;#delta(d_{0}) [cm]"             , 50, -2.5, 2.5, 100, -0.1 , 0.1 ));
+    AddHist(hc , new TH2F("h_dzres_vs_eta"      , "d_{z} residual vs |#eta|;|#eta|;#delta(d_{z}) [cm]"             , 50, -2.5, 2.5, 100, -0.05, 0.05));
+    AddHist(hc , new TH2F("h_ptres_vs_eta"      , "p_{T} residual/p_{T} vs |#eta|;|#eta|;#delta(p_{T})/p_{T}"      , 50, -2.5, 2.5, 100, -0.1 , 0.1 ));
+
+    // eff vs p_{T} 
+    // to do ...
+
+    // unset sumw2
     TH1::SetDefaultSumw2(false);
 
     if (m_verbose) {std::cout << "[TrackingEfficiencyAnalysis::BeginJob] The following histgrams are booked: " << std::endl;}
 
-    // set histogram styles
-    for (TH1Map::const_iterator hm_iter = m_hist_map.begin(); hm_iter != m_hist_map.end(); hm_iter++)
-    {
-        TH1& h = *hm_iter->second; 
-        h.SetMarkerSize(0.75);
-        h.SetMarkerStyle(20);
-        h.SetMarkerColor(kBlack);
-    }
+}
+    
+// run FitSlicesY and add resolution hist to container
+void CreateAndAddResPlot(TH1Map& hc, const std::string& hist_name, const std::string& sigma_hist_title)
+{
+    TH2& h = *dynamic_cast<TH2*>(hc.at(hist_name));
+    h.FitSlicesY();
+    TH1& h_sigma = *dynamic_cast<TH1D*>(gDirectory->Get(Form("%s_2", hist_name.c_str())));
+    h_sigma.SetName(Form("%s_sigma", hist_name.c_str()));
+    h_sigma.SetTitle(sigma_hist_title.c_str());
+    h_sigma.SetMarkerSize(0.75);
+    h_sigma.SetMarkerStyle(20);
+    h_sigma.SetMarkerColor(kRed);
+    h_sigma.SetLineColor(kBlack);
+    AddHist(hc, &h_sigma);
+    return;
 }
 
 // operations performed at the end of the job
@@ -131,6 +157,25 @@ void TrackingEfficiencyAnalysis::EndJob()
     hc["h_eff_vs_eta"]->GetYaxis()->SetRangeUser(0.1, 1.1);
     hc["h_eff_vs_pt" ]->GetYaxis()->SetRangeUser(0.1, 1.1);
 
+    // set histogram styles
+    for (TH1Map::const_iterator hm_iter = m_hist_map.begin(); hm_iter != m_hist_map.end(); hm_iter++)
+    {
+        TH1& h = *hm_iter->second;
+        if (not TString(h.GetName()).Contains("res"))
+        {
+            h.SetMarkerSize(0.75);
+            h.SetMarkerStyle(20);
+            h.SetMarkerColor(kBlack);
+        }
+    }
+
+    // create the resolution histograms
+    CreateAndAddResPlot(hc , "h_phires_vs_eta"      , "#phi resolution vs |#eta|;|#eta|;#sigma(#delta#phi) [rad]"                );
+    CreateAndAddResPlot(hc , "h_cotthetares_vs_eta" , "cot(#theta) resolution vs |#eta|;|#eta|;#sigma(#delta(cot(#theta))) [rad]");
+    CreateAndAddResPlot(hc , "h_d0res_vs_eta"       , "d_{0} resolution vs |#eta|;|#eta|;#sigma(#delta(d_{0})) [cm]"             );
+    CreateAndAddResPlot(hc , "h_dzres_vs_eta"       , "d_{z} resolution vs |#eta|;|#eta|;#sigma(#delta(d_{z})) [cm]"             );
+    CreateAndAddResPlot(hc , "h_ptres_vs_eta"       , "p_{T} resolution vs |#eta|;|#eta|;#sigma(#delta(p_{T})/p_{T})"            );
+
     // save the plots
     SaveHists(hc, m_output_file_name, "RECREATE");
 
@@ -143,6 +188,12 @@ void TrackingEfficiencyAnalysis::EndJob()
 
     // delete the hists
     DeleteHists(hc);
+}
+
+// simple contangent function
+double cot(const float x)
+{
+    return cos(x)/sin(x);
 }
 
 // operations performed per event 
@@ -163,8 +214,12 @@ void TrackingEfficiencyAnalysis::Analyze()
     {
         const double tp_pt      = tps_p4().at(tp_idx).pt();
         const double tp_eta     = tps_p4().at(tp_idx).eta();
+        const double tp_ctheta  = cot(tps_p4().at(tp_idx).theta());
+        const double tp_phi     = tps_p4().at(tp_idx).phi();
         const double tp_lip     = tps_lip().at(tp_idx);
         const double tp_tip     = tps_tip().at(tp_idx);
+        const double tp_d0      = tps_d0().at(tp_idx);
+        const double tp_dz      = tps_dz().at(tp_idx);
         const bool   tp_matched = tps_matched().at(tp_idx);
         const int    tp_nhits   = tps_nhits().at(tp_idx);
         const int    tp_charge  = tps_charge().at(tp_idx);
@@ -230,8 +285,26 @@ void TrackingEfficiencyAnalysis::Analyze()
         // numerator
         if (tp_matched)
         {
-            if (tp_pt > min_tp_for_eta_eff) {hc["h_num_vs_eta"]->Fill(tp_eta);}
-            if (tp_pt > min_tp_for_pt_eff ) {hc["h_num_vs_pt" ]->Fill(tp_pt );}
+            const double trk_pt     = trks_p4().at(tp_idx).pt();
+            const double trk_phi    = trks_p4().at(tp_idx).phi();
+            const double trk_ctheta = cot(trks_p4().at(tp_idx).theta());
+            const double trk_d0     = trks_d0().at(tp_idx);
+            const double trk_dz     = trks_dz().at(tp_idx);
+
+            if (tp_pt > min_tp_for_eta_eff)
+            {
+                hc["h_num_vs_eta"]->Fill(tp_eta);
+
+                hc["h_phires_vs_eta"      ] ->Fill(tp_eta, cos(acos(tp_phi - trk_phi)) ); 
+                hc["h_cotthetares_vs_eta" ] ->Fill(tp_eta, tp_ctheta - trk_ctheta      ); 
+                hc["h_d0res_vs_eta"       ] ->Fill(tp_eta, tp_d0 - trk_d0              ); 
+                hc["h_dzres_vs_eta"       ] ->Fill(tp_eta, tp_dz - trk_dz              ); 
+                hc["h_ptres_vs_eta"       ] ->Fill(tp_eta, (tp_pt - trk_pt)/tp_pt      ); 
+            }
+            if (tp_pt > min_tp_for_pt_eff )
+            {
+                hc["h_num_vs_pt" ]->Fill(tp_pt );
+            }
             if (m_verbose) {cout << "\tpasses numerator" << endl;}
         }
         else
@@ -310,7 +383,7 @@ try
 {
     TChain chain("tree");
     chain.Add("../data/tracking_ntuple.root");
-    const std::string& output_file_name = "plots/counts_vs_eta_looper.root";
+    const std::string& output_file_name = "plots/tracking_eff_analysis.root";
     const std::string& suffix = "png";
     const long long num_events = -1;
     const bool verbose = false;
