@@ -24,3 +24,12 @@ bool build(const std::string& option = "")
     // if here, then succeeded
     return true;
 }
+
+// clean up the libs 
+// usage: 
+// root [5] .L build.C+
+// root [6] clean() 
+void clean()
+{
+    gSystem->Exec("rm lib/*");
+}
