@@ -1,0 +1,292 @@
+---+ Analysis Tutorial
+
+---++ Overview
+
+The main goal of this twiki is to document a series of training sessions to teach the basics of doing a particle physics analysis from a practical perspective. The loose set of topics that will be covered are:
+
+   * ROOT -- the C++ based data analysis package that is used in HEP
+   * !CMSSW -- the software framework used by the collaboration
+   * CMS2 -- the software sub-framework used by the UCSD/UCSB/FNAL group (a.k.a. SNT)
+   * A full analysis example -- measuring the Z cross section
+
+These topics are not necessarily ordered in any particular way and are only loosely related.
+
+%TOC{title="Contents:"}%
+
+---++ Order of topics (Subject to change)
+---+++ ROOT
+   * Documentation: 
+      * Home: http://root.cern.ch/drupal/
+      * User's guide: http://root.cern.ch/drupal/content/users-guide
+      * Classes: http://root.cern.ch/root/html534/ClassIndex.html
+      * Tutorial Example Code: http://root.cern.ch/root/html/tutorials/
+   * To Check out the example code:
+<pre>git clone <a target="_blank" href="https://github.com/kelleyrw/AnalysisTutorial" style="color: #1155cc; font-family: arial, sans-serif; font-size: 13px; background-color: #ffffff">https://github.com/kelleyrw/AnalysisTutorial</a></pre> 
+---++++ Lesson 1
+   * Studied the basics of TTree and made efficiency plots for some tracking variables
+   * Reading: ROOT user's guide: read ch 1-3,7,12
+   * Example code: <a target="_blank" href="https://github.com/kelleyrw/AnalysisTutorial/tree/master/week1">Lesson 1</a>
+---+++++ TTree example
+ To facilitate a non-trivial example of making plots, a very simple TTree was constructed using CMSSW that contains the composite generated/simulated particles known as [[tracking particles][https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideTrackingTruth]]. You can think of these tracking particles as the combined generator and simulated truth information of all the debris of p-p collision (e.g. Pythia6 status 1). These tracking particles are associated with reconstructed tracks by looking at the simulated energy deposits in the tracker (sim hits) and matching them to the reconstructed hits from the track reconstruction algorithms (rec hits). We will go into how this TTree was made in a later lesson.
+
+This tree was filled per event and contains a unfiltered list (in the form of a std::vector) of TrackingParticles per event:
+
+<verbatim>
+Events
+  |
+  --> list of TrackingParticles
+             |
+             --> Tracking particle information (p4, # sim hits, d0, dz, ...) 
+             --> Matching reconstructed Track info (bogus values filled if no matching track).
+</verbatim>
+
+The tree is small (1000 events) and I was able to check into the repository (https://github.com/kelleyrw/AnalysisTutorial/blob/master/week1/trees/tracking_ntuple.root). All the branches should be the same size:
+
+<verbatim>
+// TrakingParticle info
+std::vector<LorentzVector> tps_p4:  four momentum
+std::vector<int> tps_pdgid:         pdg particle ID code: http://pdg.lbl.gov/2007/reviews/montecarlorpp.pdf
+std::vector<double> tps_d0:         transverse impact parameter
+std::vector<double> tps_dz:         longitudinal impact parameter
+std::vector<bool> tps_matched:      matched to track?  true/false 
+std::vector<int> tps_charge:        charge
+std::vector<int> tps_nhits:         # of simulated hits
+
+// reco track info
+std::vector<LorentzVector> trks_p4:  four momentum
+std::vector<double> trks_tip:        transverse impact parameter  (from the TrackingParticle vertex)
+std::vector<double> trks_lip:        longitudinal impact parameter  (from the TrackingParticle vertex)
+std::vector<double> trks_d0:         transverse impact parameter (using the trajectory builder)
+std::vector<double> trks_dz:         longitudinal impact parameter (using the trajectory builder)
+std::vector<double> trks_pterr:      pt uncertainty
+std::vector<double> trks_d0err:      d0 uncertainty
+std::vector<double> trks_dzerr:      dz uncertainty
+std::vector<double> trks_chi2:       chi^2 of the track's fit
+std::vector<int> trks_ndof:          # degrees of freedom
+std::vector<int> trks_nlayers:       # number of valid layers with a measurement
+std::vector<bool> trks_high_purity:  # track passes high purity quality requirement
+</verbatim>
+
+---+++++ Playing with TTree::Draw
+
+TTree::Draw gives you basic plotting from the ROOT prompt. This is convenient for quick studies and on the fly plot making. In addition to the chapter 12 on TTree from the ROOT User's guide, you should also read the documentation in the class webpage: http://root.cern.ch/root/html532/TTree.html#TTree:Draw%2
+
+Open the ROOT file and try playing with the following examples:
+
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+[rwk7t@tensor lesson1]$  root ../data/tracking_ntuple.root 
+root [0] 
+Attaching file ../data/tracking_ntuple.root as _file0...
+root [1] .ls
+</verbatim>
+
+List the branches in the tree:
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+root [2] tree->Print()
+</verbatim>
+
+List the branches in the tree with a less verbose printout:
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+root [3] tree->GetListOfBranches()->ls()
+</verbatim>
+
+Draw the tracking particles's pT.
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+root [4] tree->Draw("tps_p4.pt()") 
+</verbatim> <img width="596" alt="tps_p4_pt_ex1.png" src="%ATTACHURLPATH%/tps_p4_pt_ex1.png" height="572" />
+
+On the previous plot, the automatic binning choice was sub optimal since it tries to get everything included in a bin. To specific the binning explicitly:
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+root [5] tree->Draw("tps_p4.pt()>>(100,0,10)")
+</verbatim> <img width="596" alt="tps_p4_pt_ex2.png" src="%ATTACHURLPATH%/tps_p4_pt_ex2.png" height="572" />
+
+In order to keep have a handle to the histogram for later manipulation, you can name the output hist. Now you can do subsequent operations on it.
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+root [7] tree->Draw("tps_p4.pt()>>h1(100,0,10)")
+root [8] h1->SetLineColor(kRed)
+root [9] h1->SetTitle("tracking particle p_{T};p_{T} (GeV);A.U.")
+root [10] h1->SetLineWidth(2)
+root [11] h1->Draw()
+</verbatim> <img width="596" alt="tps_p4_pt_ex3.png" src="%ATTACHURLPATH%/tps_p4_pt_ex3.png" height="572" />
+
+To make a selection, use the 2nd field. This is also an example of how to overlay to plots.
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+root [12] tree->Draw("tps_p4.pt()>>h_pt_barrel(100,0,10)", "fabs(tps_p4.eta())<1.1");
+root [13] h_pt_barrel->Draw();
+root [14] h_pt_barrel->SetLineColor(kBlue);
+root [15] h_pt_barrel->SetLineWidth(2);
+root [16] h_pt_barrel->SetTitle("Tracking Particle p_{T} (Barrel);p_{T} (GeV)");
+root [17] h_pt_barrel->Draw();
+root [18] tree->Draw("tps_p4.pt()>>h_pt_endcap(100,0,10)", "fabs(tps_p4.eta())>1.1");
+root [19] h_pt_endcap->SetLineColor(kRed);
+root [20] h_pt_endcap->SetLineWidth(2);
+root [21] h_pt_endcap->SetTitle("Tracking Particle p_{T} (Endcap);p_{T} (GeV)");
+root [22] h_pt_endcap->Draw();
+root [23] h_pt_barrel->Draw("sames");
+root [24] TLegend leg(0.3, 0.8, 0.6, 0.5);
+root [25] leg.AddEntry(h_pt_endcap, "Endcap");
+root [26] leg.AddEntry(h_pt_barrel, "Barrel");
+root [27] leg.SetFillStyle(0);
+root [28] leg.Draw();
+</verbatim> <img width="596" alt="tps_p4_pt_overlay.png" src="%ATTACHURLPATH%/tps_p4_pt_overlay.png" height="572" />
+
+Now at this point, you may be sick of typing in commands everytime. Time to use a macro (see chapter 7). Consider the following macro (https://github.com/kelleyrw/AnalysisTutorial/tree/master/lesson1/macros/overlay.C) which is the same as the previous example
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+{
+    tree->Draw("tps_p4.pt()>>h_pt_barrel(100,0,10)", "fabs(tps_p4.eta())<1.1");
+    h_pt_barrel->Draw();
+    h_pt_barrel->SetLineColor(kBlue);
+    h_pt_barrel->SetLineWidth(2);
+    h_pt_barrel->SetTitle("Tracking Particle p_{T} (Barrel);p_{T} (GeV)");
+    h_pt_barrel->Draw();
+
+    tree->Draw("tps_p4.pt()>>h_pt_endcap(100,0,10)", "fabs(tps_p4.eta())>1.1");
+    h_pt_endcap->SetLineColor(kRed);
+    h_pt_endcap->SetLineWidth(2);
+    h_pt_endcap->SetTitle("Tracking Particle p_{T} (Endcap);p_{T} (GeV)");
+
+    h_pt_endcap->Draw();
+    h_pt_barrel->Draw("sames");
+    TLegend leg(0.3, 0.8, 0.6, 0.5);
+    leg.AddEntry(h_pt_endcap, "Endcap");
+    leg.AddEntry(h_pt_barrel, "Barrel");
+    leg.SetFillStyle(0);
+    leg.Draw();
+}
+</verbatim>
+
+To run, you open the ROOT tree and the run it:
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+[rwk7t@tensor lesson1]$  root ../data/tracking_ntuple.root 
+root [0] 
+Attaching file ../data/tracking_ntuple.root as _file0...
+root [1] .x macros/overlay.C 
+Info in <TCanvas::MakeDefCanvas>:  created default TCanvas with name c1
+</verbatim>
+
+---+++++ Efficiency Plots
+
+Our next example is to use this simple tree to make an efficiency plot vs eta. We define the efficiency is a ratio:
+
+&epsilon; = numerator count / denominator count
+
+Where denominator is a tracking particle that has a reasonable chance of actually being reconstructed:
+   * non zero charge
+   * pT &gt; 0.9 !GeV
+   * |&eta;| &lt; 2.5
+   * |transverse impact parameter| &lt; 3.5 cm
+   * |longitudinal impact parameter| &lt; 30 cm
+   * |# of simulated hits| &gt;= 3
+
+The numerator selection is the same as the denominator selection except that we require the tracking particle to be matched to a reconstructed track.
+
+The following macro produces this plot: https://github.com/kelleyrw/AnalysisTutorial/tree/master/lesson1/macros/eff.C
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+[rwk7t@tensor lesson1]$  root ../data/tracking_ntuple.root 
+root [0] 
+Attaching file ../data/tracking_ntuple.root as _file0...
+root [1] .x macros/eff.C 
+Info in <TCanvas::MakeDefCanvas>:  created default TCanvas with name c1
+</verbatim>
+</verbatim> <img width="596" alt="eff_vs_eta.png" src="%ATTACHURLPATH%/eff_vs_eta.png" height="572" />
+
+As an exercise we're going to make this same plot 2 more times.  The next example, we're going to compile the macro.  In general it is a good idea to compile you macros because the interpreter (CINT) is not robust and can incorrect interpret even simple code.  Also, it will great increase the execution time if the macro is doing anything significant.  See chapter 7 of the User's Guide for more details. 
+The following macro produces this plot same plot as above but is meant to run compiled: https://github.com/kelleyrw/AnalysisTutorial/tree/master/lesson1/macros/eff_compiled.C
+
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+[rwk7t@tensor lesson1]$  root
+root [0] .L macros/eff_compiled.C++
+Info in <TUnixSystem::ACLiC>: creating shared library /Users/rwk7t/temp/.rootbuild//Users/rwk7t/Development/newbies/lesson1/./macros/eff_compiled_C.so
+root [1] eff_compiled("../data/tracking_ntuple.root", "plots/eff_vs_eta.root", "png")
+[eff_compiled] tree is opened with 1000 entries
+[eff_compiled] printing plots to plots directory.
+Info in <TCanvas::Print>: png file plots/h_num_vs_eta_compiled.png has been created
+Info in <TCanvas::Print>: png file plots/h_den_vs_eta_compiled.png has been created
+Info in <TCanvas::Print>: png file plots/h_eff_vs_eta_compiled.png has been created
+[eff_compiled] writing plots to plots/eff_vs_eta.root
+</verbatim>
+</verbatim> <img width="596" alt="h_num_vs_eta_compiled.png" src="%ATTACHURLPATH%/h_num_vs_eta_compiled.png" height="572" />
+</verbatim> <img width="596" alt="h_den_vs_eta_compiled.png" src="%ATTACHURLPATH%/h_den_vs_eta_compiled.png" height="572" />
+</verbatim> <img width="596" alt="h_eff_vs_eta_compiled.png" src="%ATTACHURLPATH%/h_eff_vs_eta_compiled.png" height="572" />
+
+The final example from this lesson is a very simple "looper".  A looper is simple a macro that manually loops over the entries in a TTree rather than relying on TTree::Draw().  This has the advantage of speed since there will be only one loop over the tree instead of one for each plot.  Also, it has the flexibility to implement arbitrary logic whereas TTree::Draw, while flexible, can still be limited on what you can calculate and plot.   
+
+The following macro is a simple looper: https://github.com/kelleyrw/AnalysisTutorial/tree/master/lesson1/macros/eff_looper.C.  It breaks up the process into two steps: create the numerator and denominator plots (CreatePlots) and doing the division to make the efficiency (FinalPlots).  The purpose of this is making the numerator/denominator is the "slow" part -- you don't want to remake these plots if you all you need is to change the label or something on the efficiency plot.  This is a simple example of breaking up the work flow to keep the analysis running efficiently.  You can of course make a function that simple calls both if you want the option of doing it in two steps (exercise left to the reader)
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+root [2] .L macros/eff_looper.C++
+Info in <TUnixSystem::ACLiC>: creating shared library /Users/rwk7t/temp/.rootbuild//Users/rwk7t/Development/newbies/lesson1/./macros/eff_looper_C.so
+root [3] CreatePlots("../data/tracking_ntuple.root", "plots/counts_vs_eta_looper.root")
+root [4] FinalPlots("plots/counts_vs_eta_looper.root", "plots/eff_vs_eta_looper.root", "png")
+Info in <TCanvas::Print>: png file plots/h_num_vs_eta_looper.png has been created
+Info in <TCanvas::Print>: png file plots/h_den_vs_eta_looper.png has been created
+Info in <TCanvas::Print>: png file plots/h_eff_vs_eta_looper.png has been created
+</verbatim>
+</verbatim> <img width="596" alt="h_num_vs_eta_looper.png" src="%ATTACHURLPATH%/h_num_vs_eta_looper.png" height="572" />
+</verbatim> <img width="596" alt="h_den_vs_eta_looper.png" src="%ATTACHURLPATH%/h_den_vs_eta_looper.png" height="572" />
+</verbatim> <img width="596" alt="h_eff_vs_eta_looper.png" src="%ATTACHURLPATH%/h_eff_vs_eta_looper.png" height="572" />
+
+---+++++Homework:
+   * check out, understand, and run the macros from lesson1
+   * modify the macros to produce the efficiency vs pt.  The only change to the selection is since this is an efficiency vs pT, we should reduce the pT threshold to pT > 0.1 !GeV.
+   * create resolution plots vs eta and pT.  They are made by x_{reco} - x_{truth}.  These should looks similar (but not exactly) to:
+      * http://cmsdoc.cern.ch/cms/Physics/tracking/validation/MC/CMSSW_6_1_0/START61_V8_noPU_ootb/RelValTTbar/resolutionsEta.pdf
+	  * http://cmsdoc.cern.ch/cms/Physics/tracking/validation/MC/CMSSW_6_1_0/START61_V8_noPU_ootb/RelValTTbar/resolutionsPt.pdf
+   * write a brief discuss the features you see in the plots and try to explain them based on what we've gone over in the student given lectures
+
+---++++ Lesson 2
+   * A more sustainable version of the eff_looper.C.  This example is a skeleton for organizing an analysis. 
+   * <a target="_blank" href="https://github.com/kelleyrw/AnalysisTutorial/tree/master/lesson2">Lesson 2 example code</a>
+
+---+++ CMSSW
+---++++ Overview of !CMSSW
+   * Where is the code
+   * Where is the LXR
+   * Where is the Dyoxygen
+   * Where is the data
+---++++ Selected workbook topics Workbook
+   * Some of these topics are out of date -- we'll use what we can and I'll supply more relevant examples if they are too far out of date.
+   * workbook: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBook
+---+++++ Chapter 2
+   * intro the !CMSSW: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookIntroBasics
+   * discussion on computing model: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookComputingModel
+   * basics of !CMSSW: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookCMSSWFramework
+---+++++ Chapter 3
+   * Ignore PAT
+   * work flow of an analysis: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookAnalysisOverviewIntroduction
+   * which release: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookWhichRelease
+   * Open a root tree and play with TTree::Draw(): https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookFWLite
+   * Working with real data (JSON's etc...): https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookCollisionsDataAnalysis
+---+++++ Chapter 4
+   * Basics of analysis: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMoreOnCMSSWFramework
+   * Write an EDAnalyzer: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookWriteFrameworkModule
+   * Python configuration: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookConfigFileIntro
+   * Explain what an EDFilter and EDProducer does (do an example?)
+
+---+++ CMS2
+---++++ CMS2 Overview
+   * what is cms2?
+   * where is the code?
+---+++++ CMS2 ntuples
+   * where are our ntuples
+   * play with an ntuple to make some plots: TTree::Draw()
+   * how to produce cms2 ntuples
+---+++++ Writing a Looper
+   * give them a skeleton looper and have them fill in the appropriate values to make something meaningful (gen level stuff?)
+
+---+++ A full analysis example -- measuring the Z cross section
+---++++ Motivate the selection
+   * discussion on final state
+   * discuss the backgrounds
+   * look at some event displays of Z MC events
+---++++ Discuss the appropriate objects and selections
+   * event selection
+   * muon selection (ID, isolation, etc.)
+   * electron selection (ID, isolation, etc.)
+   * give a reference to the actual values and have them give a discussion on what the different components mean.
+---++++ Run Analysis
+   * have them implement the above selections
+   * give them a subset of the data to run on (small enough to run interactively)
+   * extract the yields
+   * give a cross section estimate (no systematics)
+
+-- Main.RyanKelley - 2013/12/09
