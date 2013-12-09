@@ -15,7 +15,7 @@ These topics are not necessarily ordered in any particular way and are only loos
 
 ---++ Order of topics (Subject to change)
 ---+++ ROOT
-   * Documentation: 
+   * Documentation 
       * Home: http://root.cern.ch/drupal/
       * User's guide: http://root.cern.ch/drupal/content/users-guide
       * Classes: http://root.cern.ch/root/html534/ClassIndex.html
@@ -25,11 +25,11 @@ These topics are not necessarily ordered in any particular way and are only loos
 ---++++ Lesson 1
    * Studied the basics of TTree and made efficiency plots for some tracking variables
    * Reading: ROOT user's guide: read ch 1-3,7,12
-   * Example code: <a target="_blank" href="https://github.com/kelleyrw/AnalysisTutorial/tree/master/week1">Lesson 1</a>
+   * Example code: <a target="_blank" href="https://github.com/kelleyrw/AnalysisTutorial/tree/master/lesson1">Lesson 1</a>
 ---+++++ TTree example
- To facilitate a non-trivial example of making plots, a very simple TTree was constructed using CMSSW that contains the composite generated/simulated particles known as [[tracking particles][https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideTrackingTruth]]. You can think of these tracking particles as the combined generator and simulated truth information of all the debris of p-p collision (e.g. Pythia6 status 1). These tracking particles are associated with reconstructed tracks by looking at the simulated energy deposits in the tracker (sim hits) and matching them to the reconstructed hits from the track reconstruction algorithms (rec hits). We will go into how this TTree was made in a later lesson.
+ To facilitate a non-trivial example of making plots, a very simple TTree was constructed using CMSSW that contains the composite generated/simulated particle known as [[https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideTrackingTruth][tracking particles]]. You can think of these tracking particles as the combined generator and simulated truth information of all the debris of p-p collision (e.g. Pythia6 status 1). These tracking particles are associated with reconstructed tracks by looking at the simulated energy deposits in the tracker (sim hits) and matching them to the reconstructed hits from the track reconstruction algorithms (rec hits). We will go into how this TTree was made in a later lesson.
 
-This tree was filled per event and contains a unfiltered list (in the form of a std::vector) of TrackingParticles per event:
+This tree was filled per event and contains a unfiltered list (in the form of a std::vector) of !TrackingParticles per event:
 
 <verbatim>
 Events
@@ -190,7 +190,7 @@ Info in <TCanvas::MakeDefCanvas>:  created default TCanvas with name c1
 </verbatim>
 </verbatim> <img width="596" alt="eff_vs_eta.png" src="%ATTACHURLPATH%/eff_vs_eta.png" height="572" />
 
-As an exercise we're going to make this same plot 2 more times.  The next example, we're going to compile the macro.  In general it is a good idea to compile you macros because the interpreter (CINT) is not robust and can incorrect interpret even simple code.  Also, it will great increase the execution time if the macro is doing anything significant.  See chapter 7 of the User's Guide for more details. 
+As an exercise we're going to make this same plot two more times.  The next example, we're going to compile the macro.  In general it is a good idea to compile you macros because the interpreter (CINT) is not robust and can incorrectly interpret even simple code.  Also, it will greatly increase the execution time if the macro is doing anything significant.  See chapter 7 of the User's Guide for more details. 
 The following macro produces this plot same plot as above but is meant to run compiled: https://github.com/kelleyrw/AnalysisTutorial/tree/master/lesson1/macros/eff_compiled.C
 
 <verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
@@ -211,7 +211,7 @@ Info in <TCanvas::Print>: png file plots/h_eff_vs_eta_compiled.png has been crea
 
 The final example from this lesson is a very simple "looper".  A looper is simple a macro that manually loops over the entries in a TTree rather than relying on TTree::Draw().  This has the advantage of speed since there will be only one loop over the tree instead of one for each plot.  Also, it has the flexibility to implement arbitrary logic whereas TTree::Draw, while flexible, can still be limited on what you can calculate and plot.   
 
-The following macro is a simple looper: https://github.com/kelleyrw/AnalysisTutorial/tree/master/lesson1/macros/eff_looper.C.  It breaks up the process into two steps: create the numerator and denominator plots (CreatePlots) and doing the division to make the efficiency (FinalPlots).  The purpose of this is making the numerator/denominator is the "slow" part -- you don't want to remake these plots if you all you need is to change the label or something on the efficiency plot.  This is a simple example of breaking up the work flow to keep the analysis running efficiently.  You can of course make a function that simple calls both if you want the option of doing it in two steps (exercise left to the reader)
+The following macro is a simple looper: https://github.com/kelleyrw/AnalysisTutorial/tree/master/lesson1/macros/eff_looper.C.  It breaks up the process into two steps: create the numerator and denominator plots (!CreatePlots) and doing the division to make the efficiency (!FinalPlots).  The purpose of this is making the numerator/denominator is the "slow" part -- you don't want to remake these plots if you all you need is to change the label or something on the efficiency plot.  This is a simple example of breaking up the work flow to keep the analysis running efficiently.  You can, of course, make a function that simply calls both if you want the option of doing it in two steps (exercise left to the reader)
 <verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 root [2] .L macros/eff_looper.C++
 Info in <TUnixSystem::ACLiC>: creating shared library /Users/rwk7t/temp/.rootbuild//Users/rwk7t/Development/newbies/lesson1/./macros/eff_looper_C.so
@@ -225,10 +225,10 @@ Info in <TCanvas::Print>: png file plots/h_eff_vs_eta_looper.png has been create
 </verbatim> <img width="596" alt="h_den_vs_eta_looper.png" src="%ATTACHURLPATH%/h_den_vs_eta_looper.png" height="572" />
 </verbatim> <img width="596" alt="h_eff_vs_eta_looper.png" src="%ATTACHURLPATH%/h_eff_vs_eta_looper.png" height="572" />
 
----+++++Homework:
+---+++++Homework
    * check out, understand, and run the macros from lesson1
-   * modify the macros to produce the efficiency vs pt.  The only change to the selection is since this is an efficiency vs pT, we should reduce the pT threshold to pT > 0.1 !GeV.
-   * create resolution plots vs eta and pT.  They are made by x_{reco} - x_{truth}.  These should looks similar (but not exactly) to:
+   * modify the macros to also produce the efficiency vs pt.  The only change to the selection is since this is an efficiency vs pT, we should reduce the pT threshold to pT > 0.1 !GeV.
+   * Create resolution plots vs eta and pT.  They are made by x_{reco} - x_{truth}.  Do this using whatever technique you feel is appropriate.  These should looks similar (but not exactly) to:
       * http://cmsdoc.cern.ch/cms/Physics/tracking/validation/MC/CMSSW_6_1_0/START61_V8_noPU_ootb/RelValTTbar/resolutionsEta.pdf
 	  * http://cmsdoc.cern.ch/cms/Physics/tracking/validation/MC/CMSSW_6_1_0/START61_V8_noPU_ootb/RelValTTbar/resolutionsPt.pdf
    * write a brief discuss the features you see in the plots and try to explain them based on what we've gone over in the student given lectures
