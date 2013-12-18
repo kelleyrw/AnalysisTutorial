@@ -242,8 +242,8 @@ This lesson is an example skeleton for organizing an analysis.  This is a short 
    * In the previous example looper (eff_looper.C), everything was contained in the same file.  Here the code will be re-factored and extended to promote some code re-use.  Below is a list of all the files and directories 
 
 <verbatim>
-|____build.C                              File to compile the code using ACLiC
-|____build.sh                             File to compile the code using straight up gcc
+|____compile.C                              File to compile the code using ACLiC
+|____compile.sh                             File to compile the code using straight up gcc
 |____include                              Directory to include header files for reusable code
 | |____HistTools.h                        Header file for example ROOT histogram tools
 | |____TRKEFF.h                           Header file for the TTree branch wrapper class
@@ -274,13 +274,15 @@ class TrackingEfficiencyAnalysis
         // destroy:
         ~TrackingEfficiencyAnalysis();
 
+        // method to run on the data:
+        void ScanChain(TChain& chain, long long num_events = std::numeric_limits<long long>::max());
+
+    private:
         // analysis methods:
         void BeginJob();
         void EndJob();
         void Analyze();
-        void ScanChain(TChain& chain, long long num_events = std::numeric_limits<long long>::max());
 
-    private:
         // members:
         const std::string m_output_file_name;
         const std::string m_suffix;
@@ -290,6 +292,22 @@ class TrackingEfficiencyAnalysis
 </verbatim>
 
 the analysis methods were deliberately chosen.  You will see this methodology again when we deal with CMSSW.
+   * The [[https://github.com/kelleyrw/AnalysisTutorial/blob/master/lesson2/source/TrackingEfficiencyAnalysis.cc#L90][TrackingEfficiencyAnalysis::BeginJob]] function is to be called before the analysis loop begins.  It can be used to setup the initial conditions for the analysis (open files, book histograms, set flags, etc.). 
+   * The [[https://github.com/kelleyrw/AnalysisTutorial/blob/master/lesson2/source/TrackingEfficiencyAnalysis.cc#L197][TrackingEfficiencyAnalysis::Analyze]] function is the main logic to be performed on an individual event.
+   * The [[https://github.com/kelleyrw/AnalysisTutorial/blob/master/lesson2/source/TrackingEfficiencyAnalysis.cc#L143][TrackingEfficiencyAnalysis::EndJob]] function is to be called after the analysis loop ends.  It can be used to save the results for the analysis (close files, save and histograms, print tables, etc.). 
+   * The [[https://github.com/kelleyrw/AnalysisTutorial/blob/master/lesson2/source/TrackingEfficiencyAnalysis.cc#L317][TrackingEfficiencyAnalysis::ScanChain]] function is the main looper.  Before it loops, it calls the BeginJob() function.  It then loops over the whole TChain and calls the Analyze() method for each entry in the tree.  Finally, after the loop it calls the EndJob() method.
+
+---+++++ HistTools
+
+In order to have some re-usable ROOT tools, I've provided a "starter" set for people.  I have a much more mature version [[https://github.com/kelleyrw/AnalysisTools][here]] but it may not be a bad idea to start doing some of these yourself to familiarize yourself with ROOT.  When you get comfortable you should feel free to rip off from my area on anyone else since the main goal is analysis not tools.  [[https://github.com/kelleyrw/AnalysisTutorial/blob/master/lesson2/include/HistTools.h][HistTools]] provides a very basic set of histogram tools.
+
+---+++++ [[https://github.com/kelleyrw/AnalysisTutorial/blob/master/lesson2/include/TRKEFF.h][TRKEFF]] class 
+
+This a piece of code that was automatically generated to give wrapper functions to the branches of the this TTree.  It only works on the tree in this example and if the tree itself is changes, then it will need to be regenerated.  The main point is twofold: 
+  1 It provides a simple interface to access the branches of the tree in a looper without having to call the boiler plate functions everytime (see previous lessons eff_looper.C).
+  1 It provides "lazy evaluation" on the branches.  By default, non of the branches are loaded.  In your analysis logic, it loads the branch the first time you access it then leaves it initialized until you access the next entry in the tree (event).
+
+We will discuss this more when we talk about CMS2 in latter lessons.
 
 ---+++++ Building and Running the code 
 I've provided two ways to build the code.  The first is using ROOT wrapper to gcc called ACLiC (the .L macros.C++ thing).  The second example is with GCC directly to show you what is under the hood.  There is no reason you have to stick with these two methods and they have their pluses and minuses; however, this is all that is really needed to get started on analysis.
@@ -369,11 +387,23 @@ Info in <TCanvas::Print>: png file plots/h_ptres_vs_eta.png has been created
 Info in <TCanvas::Print>: png file plots/h_ptres_vs_eta_sigma.png has been created
 </verbatim>
 
----+++++ The TrackingEfficiencyAnalysis::ScanChain function 
----+++++ The TrackingEfficiencyAnalysis::BeginJob function 
----+++++ The TrackingEfficiencyAnalysis::Analysis function 
----+++++ The TrackingEfficiencyAnalysis::EndJob function 
 ---+++++ Output plots 
+
+The output plots will be put in the plots directory.  I've provided a macro called [[https://github.com/kelleyrw/AnalysisTutorial/blob/master/lesson2/macros/FormattedPlots.C][Formated]] to produce a nice version of the residual plots.  First you must load the HistTools so I use them in the macro:
+
+root [0] .L lib/libHistTools.so 
+root [1] .x macros/FormattedPlots.C+
+Info in <TUnixSystem::ACLiC>: creating shared library /Users/rwk7t/temp/.rootbuild//Users/rwk7t/Development/newbies/lesson2/./macros/FormattedPlots_C.so
+Info in <TCanvas::Print>: pdf file plots/sigma_res.pdf has been created
+
+root [1] .x compile.C 
+Info in <TUnixSystem::ACLiC>: creating shared library /Users/rwk7t/Development/newbies/lesson2/lib/libTrackingEfficiencyAnalysis.so
+(bool)1
+root [2] .x macros/FormattedPlots.C+
+Info in <TUnixSystem::ACLiC>: creating shared library /Users/rwk7t/temp/.rootbuild//Users/rwk7t/Development/newbies/lesson2/./macros/FormattedPlots_C.so
+Info in <TCanvas::Print>: pdf file plots/sigma_res.pdf has been created
+
+
 
 ---+++++Homework
    * check out, understand, and run the code from lesson2
@@ -432,4 +462,4 @@ Info in <TCanvas::Print>: png file plots/h_ptres_vs_eta_sigma.png has been creat
    * extract the yields
    * give a cross section estimate (no systematics)
 
--- Main.RyanKelley - 2013/12/09
+-- Main.RyanKelley - 2013/12/17
