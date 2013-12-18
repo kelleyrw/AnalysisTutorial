@@ -289,12 +289,86 @@ class TrackingEfficiencyAnalysis
 };
 </verbatim>
 
-the analysis methods were dilberately chosen.
-
+the analysis methods were deliberately chosen.  You will see this methodology again when we deal with CMSSW.
 
 ---+++++ Building and Running the code 
+I've provided two ways to build the code.  The first is using ROOT wrapper to gcc called ACLiC (the .L macros.C++ thing).  The second example is with GCC directly to show you what is under the hood.  There is no reason you have to stick with these two methods and they have their pluses and minuses; however, this is all that is really needed to get started on analysis.
+
 ---++++++ ACLiC 
+I've provided a simple macro to compile the code called [[https://github.com/kelleyrw/AnalysisTutorial/blob/master/lesson2/compile.C][compile.C]].  To compile this analysis code, you simple run the macro in ROOT:
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+root [0] .x compile.C+
+Info in <TUnixSystem::ACLiC>: creating shared library /Users/rwk7t/temp/.rootbuild//Users/rwk7t/Development/newbies/lesson2/./compile_C.so
+Info in <TUnixSystem::ACLiC>: creating shared library /Users/rwk7t/Development/newbies/lesson2/lib/libHistTools.so
+Info in <TUnixSystem::ACLiC>: creating shared library /Users/rwk7t/Development/newbies/lesson2/lib/libTRKEFF.so
+Info in <TUnixSystem::ACLiC>: creating shared library /Users/rwk7t/Development/newbies/lesson2/lib/libTrackingEfficiencyAnalysis.so
+(bool)1
+</verbatim>
+
+When you ready to run the code, there is a simple wrapper to compile the code, create an TrackingEfficiencyAnalysis object, and run it called [[https://github.com/kelleyrw/AnalysisTutorial/blob/master/lesson2/macros/run_all.C][run_all.C]]:
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+root [0] .x macros/run_all.C 
+Info in <TUnixSystem::ACLiC>: creating shared library /Users/rwk7t/temp/.rootbuild//Users/rwk7t/Development/newbies/lesson2/./compile_C.so
+[TrackingEfficiencyAnalysis::ScanChain] finished processing 1000 events
+------------------------------
+CPU  Time: 1.2
+Real Time: 1.2
+
+[TrackingEfficiencyAnalysis::EndJob] printing histograms:
+Info in <TCanvas::Print>: png file plots/h_cotthetares_vs_eta.png has been created
+Info in <TCanvas::Print>: png file plots/h_cotthetares_vs_eta_sigma.png has been created
+Info in <TCanvas::Print>: png file plots/h_d0res_vs_eta.png has been created
+Info in <TCanvas::Print>: png file plots/h_d0res_vs_eta_sigma.png has been created
+Info in <TCanvas::Print>: png file plots/h_den_vs_eta.png has been created
+Info in <TCanvas::Print>: png file plots/h_den_vs_pt.png has been created
+Info in <TCanvas::Print>: png file plots/h_dzres_vs_eta.png has been created
+Info in <TCanvas::Print>: png file plots/h_dzres_vs_eta_sigma.png has been created
+Info in <TCanvas::Print>: png file plots/h_eff_vs_eta.png has been created
+Info in <TCanvas::Print>: png file plots/h_eff_vs_pt.png has been created
+Info in <TCanvas::Print>: png file plots/h_num_vs_eta.png has been created
+Info in <TCanvas::Print>: png file plots/h_num_vs_pt.png has been created
+Info in <TCanvas::Print>: png file plots/h_phires_vs_eta.png has been created
+Info in <TCanvas::Print>: png file plots/h_phires_vs_eta_sigma.png has been created
+Info in <TCanvas::Print>: png file plots/h_ptres_vs_eta.png has been created
+Info in <TCanvas::Print>: png file plots/h_ptres_vs_eta_sigma.png has been created
+</verbatim>
+
 ---++++++ GCC directly 
+To see what is really going on, I provided a simple script that contains a single line to compile this code as a stand alone program (rather than running in ROOT/CINT).  The main reason is to demonstrate that it is possible to compile ROOT objects and classes without the interpreter at all (CINT).  You will find the interpreter has limitations and sometimes you may want to go around it.  One could easily extend this using GNU Make or even a fully flushed out build system or IDE (Ecplipse, Boost Build, CMake, CMSSW's scram, etc.).
+
+To compile from the command prompt:
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+[rwkelley@uaf-7 lesson2]$  ./compile.sh 
+g++ -O2 source/TrackingEfficiencyAnalysis.cc source/TRKEFF.cc source/HistTools.cc -o tracking_eff_analysis -pthread -m64 -I/code/osgcode/imacneill/root/05.34.07/include -L/code/osgcode/imacneill/root/05.34.07/lib -lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -pthread -lm -ldl -rdynamic -lGenVector -Iinclude
+</verbatim>
+
+This produces an executable program called "tracking_eff_analysis".
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+[rwk7t@tensor lesson2]$  ./tracking_eff_analysis 
+[TrackingEfficiencyAnalysis::ScanChain] finished processing 1000 events
+------------------------------
+CPU  Time: 1.2
+Real Time: 1.2
+
+[TrackingEfficiencyAnalysis::EndJob] printing histograms:
+Info in <TCanvas::Print>: png file plots/h_cotthetares_vs_eta.png has been created
+Info in <TCanvas::Print>: png file plots/h_cotthetares_vs_eta_sigma.png has been created
+Info in <TCanvas::Print>: png file plots/h_d0res_vs_eta.png has been created
+Info in <TCanvas::Print>: png file plots/h_d0res_vs_eta_sigma.png has been created
+Info in <TCanvas::Print>: png file plots/h_den_vs_eta.png has been created
+Info in <TCanvas::Print>: png file plots/h_den_vs_pt.png has been created
+Info in <TCanvas::Print>: png file plots/h_dzres_vs_eta.png has been created
+Info in <TCanvas::Print>: png file plots/h_dzres_vs_eta_sigma.png has been created
+Info in <TCanvas::Print>: png file plots/h_eff_vs_eta.png has been created
+Info in <TCanvas::Print>: png file plots/h_eff_vs_pt.png has been created
+Info in <TCanvas::Print>: png file plots/h_num_vs_eta.png has been created
+Info in <TCanvas::Print>: png file plots/h_num_vs_pt.png has been created
+Info in <TCanvas::Print>: png file plots/h_phires_vs_eta.png has been created
+Info in <TCanvas::Print>: png file plots/h_phires_vs_eta_sigma.png has been created
+Info in <TCanvas::Print>: png file plots/h_ptres_vs_eta.png has been created
+Info in <TCanvas::Print>: png file plots/h_ptres_vs_eta_sigma.png has been created
+</verbatim>
+
 ---+++++ The TrackingEfficiencyAnalysis::ScanChain function 
 ---+++++ The TrackingEfficiencyAnalysis::BeginJob function 
 ---+++++ The TrackingEfficiencyAnalysis::Analysis function 

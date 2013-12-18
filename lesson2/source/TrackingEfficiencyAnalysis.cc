@@ -395,8 +395,6 @@ try
     const bool verbose = false;
     TrackingEfficiencyAnalysis analysis(output_file_name, suffix, verbose);
     analysis.ScanChain(chain, num_events);
-    analysis.ScanChain(chain, num_events);
-    analysis.ScanChain(chain, num_events);
     return 0;
 }
 catch (std::exception& e)
