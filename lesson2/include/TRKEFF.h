@@ -140,6 +140,8 @@ namespace trkeff
         (
             branch_class.find("/B")!=std::string::npos || // char
             branch_class.find("/b")!=std::string::npos || // unsigned char
+            branch_class.find("/C")!=std::string::npos || // char
+            branch_class.find("/c")!=std::string::npos || // unsigned char
             branch_class.find("/S")!=std::string::npos || // short
             branch_class.find("/s")!=std::string::npos || // unsigned short
             branch_class.find("/I")!=std::string::npos || // int

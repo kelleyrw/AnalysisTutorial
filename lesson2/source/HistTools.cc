@@ -126,6 +126,15 @@ void ListHists(const TH1Map& hist_map)
     }
 }
 
+// turn on/off the stats for the histograms 
+void SetStats(TH1Map& hist_map, const bool toggle)
+{
+    for (TH1Map::const_iterator hm_iter = hist_map.begin(); hm_iter != hist_map.end(); hm_iter++)
+    {
+        hm_iter->second->SetStats(toggle);
+    }
+}
+
 // set style
 void SetStyle(const std::string& option)
 {

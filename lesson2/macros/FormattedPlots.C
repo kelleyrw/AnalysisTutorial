@@ -6,6 +6,7 @@ void FormattedPlots()
 {
     TH1Map hc;
     LoadHists(hc, "plots/tracking_eff_analysis.root");
+    SetStats(hc, /*toggle=*/false);
 
     TCanvas* c1 = new TCanvas("c1", "c1", 800, 1200);
     c1->Divide(2,3);
@@ -22,7 +23,9 @@ void FormattedPlots()
     c1->cd(4)->SetLogy(); hc["h_dzres_vs_eta_sigma"      ]->Draw();
     c1->cd(5)->SetLogy(); hc["h_ptres_vs_eta_sigma"      ]->Draw();
 
+    c1->Print("plots/sigma_res.png");
     c1->Print("plots/sigma_res.pdf");
+    c1->Print("plots/sigma_res.eps");
 } 
 
 
