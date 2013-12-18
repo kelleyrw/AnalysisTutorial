@@ -82,8 +82,8 @@ void PrintHists(const TH1Map& hist_map, const std::string& pathname,  const std:
     }
 }
 
-// delete the histogram pointers in the map
-void DeleteHists(const TH1Map& hist_map)
+// clear and delete the histogram pointers in the map
+void ClearHists(TH1Map& hist_map)
 {
     for (TH1Map::const_iterator hm_iter = hist_map.begin(); hm_iter != hist_map.end(); hm_iter++)
     {
@@ -91,6 +91,7 @@ void DeleteHists(const TH1Map& hist_map)
         hist_temp->SetDirectory(NULL);
         delete hist_temp;
     }
+    hist_map.clear();
 }
 
 // load all the hists from the file

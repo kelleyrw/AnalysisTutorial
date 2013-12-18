@@ -26,8 +26,8 @@ void LoadHists(TH1Map& hist_map, const std::string& filename);
 // print the list of histograms
 void ListHists(const TH1Map& hist_map);
 
-// delete the histogram pointers in the map
-void DeleteHists(const TH1Map& hist_map);
+// clear and delete the histogram pointers in the map
+void ClearHists(TH1Map& hist_map);
 
 // Set style
 void SetStyle(const std::string& value = "emrou");

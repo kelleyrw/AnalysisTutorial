@@ -62,8 +62,6 @@ TrackingEfficiencyAnalysis::TrackingEfficiencyAnalysis
     , m_hist_map()
 {
     // run begin job when object is constructed
-    BeginJob();
-   
     if (m_verbose)
     {
         std::cout << "[TrackingEfficiencyAnalysis::TrackingEfficiencyAnalysis] "
@@ -77,9 +75,6 @@ TrackingEfficiencyAnalysis::TrackingEfficiencyAnalysis
 // destroy:
 TrackingEfficiencyAnalysis::~TrackingEfficiencyAnalysis()
 {
-    // run end job when object is destroyed 
-    EndJob();
-
     if (m_verbose) {std::cout << "[TrackingEfficiencyAnalysis::~TrackingEfficiencyAnalysis] "
                                  "TrackingEfficiencyAnalysis is complete." << std::endl;}
 }
@@ -189,7 +184,7 @@ void TrackingEfficiencyAnalysis::EndJob()
     }
 
     // delete the hists
-    DeleteHists(hc);
+    ClearHists(hc);
 }
 
 // simple contangent function
@@ -337,7 +332,14 @@ void TrackingEfficiencyAnalysis::ScanChain(TChain& chain, long long num_events)
     num_events = (num_events > 0 ? std::min(chain.GetEntries(), num_events) : chain.GetEntries());
     trkeff_obj.Init(chain);
 
+    // --------------------//
+    // Run the Begin Job
+    // --------------------//
+    BeginJob();
+
+    // --------------------//
     // Event Loop
+    // --------------------//
     for (long long entry = 0; entry < num_events; entry++)
     {
         if (m_verbose)
@@ -366,10 +368,7 @@ void TrackingEfficiencyAnalysis::ScanChain(TChain& chain, long long num_events)
         num_events_processed++;
     }
 
-    // the benchmark results 
-    // -------------------------------------------------------------------------------------------------//
-
-    // done
+    // Done and benchmark results 
     bmark.Stop("benchmark");
     fflush(stdout);
     cout << "[TrackingEfficiencyAnalysis::ScanChain] finished processing " << num_events << " events" << endl;
@@ -377,6 +376,11 @@ void TrackingEfficiencyAnalysis::ScanChain(TChain& chain, long long num_events)
     cout << "CPU  Time: " << Form("%.01f", bmark.GetCpuTime("benchmark" )) << endl;
     cout << "Real Time: " << Form("%.01f", bmark.GetRealTime("benchmark")) << endl;
     cout << endl;
+
+    // --------------------//
+    // Run the End Job
+    // --------------------//
+    EndJob();
 }
 
 #ifndef __CINT__
@@ -390,6 +394,8 @@ try
     const long long num_events = -1;
     const bool verbose = false;
     TrackingEfficiencyAnalysis analysis(output_file_name, suffix, verbose);
+    analysis.ScanChain(chain, num_events);
+    analysis.ScanChain(chain, num_events);
     analysis.ScanChain(chain, num_events);
     return 0;
 }
