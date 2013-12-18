@@ -33,13 +33,15 @@ class TrackingEfficiencyAnalysis
         // destroy:
         ~TrackingEfficiencyAnalysis();
 
+        // method to run on the data:
+        void ScanChain(TChain& chain, long long num_events = std::numeric_limits<long long>::max());
+
+    private:
         // analysis methods:
         void BeginJob();
         void EndJob();
         void Analyze();
-        void ScanChain(TChain& chain, long long num_events = std::numeric_limits<long long>::max());
 
-    private:
         // members:
         const std::string m_output_file_name;
         const std::string m_suffix;
@@ -117,7 +119,7 @@ void TrackingEfficiencyAnalysis::BeginJob()
     AddHist(hc , new TH2F("h_ptres_vs_eta"      , "p_{T} residual/p_{T} vs |#eta|;|#eta|;#delta(p_{T})/p_{T}"      , 50, -2.5, 2.5, 100, -0.1 , 0.1 ));
 
     // eff vs p_{T} 
-    // to do ...
+    // to do as an exercise...
 
     // unset sumw2
     TH1::SetDefaultSumw2(false);
@@ -182,7 +184,7 @@ void TrackingEfficiencyAnalysis::EndJob()
     // print the plots
     if (not m_suffix.empty())
     {
-        if (m_verbose) {std::cout << "[TrackingEfficiencyAnalysis::EndJob] printing histograms:" << std::endl;}
+        std::cout << "[TrackingEfficiencyAnalysis::EndJob] printing histograms:" << std::endl;
         PrintHists(hc, "plots", m_suffix);
     }
 

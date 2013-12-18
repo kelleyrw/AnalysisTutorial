@@ -1,10 +1,19 @@
+/* #include "TROOT.h" */
+/* #include "TChain.h" */
+/* #include <string>  */
+/* #include <iostream>  */
+/* #include <stdexcept>  */
+
+/* class TrackingEfficiencyAnalysis; */
+
 void run_all()
 {
     // build the code
-    gROOT->LoadMacro("build.C");
+/*     gROOT->ProcessLine(".x build.C++"); */
+    gROOT->LoadMacro("build.C++");
     if (!build())
     {
-        cout << "[run_all] build failed..." << endl;
+        std::cout << "[run_all] build failed..." << std::endl;
     }
 
     // create the chain
@@ -16,9 +25,7 @@ void run_all()
     const std::string output_file_name = "plots/eff.root";
     const std::string suffix = "png";
     const long long num_events = -1;
-/*     const long long num_events = 10; */
     const bool verbose = false;
-/*     const bool verbose = true; */
 
     // create Analysis object and run it
     try
