@@ -237,6 +237,7 @@ Info in <TCanvas::Print>: png file plots/h_eff_vs_eta_looper.png has been create
 This lesson is an example skeleton for organizing an analysis.  This is a short lesson and the main point of this lesson is to show how to organize an analysis in a more structured way and to introduce some of the abstractions that will lead us to the conventions of CMSSW.
    * <a target="_blank" href="https://github.com/kelleyrw/AnalysisTutorial/tree/master/lesson2">Lesson 2 example code</a>
    * This example uses the same simple tracking tree from the previous lesson and also produces the same plots to show, what I consider, a less tedious way.  There will always be an overhead to making plots and doing an analysis; however, with some smart choices it can be less tedious. 
+
 ---+++++ Code Layout
    * In the previous example looper (eff_looper.C), everything was contained in the same file.  Here the code will be re-factored and extended to promote some code re-use.  Below is a list of all the files and directories 
 
@@ -247,7 +248,7 @@ This lesson is an example skeleton for organizing an analysis.  This is a short 
 | |____HistTools.h                        Header file for example ROOT histogram tools
 | |____TRKEFF.h                           Header file for the TTree branch wrapper class
 |____lib                                  Directory to contain the libraries
-|____macros                               Directory to cotain ACLiC compiled simple macros (usually throw away style code)
+|____macros                               Directory to contain ACLiC compiled simple macros (usually throw away style code)
 | |____FormattedPlots.C                   Simple macro to print the formated plots
 | |____run_all.C                          Simple macro to run the analysis
 |____plots                                Directory to contain the output of the plots
@@ -257,7 +258,53 @@ This lesson is an example skeleton for organizing an analysis.  This is a short 
 | |____TRKEFF.cc                          Source file for the TTree branch wrapper class
 </verbatim>
    * Note: that I'm using the CMSSW convention that *.C files are intended to be ROOT compiled macros and *.cc files are supposed to be "fully c++" complaint code.
+The main analysis is done in [[https://github.com/kelleyrw/AnalysisTutorial/blob/master/lesson2/source/TrackingEfficiencyAnalysis.cc][TrackingEfficiencyAnalysis.cc]].  This is a c++ class that holds all of the metadata and runs the analysis.  The main reason to make this a class is to keep all of the relevant variables and data together.  If this were a set of functions, you would have to pass a bunch of parameters back and forth -- a class is more more suited for this purpose.  Also, In the class definition below
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+class TrackingEfficiencyAnalysis
+{
+    public:
+        // construct: 
+        TrackingEfficiencyAnalysis
+        (
+             const std::string& output_file_name = "plots/counts_vs_eta_looper.root",
+             const std::string& suffix = "png",
+             const bool verbose = true
+        );
 
+        // destroy:
+        ~TrackingEfficiencyAnalysis();
+
+        // analysis methods:
+        void BeginJob();
+        void EndJob();
+        void Analyze();
+        void ScanChain(TChain& chain, long long num_events = std::numeric_limits<long long>::max());
+
+    private:
+        // members:
+        const std::string m_output_file_name;
+        const std::string m_suffix;
+        const bool m_verbose;
+        TH1Map m_hist_map;
+};
+</verbatim>
+
+the analysis methods were dilberately chosen.
+
+
+---+++++ Building and Running the code 
+---++++++ ACLiC 
+---++++++ GCC directly 
+---+++++ The TrackingEfficiencyAnalysis::ScanChain function 
+---+++++ The TrackingEfficiencyAnalysis::BeginJob function 
+---+++++ The TrackingEfficiencyAnalysis::Analysis function 
+---+++++ The TrackingEfficiencyAnalysis::EndJob function 
+---+++++ Output plots 
+
+---+++++Homework
+   * check out, understand, and run the code from lesson2
+   * modify the code to also produce the resolution vs pt.  The only change to the selection is since this is an efficiency vs pT, we should reduce the pT threshold to pT > 0.1 !GeV.
+   * modify the macros to produce the nicely formatted plots using log scale.
 
 ---+++ CMSSW
 ---++++ Overview of !CMSSW
