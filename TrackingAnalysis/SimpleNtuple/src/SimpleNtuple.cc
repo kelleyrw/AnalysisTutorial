@@ -45,8 +45,8 @@ Created:         Fri Nov 22 09:32:25 PST 2013
 #include "Math/Point3D.h"
 
 // constants, enums and typedefs
-typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > LorentzVector;
-typedef std::vector<ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > > vecLorentzVector;
+typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > LorentzVectorD;
+typedef std::vector<ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > > vecLorentzVectorD;
 typedef ROOT::Math::PositionVector3D<ROOT::Math::Cartesian3D<double> > Point;
 
 // simple struct to hold tree variables 
@@ -156,7 +156,7 @@ void EventInfo::SetBranches(TTree* const tree)
     tree->Branch("event", &event);
 
     // class types
-    tree->Branch("trks_p4"          , "vecLorentzVector"    , &trks_p4         ); 
+    tree->Branch("trks_p4"          , "vecLorentzVectorD"   , &trks_p4         ); 
     tree->Branch("trks_d0"          , "std::vector<double>" , &trks_d0         ); 
     tree->Branch("trks_dz"          , "std::vector<double>" , &trks_dz         ); 
     tree->Branch("trks_pterr"       , "std::vector<double>" , &trks_pterr      ); 
@@ -168,7 +168,7 @@ void EventInfo::SetBranches(TTree* const tree)
     tree->Branch("trks_high_purity" , "std::vector<bool>"   , &trks_high_purity); 
     tree->Branch("tps_matched"      , "std::vector<bool>"   , &tps_matched     ); 
     tree->Branch("tps_pdgid"        , "std::vector<int>"    , &tps_pdgid       ); 
-    tree->Branch("tps_p4"           , "vecLorentzVector"    , &tps_p4          ); 
+    tree->Branch("tps_p4"           , "vecLorentzVectorD"   , &tps_p4          ); 
     tree->Branch("tps_d0"           , "std::vector<double>" , &tps_d0          ); 
     tree->Branch("tps_dz"           , "std::vector<double>" , &tps_dz          ); 
     tree->Branch("tps_tip"          , "std::vector<double>" , &tps_tip         ); 
@@ -342,7 +342,7 @@ void SimpleNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
             double d0 = ts.perigeeParameters().transverseImpactParameter();
             double dz = ts.perigeeParameters().longitudinalImpactParameter();
 
-            m_evt.tps_p4.push_back(LorentzVector(tp.px(), tp.py(), tp.pz(), tp.p()));
+            m_evt.tps_p4.push_back(LorentzVectorD(tp.px(), tp.py(), tp.pz(), tp.p()));
             m_evt.tps_pdgid.push_back(tp.pdgId());
             m_evt.tps_d0.push_back(d0);
             m_evt.tps_dz.push_back(dz);
@@ -365,7 +365,7 @@ void SimpleNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
             const reco::Track& assoc_trk = *sim_to_reco[tp_ref].front().first;
 
             // fill reco track variables
-            m_evt.trks_p4.push_back(LorentzVector(assoc_trk.px(), assoc_trk.py(), assoc_trk.pz(), assoc_trk.p()));
+            m_evt.trks_p4.push_back(LorentzVectorD(assoc_trk.px(), assoc_trk.py(), assoc_trk.pz(), assoc_trk.p()));
             m_evt.trks_d0.push_back(trks_vtxs.empty() ? assoc_trk.d0() : -1.0*assoc_trk.dxy(trks_vtxs.front().position()));
             m_evt.trks_dz.push_back(trks_vtxs.empty() ? assoc_trk.dz() : assoc_trk.dz(trks_vtxs.front().position()));
             m_evt.trks_pterr.push_back(assoc_trk.ptError());
@@ -381,7 +381,7 @@ void SimpleNtuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
             m_evt.tps_matched.push_back(false);
 
             // fill reco track variables with bogus values
-            m_evt.trks_p4.push_back(LorentzVector(-999999,-999999,-999999,-999999));
+            m_evt.trks_p4.push_back(LorentzVectorD(-999999,-999999,-999999,-999999));
             m_evt.trks_d0.push_back(-999999);
             m_evt.trks_dz.push_back(-999999);
             m_evt.trks_chi2.push_back(-999999);
