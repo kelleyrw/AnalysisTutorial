@@ -187,7 +187,7 @@ void TrackingEfficiencyAnalysis::EndJob()
     ClearHists(hc);
 }
 
-// simple contangent function
+// simple cotangent function
 double cot(const float x)
 {
     return cos(x)/sin(x);
@@ -300,7 +300,7 @@ void TrackingEfficiencyAnalysis::Analyze()
             }
             if (tp_pt > min_tp_for_pt_eff )
             {
-                hc["h_num_vs_pt" ]->Fill(tp_pt);
+                hc["h_num_vs_pt"]->Fill(tp_pt);
             }
             if (m_verbose) {cout << "\tpasses numerator" << endl;}
         }
@@ -338,7 +338,7 @@ void TrackingEfficiencyAnalysis::ScanChain(TChain& chain, long long num_events)
     BeginJob();
 
     // --------------------//
-    // Event Loop
+    // Event Loop/con
     // --------------------//
     for (long long entry = 0; entry < num_events; entry++)
     {
@@ -394,8 +394,6 @@ try
     const long long num_events = -1;
     const bool verbose = false;
     TrackingEfficiencyAnalysis analysis(output_file_name, suffix, verbose);
-    analysis.ScanChain(chain, num_events);
-    analysis.ScanChain(chain, num_events);
     analysis.ScanChain(chain, num_events);
     return 0;
 }

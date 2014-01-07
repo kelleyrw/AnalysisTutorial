@@ -32,6 +32,9 @@ void ClearHists(TH1Map& hist_map);
 // Set style
 void SetStyle(const std::string& value = "emrou");
 
+// turn on/off the stats for the histograms 
+void SetStats(TH1Map& hist_map, const bool toggle);
+
 // make an efficiency plot by dividing the two histograms 
 TH1* MakeEfficiencyPlot
 (

@@ -1,19 +1,10 @@
-/* #include "TROOT.h" */
-/* #include "TChain.h" */
-/* #include <string>  */
-/* #include <iostream>  */
-/* #include <stdexcept>  */
-
-/* class TrackingEfficiencyAnalysis; */
-
 void run_all()
 {
-    // build the code
-/*     gROOT->ProcessLine(".x build.C++"); */
-    gROOT->LoadMacro("build.C++");
-    if (!build())
+    // compile the code
+    gROOT->LoadMacro("compile.C++");
+    if (!compile())
     {
-        std::cout << "[run_all] build failed..." << std::endl;
+        std::cout << "[run_all] compile failed..." << std::endl;
     }
 
     // create the chain

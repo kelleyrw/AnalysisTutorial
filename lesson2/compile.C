@@ -1,13 +1,13 @@
 // compile the code and load it
 // usage: 
-// root [5] .x build.C+
+// root [5] .x compile.C+
 
 #include "TString.h"
 #include "TSystem.h"
 #include "TROOT.h"
 #include <string>
 
-bool build(const std::string& option = "")
+bool compile(const std::string& option = "")
 {
     // setup the include path
     TString include_path = gSystem->GetIncludePath();
@@ -27,7 +27,7 @@ bool build(const std::string& option = "")
 
 // clean up the libs 
 // usage: 
-// root [5] .L build.C+
+// root [5] .L compile.C+
 // root [6] clean() 
 void clean()
 {

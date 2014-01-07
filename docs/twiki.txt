@@ -237,17 +237,18 @@ Info in <TCanvas::Print>: png file plots/h_eff_vs_eta_looper.png has been create
 This lesson is an example skeleton for organizing an analysis.  This is a short lesson and the main point of this lesson is to show how to organize an analysis in a more structured way and to introduce some of the abstractions that will lead us to the conventions of CMSSW.
    * <a target="_blank" href="https://github.com/kelleyrw/AnalysisTutorial/tree/master/lesson2">Lesson 2 example code</a>
    * This example uses the same simple tracking tree from the previous lesson and also produces the same plots to show, what I consider, a less tedious way.  There will always be an overhead to making plots and doing an analysis; however, with some smart choices it can be less tedious. 
+
 ---+++++ Code Layout
    * In the previous example looper (eff_looper.C), everything was contained in the same file.  Here the code will be re-factored and extended to promote some code re-use.  Below is a list of all the files and directories 
 
 <verbatim>
-|____build.C                              File to compile the code using ACLiC
-|____build.sh                             File to compile the code using straight up gcc
+|____compile.C                              File to compile the code using ACLiC
+|____compile.sh                             File to compile the code using straight up gcc
 |____include                              Directory to include header files for reusable code
 | |____HistTools.h                        Header file for example ROOT histogram tools
 | |____TRKEFF.h                           Header file for the TTree branch wrapper class
 |____lib                                  Directory to contain the libraries
-|____macros                               Directory to cotain ACLiC compiled simple macros (usually throw away style code)
+|____macros                               Directory to contain ACLiC compiled simple macros (usually throw away style code)
 | |____FormattedPlots.C                   Simple macro to print the formated plots
 | |____run_all.C                          Simple macro to run the analysis
 |____plots                                Directory to contain the output of the plots
@@ -257,7 +258,153 @@ This lesson is an example skeleton for organizing an analysis.  This is a short 
 | |____TRKEFF.cc                          Source file for the TTree branch wrapper class
 </verbatim>
    * Note: that I'm using the CMSSW convention that *.C files are intended to be ROOT compiled macros and *.cc files are supposed to be "fully c++" complaint code.
+The main analysis is done in [[https://github.com/kelleyrw/AnalysisTutorial/blob/master/lesson2/source/TrackingEfficiencyAnalysis.cc][TrackingEfficiencyAnalysis.cc]].  This is a c++ class that holds all of the metadata and runs the analysis.  The main reason to make this a class is to keep all of the relevant variables and data together.  If this were a set of functions, you would have to pass a bunch of parameters back and forth -- a class is more more suited for this purpose.  Also, In the class definition below
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+class TrackingEfficiencyAnalysis
+{
+    public:
+        // construct: 
+        TrackingEfficiencyAnalysis
+        (
+             const std::string& output_file_name = "plots/counts_vs_eta_looper.root",
+             const std::string& suffix = "png",
+             const bool verbose = true
+        );
 
+        // destroy:
+        ~TrackingEfficiencyAnalysis();
+
+        // method to run on the data:
+        void ScanChain(TChain& chain, long long num_events = std::numeric_limits<long long>::max());
+
+    private:
+        // analysis methods:
+        void BeginJob();
+        void EndJob();
+        void Analyze();
+
+        // members:
+        const std::string m_output_file_name;
+        const std::string m_suffix;
+        const bool m_verbose;
+        TH1Map m_hist_map;
+};
+</verbatim>
+
+the analysis methods were deliberately chosen.  You will see this methodology again when we deal with CMSSW.
+   * The [[https://github.com/kelleyrw/AnalysisTutorial/blob/master/lesson2/source/TrackingEfficiencyAnalysis.cc#L90][TrackingEfficiencyAnalysis::BeginJob]] function is to be called before the analysis loop begins.  It can be used to setup the initial conditions for the analysis (open files, book histograms, set flags, etc.). 
+   * The [[https://github.com/kelleyrw/AnalysisTutorial/blob/master/lesson2/source/TrackingEfficiencyAnalysis.cc#L197][TrackingEfficiencyAnalysis::Analyze]] function is the main logic to be performed on an individual event.
+   * The [[https://github.com/kelleyrw/AnalysisTutorial/blob/master/lesson2/source/TrackingEfficiencyAnalysis.cc#L143][TrackingEfficiencyAnalysis::EndJob]] function is to be called after the analysis loop ends.  It can be used to save the results for the analysis (close files, save and histograms, print tables, etc.). 
+   * The [[https://github.com/kelleyrw/AnalysisTutorial/blob/master/lesson2/source/TrackingEfficiencyAnalysis.cc#L317][TrackingEfficiencyAnalysis::ScanChain]] function is the main looper.  Before it loops, it calls the !BeginJob() function.  It then loops over the whole TChain and calls the Analyze() method for each entry in the tree.  Finally, after the loop it calls the !EndJob() method.
+
+---+++++ [[https://github.com/kelleyrw/AnalysisTutorial/blob/master/lesson2/include/HistTools.h][HistTools]] -- a starter kit for histogram tools
+
+In order to have some re-usable ROOT tools, I've provided a "starter" set for people.  I have a much more mature version [[https://github.com/kelleyrw/AnalysisTools][here]] but it may not be a bad idea to start doing some of these yourself to familiarize yourself with ROOT.  When you get comfortable you should feel free to rip off from my area on anyone else since the main goal is analysis not tools.  HistTools provides a very basic set of histogram tools.
+
+---+++++ [[https://github.com/kelleyrw/AnalysisTutorial/blob/master/lesson2/include/TRKEFF.h][TRKEFF]] class 
+
+This a piece of code that was automatically generated to give wrapper functions to the branches of the this TTree.  It only works on the tree in this example and if the tree itself is changes, then it will need to be regenerated.  The main point is twofold: 
+   1 It provides a simple interface to access the branches of the tree in a looper without having to call the boiler plate functions everytime (see previous lessons eff_looper.C).
+   1 It provides "lazy evaluation" on the branches.  By default, none of the branches are loaded.  In your analysis logic, it loads the branch the first time you access it then leaves it initialized until you access the next entry in the tree (event).
+
+We will discuss this more when we talk about CMS2 in latter lessons.
+
+---+++++ Building and Running the code 
+I've provided two ways to build the code.  The first is using ROOT wrapper to gcc called [[http://root.cern.ch/download/doc/ROOTUsersGuideHTML/ch07s09.html][ACLiC]] (the .L macros.C++ thing).  The second example is with GCC directly to show you what is under the hood.  There is no reason you have to stick with these two methods and they have their pluses and minuses; however, this is all that is really needed to get started on analysis.
+
+---++++++ !ACLiC 
+I've provided a simple macro to compile the code called [[https://github.com/kelleyrw/AnalysisTutorial/blob/master/lesson2/compile.C][compile.C]].  To compile this analysis code, you simple run the macro in ROOT:
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+root [0] .x compile.C+
+Info in <TUnixSystem::ACLiC>: creating shared library /Users/rwk7t/temp/.rootbuild//Users/rwk7t/Development/newbies/lesson2/./compile_C.so
+Info in <TUnixSystem::ACLiC>: creating shared library /Users/rwk7t/Development/newbies/lesson2/lib/libHistTools.so
+Info in <TUnixSystem::ACLiC>: creating shared library /Users/rwk7t/Development/newbies/lesson2/lib/libTRKEFF.so
+Info in <TUnixSystem::ACLiC>: creating shared library /Users/rwk7t/Development/newbies/lesson2/lib/libTrackingEfficiencyAnalysis.so
+(bool)1
+</verbatim>
+
+When you ready to run the code, there is a simple wrapper to compile the code, create an !TrackingEfficiencyAnalysis object, and run it called [[https://github.com/kelleyrw/AnalysisTutorial/blob/master/lesson2/macros/run_all.C][run_all.C]]:
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+root [0] .x macros/run_all.C 
+Info in <TUnixSystem::ACLiC>: creating shared library /Users/rwk7t/temp/.rootbuild//Users/rwk7t/Development/newbies/lesson2/./compile_C.so
+[TrackingEfficiencyAnalysis::ScanChain] finished processing 1000 events
+------------------------------
+CPU  Time: 1.2
+Real Time: 1.2
+
+[TrackingEfficiencyAnalysis::EndJob] printing histograms:
+Info in <TCanvas::Print>: png file plots/h_cotthetares_vs_eta.png has been created
+Info in <TCanvas::Print>: png file plots/h_cotthetares_vs_eta_sigma.png has been created
+Info in <TCanvas::Print>: png file plots/h_d0res_vs_eta.png has been created
+Info in <TCanvas::Print>: png file plots/h_d0res_vs_eta_sigma.png has been created
+Info in <TCanvas::Print>: png file plots/h_den_vs_eta.png has been created
+Info in <TCanvas::Print>: png file plots/h_den_vs_pt.png has been created
+Info in <TCanvas::Print>: png file plots/h_dzres_vs_eta.png has been created
+Info in <TCanvas::Print>: png file plots/h_dzres_vs_eta_sigma.png has been created
+Info in <TCanvas::Print>: png file plots/h_eff_vs_eta.png has been created
+Info in <TCanvas::Print>: png file plots/h_eff_vs_pt.png has been created
+Info in <TCanvas::Print>: png file plots/h_num_vs_eta.png has been created
+Info in <TCanvas::Print>: png file plots/h_num_vs_pt.png has been created
+Info in <TCanvas::Print>: png file plots/h_phires_vs_eta.png has been created
+Info in <TCanvas::Print>: png file plots/h_phires_vs_eta_sigma.png has been created
+Info in <TCanvas::Print>: png file plots/h_ptres_vs_eta.png has been created
+Info in <TCanvas::Print>: png file plots/h_ptres_vs_eta_sigma.png has been created
+</verbatim>
+
+---++++++ GCC directly 
+To see what is really going on, I provided a simple script that contains a single line to compile this code as a stand alone program (rather than running in ROOT/CINT).  The main reason is to demonstrate that it is possible to compile ROOT objects and classes without the interpreter at all (CINT).  You will find the interpreter has limitations and sometimes you may want to go around it.  One could easily extend this using GNU Make or even a fully flushed out build system or IDE (Ecplipse, Boost Build, CMake, CMSSW's scram, etc.).
+
+To compile from the command prompt:
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+[rwkelley@uaf-7 lesson2]$  ./compile.sh 
+g++ -O2 source/TrackingEfficiencyAnalysis.cc source/TRKEFF.cc source/HistTools.cc -o tracking_eff_analysis -pthread -m64 -I/code/osgcode/imacneill/root/05.34.07/include -L/code/osgcode/imacneill/root/05.34.07/lib -lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -pthread -lm -ldl -rdynamic -lGenVector -Iinclude
+</verbatim>
+
+This produces an executable program called "tracking_eff_analysis".
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+[rwk7t@tensor lesson2]$  ./tracking_eff_analysis 
+[TrackingEfficiencyAnalysis::ScanChain] finished processing 1000 events
+------------------------------
+CPU  Time: 1.2
+Real Time: 1.2
+
+[TrackingEfficiencyAnalysis::EndJob] printing histograms:
+Info in <TCanvas::Print>: png file plots/h_cotthetares_vs_eta.png has been created
+Info in <TCanvas::Print>: png file plots/h_cotthetares_vs_eta_sigma.png has been created
+Info in <TCanvas::Print>: png file plots/h_d0res_vs_eta.png has been created
+Info in <TCanvas::Print>: png file plots/h_d0res_vs_eta_sigma.png has been created
+Info in <TCanvas::Print>: png file plots/h_den_vs_eta.png has been created
+Info in <TCanvas::Print>: png file plots/h_den_vs_pt.png has been created
+Info in <TCanvas::Print>: png file plots/h_dzres_vs_eta.png has been created
+Info in <TCanvas::Print>: png file plots/h_dzres_vs_eta_sigma.png has been created
+Info in <TCanvas::Print>: png file plots/h_eff_vs_eta.png has been created
+Info in <TCanvas::Print>: png file plots/h_eff_vs_pt.png has been created
+Info in <TCanvas::Print>: png file plots/h_num_vs_eta.png has been created
+Info in <TCanvas::Print>: png file plots/h_num_vs_pt.png has been created
+Info in <TCanvas::Print>: png file plots/h_phires_vs_eta.png has been created
+Info in <TCanvas::Print>: png file plots/h_phires_vs_eta_sigma.png has been created
+Info in <TCanvas::Print>: png file plots/h_ptres_vs_eta.png has been created
+Info in <TCanvas::Print>: png file plots/h_ptres_vs_eta_sigma.png has been created
+</verbatim>
+
+---+++++ Output plots 
+
+The output plots will be put in the plots directory.  I've provided a macro called [[https://github.com/kelleyrw/AnalysisTutorial/blob/master/lesson2/macros/FormattedPlots.C][Formated]] to produce a nice version of the residual plots.  First you must load the HistTools so I use them in the macro:
+
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+root [0] .L lib/libHistTools.so 
+root [1] .x macros/FormattedPlots.C+
+Info in <TUnixSystem::ACLiC>: creating shared library /Users/rwk7t/temp/.rootbuild//Users/rwk7t/Development/newbies/lesson2/./macros/FormattedPlots_C.so
+Info in <TCanvas::Print>: pdf file plots/sigma_res.pdf has been created
+</verbatim>
+
+This produces formated plots:
+</verbatim> <img width="1000" alt="sigma_res.png" src="%ATTACHURLPATH%/sigma_res.png" height="1500" />
+
+---+++++Homework
+   * check out, understand, and run the code from lesson2
+   * modify the code to also produce the resolution vs pt.  The only change to the selection is since this is an efficiency vs pT, we should reduce the pT threshold to pT > 0.1 !GeV.
+   * modify the macros to produce the nicely formatted plots using log scale.
 
 ---+++ CMSSW
 ---++++ Overview of !CMSSW
@@ -311,4 +458,4 @@ This lesson is an example skeleton for organizing an analysis.  This is a short 
    * extract the yields
    * give a cross section estimate (no systematics)
 
--- Main.RyanKelley - 2013/12/09
+-- Main.RyanKelley - 2013/12/17
