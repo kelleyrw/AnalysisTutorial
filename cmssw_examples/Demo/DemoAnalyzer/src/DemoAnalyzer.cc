@@ -65,13 +65,11 @@ DemoAnalyzer::DemoAnalyzer(const edm::ParameterSet& iConfig)
    //now do what ever initialization is needed
 }
 
-
 DemoAnalyzer::~DemoAnalyzer()
 {
    // do anything here that needs to be done at desctruction time
    // (e.g. close files, deallocate resources etc.)
 }
-
 
 // ------------ method called for each event  ------------
 void DemoAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
@@ -86,7 +84,6 @@ void DemoAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
         LogInfo("Demo") << "number of tracks " << tracks->size();
     }
 }
-
 
 // ------------ method called once each job just before starting event loop  ------------
 void DemoAnalyzer::beginJob()
