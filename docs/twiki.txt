@@ -408,28 +408,135 @@ This produces formated plots:
 
 ---+++ CMSSW
 ---++++ Overview of !CMSSW
-   * Where is the code
-   * Where is the LXR
-   * Where is the Dyoxygen
-   * Where is the data
+   * Where is the code?
+	   * Repository: https://github.com/cms-sw/cmssw
+   * Where is the LXR?
+      * !CMSSW Cross-Reference: http://cmslxr.fnal.gov/lxr/
+   * Where is the Dyoxygen?
+      * GUI for code: https://cmssdt.cern.ch/SDT/doxygen/
+   * Where is the data?
+      * Data Aggregation System: https://cmsweb.cern.ch/das/
+      * Example: https://cmsweb.cern.ch/das/request?view=list&limit=10&instance=cms_dbs_prod_global&input=dataset%3D%2F*DYJetsToLL*%2F*%2F*AODSIM* 
+      * Can also use the DBS on the command line (after !CMSSW is setup -- see below)
 ---++++ Selected workbook topics Workbook
    * Some of these topics are out of date -- we'll use what we can and I'll supply more relevant examples if they are too far out of date.
    * workbook: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBook
 ---+++++ Chapter 2
-   * intro the !CMSSW: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookIntroBasics
-   * discussion on computing model: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookComputingModel
-   * basics of !CMSSW: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookCMSSWFramework
+   * Intro to !CMSSW: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookIntroBasics
+   * Discussion on computing model: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookComputingModel
+   * Basics of !CMSSW: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookCMSSWFramework
 ---+++++ Chapter 3
    * Ignore PAT
    * work flow of an analysis: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookAnalysisOverviewIntroduction
    * which release: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookWhichRelease
+      * !CMSSW setup: put this in your .bash_profile
+      * <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+source /code/osgcode/cmssoft/cms/cmsset_default.sh
+export SCRAM_ARCH=slc5_amd64_gcc462
+</verbatim>
+      * for this exercise, use CMSSW_5_3_2_patch4 (this is what we currently use in cms2)
+      * setup a release by doing the following:
+      * <verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+cmsrel CMSSW_5_3_2_patch4
+pushd CMSSW_5_3_2_patch4/src
+cmsenv
+popd
+</verbatim>
+      * It is often convenient to create a !CMSSW project with a special name, so that its contents are more easily recognized by you. For example, one could
+      * <verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+scramv1 p -n CMSSW_5_3_2_patch4_Tutorial CMSSW CMSSW_5_3_2_patch4
+pushd CMSSW_5_3_2_patch4_Tutorial/src
+cmsenv
+popd
+</verbatim>
+   * Get a ROOT file.  You can find them on the dbs (or DAS) and use xrootd to either open then or copy them:
+      * Find a file that you want do down load
+      * <verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+dbsql find file where dataset=/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM
+</verbatim>
+      * Open it in xrootd
+      * <verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+root root://xrootd.unl.edu//store/mc/Summer12_DR53X/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/AODSIM/PU_S10_START53_V7A-v1/0000/00037C53-AAD1-E111-B1BE-003048D45F38.root
+</verbatim>
+      * Or copy it locally 
+      * <verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+xrdcp root://xrootd.unl.edu//store/mc/Summer12_DR53X/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/AODSIM/PU_S10_START53_V7A-v1/0000/00037C53-AAD1-E111-B1BE-003048D45F38.root dy.root
+</verbatim>
+      * If you don't have a grid certificate yet, then use the file I copied locally
+      * <verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+root /nfs-7/userdata/edm/53X/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_AODSIM_PU_S10_START53_V7A-v1.root
+</verbatim>
    * Open a root tree and play with TTree::Draw(): https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookFWLite
+      * Example EDM ROOT file: /nfs-7/userdata/edm/53X/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_AODSIM_PU_S10_START53_V7A-v1.root
+      * <verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+[rwkelley@uaf-7 lesson3]$  root /nfs-7/userdata/edm/53X/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_AODSIM_PU_S10_START53_V7A-v1.root
+root [0] 
+Attaching file /nfs-7/userdata/edm/53X/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_AODSIM_PU_S10_START53_V7A-v1.root as _file0...
+Warning in <TClass::TClass>: no dictionary for class edm::EventAuxiliary is available
+Warning in <TClass::TClass>: no dictionary for class edm::Hash<2> is available
+Warning in <TClass::TClass>: no dictionary for class edm::EventID is available
+Warning in <TClass::TClass>: no dictionary for class edm::Timestamp is available
+Warning in <TClass::TClass>: no dictionary for class edm::LuminosityBlockAuxiliary is available
+Warning in <TClass::TClass>: no dictionary for class edm::LuminosityBlockID is available
+...
+Warning in <TClass::TClass>: no dictionary for class pair<unsigned int,string> is available
+</verbatim>
+
+What were all these errors?  The cause is CINT/ROOT is independent of !CMSSW and thus does not natively understand any of the !CMSSW specific classes (reco::Track, edm::EventAuxiliary, !TrackingParticle, etc.).  If you are running fully compiled this is not an issue; however, if you want to look at this file via CINT, you will need to load the dictonaries such that ROOT will understand these classes.  Fortunately, this can be accomplished by setting of !CMSSW's FWLite:
+
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+{
+    // Set up FW Lite for automatic loading of CMS libraries
+    // and data formats.   As you may have other user-defined setup
+    // in your rootlogon.C, the CMS setup is executed only if the CMS
+    // environment is set up.
+    //
+    const TString cmsswbase = getenv("CMSSW_BASE");
+    if (cmsswbase.Length() > 0) {
+        //
+        // The CMSSW environment is defined (this is true even for FW Lite)
+        // so set up the rest.
+        //
+        cout << "Loading FW Lite setup." << endl;
+        gSystem->Load("libFWCoreFWLite.so");
+        AutoLibraryLoader::enable();
+        gSystem->Load("libDataFormatsFWLite.so");
+        gSystem->Load("libDataFormatsPatCandidates.so");
+    }
+}
+</verbatim>
+
+Before you load the file, load FWLite.  Now the warnings should disapear.
+
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+[rwkelley@uaf-7 lesson3]$  root /nfs-7/userdata/edm/53X/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_AODSIM_PU_S10_START53_V7A-v1.root
+[rwkelley@uaf-7 lesson3]$  root -b
+root [0] .x macros/load_fwlite.C 
+Loading CMSSW FWLite
+root [1] TFile* file = TFile::Open("/nfs-7/userdata/edm/53X/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_AODSIM_PU_S10_START53_V7A-v1.root")
+root [2] 
+</verbatim>
+
+Often, people put this into their .rootlogon.C file such that it is loaded with ROOT whenever !CMSSW is setup.
+
    * Working with real data (JSON's etc...): https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookCollisionsDataAnalysis
 ---+++++ Chapter 4
    * Basics of analysis: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMoreOnCMSSWFramework
    * Write an EDAnalyzer: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookWriteFrameworkModule
+      * Implement this module using CMSSW_5_3_2_patch4 (this is what we use for CMS2)
+      * DY MC file: /nfs-7/userdata/edm/53X/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_AODSIM_PU_S10_START53_V7A-v1.root
    * Python configuration: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookConfigFileIntro
    * Explain what an EDFilter and EDProducer does (do an example?)
+---+++++ CMSSW Z Analysis exercise
+   * Write a EDProducer to make a simple ntuple with some basic variables for a quick generator study of the Z-boson
+      * keep the p4 of the Z and it's daughter leptons 
+         * gen label --> "genParticles"
+      * match daughter leptons to its corresponding reco objects (if they exist)
+         * muon label --> "muons"
+         * electron label --> "gsfElectrons"
+   * Write an EDFilter to filter out Z --> tau tau events       
+   * Write an EDAnalyzer to make some histograms of the variables quantities above
+      * Try to look at the difference between the generator level quantity vs the reco quantity to get a feel for the resolution to measure these quantities (e.g. m_Z vs m_l1l2).
 
 ---+++ CMS2
 ---++++ CMS2 Overview
@@ -458,4 +565,4 @@ This produces formated plots:
    * extract the yields
    * give a cross section estimate (no systematics)
 
--- Main.RyanKelley - 2013/12/17
+-- Main.RyanKelley - 2014/01/08
