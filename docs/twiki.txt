@@ -531,12 +531,21 @@ Often, people put this into their .rootlogon.C file such that it is loaded with 
    * Write a EDProducer to make a simple ntuple with some basic variables for a quick generator study of the Z-boson
       * keep the p4 of the Z and it's daughter leptons 
          * gen label --> "genParticles"
-      * match daughter leptons to its corresponding reco objects (if they exist)
+      * match daughter leptons to its corresponding reco objects (if they exist).
          * muon label --> "muons"
          * electron label --> "gsfElectrons"
    * Write an EDFilter to filter out Z --> tau tau events       
    * Write an EDAnalyzer to make some histograms of the variables quantities above
       * Try to look at the difference between the generator level quantity vs the reco quantity to get a feel for the resolution to measure these quantities (e.g. m_Z vs m_l1l2).
+   * I'd like to see the following plots at least:
+      * mass of the Z
+      * Compare the dilepton invariant mass at gen level and reco level
+         * for ee, &mu;&mu; and both together
+      * Compare p<sub>T</sub> and &eta; of the leptons (gen and reco level)
+      * Resolution of the z mass vs z mass  
+      * Resolution of the lepton p<sub>T</sub> vs p<sub>T</sub> (e's and &mu;'s separately).
+      * Efficiency of reconstructing the lepton vs p<sub>T</sub> (e's and &mu;'s separately).
+   * Please make a few slides summarizing your results.  I will look at them and check your code on Friday.
 
 ---+++ CMS2
 ---++++ CMS2 Overview
