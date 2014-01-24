@@ -171,6 +171,7 @@ void ZTreeMaker::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     iEvent.getByLabel(m_electron_label, els_handle);    
     const reco::GsfElectronCollection& electrons = *els_handle;
 
+    // NULL means no match
     const reco::Candidate* const d1_match_cand = (abs(d1->pdgId())==13 ? MatchGenToCandidate(*d1, muons, m_dr) : MatchGenToCandidate(*d1, electrons, m_dr));
     if (d1_match_cand != NULL)
     {

@@ -128,7 +128,7 @@ class ZTreeAnalyzer : public edm::EDAnalyzer
 
 typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > LorentzVectorD;
 
-const std::array<double, 7> pt_bins = {{0, 10, 20, 30, 40, 50, 100}};
+const std::array<double, 8> pt_bins = {{0, 5.0, 10, 20, 30, 40, 50, 100}};
 
 void SetHistStyle(TH1& hist)
 {
@@ -156,46 +156,46 @@ ZTreeAnalyzer::ZTreeAnalyzer(const edm::ParameterSet& iConfig)
     , h_gen_mmm              ("h_gen_mmm"             , "Dimuon Invariant Mass (Generator);m_{#mu#mu} (GeV);a.u."  , m_mll_nbins , m_mll_min , m_mll_max )
     , h_reco_mmm             ("h_reco_mmm"            , "Dimuon Invariant Mass (Reco);m_{#mu#mu} (GeV);a.u."       , m_mll_nbins , m_mll_min , m_mll_max )
     , h_gen_e1_pt            ("h_gen_e1_pt"           , "e_{1} p_{T} (Generator);p_{T} (GeV);a.u."                 , 50          , 0         , 100       )
-    , h_gen_e1_eta           ("h_gen_e1_eta"          , "e_{1} |#eta| (Generator);|#eta|;a.u."                     , 50          , -5        , 5         )
+    , h_gen_e1_eta           ("h_gen_e1_eta"          , "e_{1} |#eta| (Generator);|#eta|;a.u."                     , 25          , -5        , 5         )
     , h_gen_e1_charge        ("h_gen_e1_charge"       , "e_{1} charge (Generator);charge;a.u."                     , 5           , -2.5      , 2.5       )
     , h_gen_e1_matched       ("h_gen_e1_matched"      , "e_{1} is matched to reco (Generator);;a.u."               , 6           , -0.5      , 2.5       )
     , h_num_e1_pt            ("h_num_e1_pt"           , "e_{1} p_{T} (Numerator);p_{T} (GeV);a.u."                 , pt_bins.size()-1, pt_bins.data()    )
     , h_den_e1_pt            ("h_den_e1_pt"           , "e_{1} p_{T} (Denominator);p_{T} (GeV);a.u."               , pt_bins.size()-1, pt_bins.data()    )
     , h_reco_e1_pt           ("h_reco_e1_pt"          , "e_{1} p_{T} (Reco);p_{T} (GeV);a.u."                      , 50          , 0         , 100       )
-    , h_reco_e1_eta          ("h_reco_e1_eta"         , "e_{1} |#eta| (Reco);|#eta|;a.u."                          , 50          , -5        , 5         )
+    , h_reco_e1_eta          ("h_reco_e1_eta"         , "e_{1} |#eta| (Reco);|#eta|;a.u."                          , 25          , -5        , 5         )
     , h_reco_e1_charge       ("h_reco_e1_charge"      , "e_{1} charge (Reco);charge;a.u."                          , 5           , -2.5      , 2.5       )
     , h_reco_e1_dr           ("h_reco_e1_dr"          , "e_{1} #deltaR(gen, reco);#deltaR;a.u."                    , 10          , 0.0       , 0.2       )
     , h_reco_e1_res_vs_pt    ("h_reco_e1_res_vs_pt"   , "e_{1} Residual vs p_{T};p_{T} (GeV);Residual"             , pt_bins.size()-1, pt_bins.data()    , 100, -10.0, 10.0)
     , h_gen_e2_pt            ("h_gen_e2_pt"           , "e_{2} p_{T} (Generator);p_{T} (GeV);a.u."                 , 50          , 0         , 100       )
-    , h_gen_e2_eta           ("h_gen_e2_eta"          , "e_{2} |#eta| (Generator);|#eta|;a.u."                     , 50          , -5        , 5         )
+    , h_gen_e2_eta           ("h_gen_e2_eta"          , "e_{2} |#eta| (Generator);|#eta|;a.u."                     , 25          , -5        , 5         )
     , h_gen_e2_charge        ("h_gen_e2_charge"       , "e_{2} charge (Generator);charge;a.u."                     , 5           , -2.5      , 2.5       )
     , h_gen_e2_matched       ("h_gen_e2_matched"      , "e_{2} is matched to reco (Generator);;a.u."               , 6           , -0.5      , 2.5       )
     , h_num_e2_pt            ("h_num_e2_pt"           , "e_{2} p_{T} (Numerator);p_{T} (GeV);a.u."                 , pt_bins.size()-1, pt_bins.data()    )
     , h_den_e2_pt            ("h_den_e2_pt"           , "e_{2} p_{T} (Denominator);p_{T} (GeV);a.u."               , pt_bins.size()-1, pt_bins.data()    )
     , h_reco_e2_pt           ("h_reco_e2_pt"          , "e_{2} p_{T} (Reco);p_{T} (GeV);a.u."                      , 50          , 0         , 100       )
-    , h_reco_e2_eta          ("h_reco_e2_eta"         , "e_{2} |#eta| (Reco);|#eta|;a.u."                          , 50          , -5        , 5         )
+    , h_reco_e2_eta          ("h_reco_e2_eta"         , "e_{2} |#eta| (Reco);|#eta|;a.u."                          , 25          , -5        , 5         )
     , h_reco_e2_charge       ("h_reco_e2_charge"      , "e_{2} charge (Reco);charge;a.u."                          , 5           , -2.5      , 2.5       )
     , h_reco_e2_dr           ("h_reco_e2_dr"          , "e_{2} #deltaR(gen, reco);#deltaR;a.u."                    , 10          , 0.0       , 0.2       )
     , h_reco_e2_res_vs_pt    ("h_reco_e2_res_vs_pt"   , "e_{2} Residual vs p_{T};p_{T} (GeV);Residual"             , pt_bins.size()-1, pt_bins.data()    , 100, -10.0, 10.0)
     , h_gen_mu1_pt           ("h_gen_mu1_pt"          , "#mu_{1} p_{T} (Generator);p_{T} (GeV);a.u."               , 50          , 0         , 100       )
-    , h_gen_mu1_eta          ("h_gen_mu1_eta"         , "#mu_{1} |#eta| (Generator);|#eta|;a.u."                   , 50          , -5        , 5         )
+    , h_gen_mu1_eta          ("h_gen_mu1_eta"         , "#mu_{1} |#eta| (Generator);|#eta|;a.u."                   , 25          , -5        , 5         )
     , h_gen_mu1_charge       ("h_gen_mu1_charge"      , "#mu_{1} charge (Generator);charge;a.u."                   , 5           , -2.5      , 2.5       )
     , h_gen_mu1_matched      ("h_gen_mu1_matched"     , "#mu_{1} is matched to reco (Generator);;a.u."             , 6           , -0.5      , 2.5       )
     , h_num_mu1_pt           ("h_num_mu1_pt"          , "#mu_{1} p_{T} (Numerator);p_{T} (GeV);a.u."               , pt_bins.size()-1, pt_bins.data()    )
     , h_den_mu1_pt           ("h_den_mu1_pt"          , "#mu_{1} p_{T} (Denominator);p_{T} (GeV);a.u."             , pt_bins.size()-1, pt_bins.data()    )
     , h_reco_mu1_pt          ("h_reco_mu1_pt"         , "#mu_{1} p_{T} (Reco);p_{T} (GeV);a.u."                    , 50          , 0         , 100       )
-    , h_reco_mu1_eta         ("h_reco_mu1_eta"        , "#mu_{1} |#eta| (Reco);|#eta|;a.u."                        , 50          , -5        , 5         )
+    , h_reco_mu1_eta         ("h_reco_mu1_eta"        , "#mu_{1} |#eta| (Reco);|#eta|;a.u."                        , 25          , -5        , 5         )
     , h_reco_mu1_charge      ("h_reco_mu1_charge"     , "#mu_{1} charge (Reco);charge;a.u."                        , 5           , -2.5      , 2.5       )
     , h_reco_mu1_dr          ("h_reco_mu1_dr"         , "#mu_{1} #deltaR(gen, reco);#deltaR;a.u."                  , 10          , 0.0       , 0.2       )
     , h_reco_mu1_res_vs_pt   ("h_reco_mu1_res_vs_pt"  , "#mu_{1} Residual vs p_{T};p_{T} (GeV);Residual"           , pt_bins.size()-1, pt_bins.data()    , 100, -10.0, 10.0)
     , h_gen_mu2_pt           ("h_gen_mu2_pt"          , "#mu_{2} p_{T} (Generator);p_{T} (GeV);a.u."               , 50          , 0         , 100       )
-    , h_gen_mu2_eta          ("h_gen_mu2_eta"         , "#mu_{2} |#eta| (Generator);|#eta|;a.u."                   , 50          , -5        , 5         )
+    , h_gen_mu2_eta          ("h_gen_mu2_eta"         , "#mu_{2} |#eta| (Generator);|#eta|;a.u."                   , 25          , -5        , 5         )
     , h_gen_mu2_charge       ("h_gen_mu2_charge"      , "#mu_{2} charge (Generator);charge;a.u."                   , 5           , -2.5      , 2.5       )
     , h_gen_mu2_matched      ("h_gen_mu2_matched"     , "#mu_{2} is matched to reco (Generator);;a.u."             , 6           , -0.5      , 2.5       )
     , h_num_mu2_pt           ("h_num_mu2_pt"          , "#mu_{2} p_{T} (Numerator);p_{T} (GeV);a.u."               , pt_bins.size()-1, pt_bins.data()    )
     , h_den_mu2_pt           ("h_den_mu2_pt"          , "#mu_{2} p_{T} (Denominator);p_{T} (GeV);a.u."             , pt_bins.size()-1, pt_bins.data()    )
     , h_reco_mu2_pt          ("h_reco_mu2_pt"         , "#mu_{2} p_{T} (Reco);p_{T} (GeV);a.u."                    , 50          , 0         , 100       )
-    , h_reco_mu2_eta         ("h_reco_mu2_eta"        , "#mu_{2} |#eta| (Reco);|#eta|;a.u."                        , 50          , -5        , 5         )
+    , h_reco_mu2_eta         ("h_reco_mu2_eta"        , "#mu_{2} |#eta| (Reco);|#eta|;a.u."                        , 25          , -5        , 5         )
     , h_reco_mu2_charge      ("h_reco_mu2_charge"     , "#mu_{2} charge (Reco);charge;a.u."                        , 5           , -2.5      , 2.5       )
     , h_reco_mu2_dr          ("h_reco_mu2_dr"         , "#mu_{2} #deltaR(gen, reco);#deltaR;a.u."                  , 10          , 0.0       , 0.2       )
     , h_reco_mu2_res_vs_pt   ("h_reco_mu2_res_vs_pt"  , "#mu_{2} Residual vs p_{T};p_{T} (GeV);Residual"           , pt_bins.size()-1, pt_bins.data()    , 100, -10.0, 10.0)
@@ -324,8 +324,8 @@ void ZTreeAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     // Fill gen level info
     // --------------------------------------------- //
 
-    const bool is_mumu    = (l1_pdgid*l2_pdgid == -11*11);
-    const bool is_ee      = (l1_pdgid*l2_pdgid == -13*13);
+    const bool is_ee   = (l1_pdgid*l2_pdgid == -11*11);
+    const bool is_mumu = (l1_pdgid*l2_pdgid == -13*13);
  
     h_gen_mz.Fill(z_p4.mass());
     h_gen_mll.Fill(l12_p4.mass());
@@ -337,12 +337,12 @@ void ZTreeAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
         h_gen_mu1_eta.Fill(l1_p4.eta());
         h_gen_mu1_charge.Fill(l1_charge);
         h_gen_mu1_matched.Fill(l1_matched);
-        h_den_mu1_pt.Fill(l1_p4.pt());
         h_gen_mu2_pt.Fill(l2_p4.pt());
         h_gen_mu2_eta.Fill(l2_p4.eta());
         h_gen_mu2_charge.Fill(l2_charge);
         h_gen_mu2_matched.Fill(l2_matched);
-        h_den_mu2_pt.Fill(l2_p4.pt());
+        if (fabs(l1_p4.eta()) < 2.4) {h_den_mu1_pt.Fill(l1_p4.pt());}
+        if (fabs(l2_p4.eta()) < 2.4) {h_den_mu2_pt.Fill(l2_p4.pt());}
     }
     if (is_ee)
     {
@@ -351,16 +351,28 @@ void ZTreeAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
         h_gen_e1_eta.Fill(l1_p4.eta());
         h_gen_e1_charge.Fill(l1_charge);
         h_gen_e1_matched.Fill(l1_matched);
-        h_den_e1_pt.Fill(l1_p4.pt());
         h_gen_e2_pt.Fill(l2_p4.pt());
         h_gen_e2_eta.Fill(l2_p4.eta());
         h_gen_e2_charge.Fill(l2_charge);
         h_gen_e2_matched.Fill(l2_matched);
-        h_den_e2_pt.Fill(l2_p4.pt());
+        if (fabs(l1_p4.eta()) < 2.4) {h_den_e1_pt.Fill(l1_p4.pt());}
+        if (fabs(l2_p4.eta()) < 2.4) {h_den_e2_pt.Fill(l2_p4.pt());}
     }
 
     // Fill reco level info
     // --------------------------------------------- //
+
+    // lepton efficieny
+    if (l1_matched and fabs(l1_p4.eta()) < 2.4)
+    {
+        if (is_ee  ) {h_num_e1_pt.Fill(l1_p4.pt());}
+        if (is_mumu) {h_num_mu1_pt.Fill(l1_p4.pt());}
+    }
+    if (l2_matched and fabs(l2_p4.eta()) < 2.4)
+    {
+        if (is_ee  ) {h_num_e2_pt.Fill(l2_p4.pt());}
+        if (is_mumu) {h_num_mu2_pt.Fill(l2_p4.pt());}
+    }
 
     // assume everything is matched after here
     if (not l12_matched) {return;}
@@ -374,10 +386,8 @@ void ZTreeAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
         h_reco_mu1_eta.Fill(l1_reco_p4.eta());
         h_reco_mu1_charge.Fill(l1_reco_charge);
         h_reco_mu1_dr.Fill(l1_reco_dr);
-        h_num_mu1_pt.Fill(l1_p4.pt());
         h_reco_mu2_pt.Fill(l2_reco_p4.pt());
         h_reco_mu2_eta.Fill(l2_reco_p4.eta());
-        h_num_mu2_pt.Fill(l2_p4.pt());
         h_reco_mu2_charge.Fill(l2_reco_charge);
         h_reco_mu2_dr.Fill(l2_reco_dr);
         h_res_mll.Fill(l12_p4.mass(), l12_p4.mass()-l12_reco_p4.mass());
@@ -390,12 +400,10 @@ void ZTreeAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
         h_res_mee.Fill(l12_p4.mass(), l12_p4.mass()-l12_reco_p4.mass());
         h_reco_e1_pt.Fill(l1_reco_p4.pt());
         h_reco_e1_eta.Fill(l1_reco_p4.eta());
-        h_num_e1_pt.Fill(l1_p4.pt());
         h_reco_e1_charge.Fill(l1_reco_charge);
         h_reco_e1_dr.Fill(l1_reco_dr);
         h_reco_e2_pt.Fill(l2_reco_p4.pt());
         h_reco_e2_eta.Fill(l2_reco_p4.eta());
-        h_num_e2_pt.Fill(l2_p4.pt());
         h_reco_e2_charge.Fill(l2_reco_charge);
         h_reco_e2_dr.Fill(l2_reco_dr);
         h_res_mll.Fill(l12_p4.mass(), l12_p4.mass()-l12_reco_p4.mass());
@@ -444,7 +452,7 @@ TH1& MakeResolutionHist(TH2& res_hist, const std::string& name, const std::strin
         throw std::runtime_error("[ZTreeAnalyzer::MakeResolutionPlot] Error: Sigma Histograms not found!");
     }
     TH1::AddDirectory(old_add_dir);
-    h_sigma->SetName(Form("%s_sigma", name.c_str()));
+    h_sigma->SetName(name.c_str());
     h_sigma->SetTitle(title.c_str());
     SetHistStyle(*h_sigma);
     return *h_sigma;
@@ -455,10 +463,14 @@ void ZTreeAnalyzer::endJob()
     try
     {
         // efficiency plots
-        TH1& h_e1_eff_vs_pt  = MakeEfficiencyPlot(h_num_e1_pt , h_den_e1_pt , "h_e1_eff_vs_pt" , "e_{1} Efficiency vs p_{T};p_{T} (GeV);#espsilon"  );
-        TH1& h_e2_eff_vs_pt  = MakeEfficiencyPlot(h_num_e2_pt , h_den_e2_pt , "h_e2_eff_vs_pt" , "e_{2} Efficiency vs p_{T};p_{T} (GeV);#espsilon"  );
-        TH1& h_mu1_eff_vs_pt = MakeEfficiencyPlot(h_num_mu1_pt, h_den_mu1_pt, "h_mu1_eff_vs_pt", "#mu_{1} Efficiency vs p_{T};p_{T} (GeV);#espsilon");
-        TH1& h_mu2_eff_vs_pt = MakeEfficiencyPlot(h_num_mu2_pt, h_den_mu2_pt, "h_mu2_eff_vs_pt", "#mu_{2} Efficiency vs p_{T};p_{T} (GeV);#espsilon");
+        TH1& h_e1_eff_vs_pt  = MakeEfficiencyPlot(h_num_e1_pt , h_den_e1_pt , "h_e1_eff_vs_pt" , "e_{1} Efficiency vs p_{T};p_{T} (GeV);#epsilon"  );
+        TH1& h_e2_eff_vs_pt  = MakeEfficiencyPlot(h_num_e2_pt , h_den_e2_pt , "h_e2_eff_vs_pt" , "e_{2} Efficiency vs p_{T};p_{T} (GeV);#epsilon"  );
+        TH1& h_mu1_eff_vs_pt = MakeEfficiencyPlot(h_num_mu1_pt, h_den_mu1_pt, "h_mu1_eff_vs_pt", "#mu_{1} Efficiency vs p_{T};p_{T} (GeV);#epsilon");
+        TH1& h_mu2_eff_vs_pt = MakeEfficiencyPlot(h_num_mu2_pt, h_den_mu2_pt, "h_mu2_eff_vs_pt", "#mu_{2} Efficiency vs p_{T};p_{T} (GeV);#epsilon");
+        h_e1_eff_vs_pt.GetYaxis()->SetRangeUser( 0.3, 1.1);
+        h_e2_eff_vs_pt.GetYaxis()->SetRangeUser( 0.3, 1.1);
+        h_mu1_eff_vs_pt.GetYaxis()->SetRangeUser(0.3, 1.1);
+        h_mu2_eff_vs_pt.GetYaxis()->SetRangeUser(0.3, 1.1);
 
         // resolution sigma plots
         TH1& h_sigma_mll       = MakeResolutionHist(h_res_mll           , "h_sigma_mll"       , "Dilepton Invariant Mass Residual;m_{ll} (GeV);#sigma(m_{ll}^{gen}-m_{ll}^{reco}) (GeV)"          );
