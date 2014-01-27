@@ -69,7 +69,7 @@ struct EventInfo
     unsigned int event;
 
     // reco track info
-    std::vector<LorentzVector> trks_p4;
+    std::vector<LorentzVectorD> trks_p4;
     std::vector<double> trks_d0;
     std::vector<double> trks_dz;
     std::vector<double> trks_pterr;
@@ -83,7 +83,7 @@ struct EventInfo
     // TrakingParticle info
 	std::vector<bool> tps_matched;
     std::vector<int> tps_pdgid;
-    std::vector<LorentzVector> tps_p4;
+    std::vector<LorentzVectorD> tps_p4;
     std::vector<double> tps_d0;
     std::vector<double> tps_dz;
     std::vector<double> tps_tip;
