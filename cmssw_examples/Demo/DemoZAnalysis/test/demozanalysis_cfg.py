@@ -19,7 +19,7 @@ process.load("Demo.DemoZAnalysis.ZTreeFilter_cfi")
 
 # load ZTreeAnalyzer
 process.load("Demo.DemoZAnalysis.ZTreeAnalyzer_cfi")
-process.TFileService = cms.Service("TFileService", fileName = cms.string("plots/dy_plots.root") )
+process.ZTreeAnalyzer.hist_filename = cms.untracked.string("plots/dy_plots.root")
 
 # output 
 process.out = cms.OutputModule("PoolOutputModule",
