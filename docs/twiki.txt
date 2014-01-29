@@ -257,8 +257,8 @@ This lesson is an example skeleton for organizing an analysis.  This is a short 
 | |____TrackingEfficiencyAnalysis.cc      Source file for the main analysis looper
 | |____TRKEFF.cc                          Source file for the TTree branch wrapper class
 </verbatim>
-   * Note: that I'm using the CMSSW convention that *.C files are intended to be ROOT compiled macros and *.cc files are supposed to be "fully c++" complaint code.
-The main analysis is done in [[https://github.com/kelleyrw/AnalysisTutorial/blob/master/lesson2/source/TrackingEfficiencyAnalysis.cc][TrackingEfficiencyAnalysis.cc]].  This is a c++ class that holds all of the metadata and runs the analysis.  The main reason to make this a class is to keep all of the relevant variables and data together.  If this were a set of functions, you would have to pass a bunch of parameters back and forth -- a class is more more suited for this purpose.  Also, In the class definition below
+   * Note: that I'm using the CMSSW convention that *.C files are intended to be ROOT compiled macros and *.cc files are supposed to be "fully C++" complaint code.
+The main analysis is done in [[https://github.com/kelleyrw/AnalysisTutorial/blob/master/lesson2/source/TrackingEfficiencyAnalysis.cc][TrackingEfficiencyAnalysis.cc]].  This is a C++ class that holds all of the metadata and runs the analysis.  The main reason to make this a class is to keep all of the relevant variables and data together.  If this were a set of functions, you would have to pass a bunch of parameters back and forth -- a class is more more suited for this purpose.  Also, In the class definition below
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 class TrackingEfficiencyAnalysis
 {
@@ -546,6 +546,399 @@ Often, people put this into their .rootlogon.C file such that it is loaded with 
       * Resolution of the lepton p<sub>T</sub> vs p<sub>T</sub> (e's and &mu;'s separately).
       * Efficiency of reconstructing the lepton vs p<sub>T</sub> (e's and &mu;'s separately).
    * Please make a few slides summarizing your results.  I will look at them and check your code on Friday.
+---+++ Build and SCRAM Lesson
+C was developed in the 1970s and C++ in the 1980s.  These both predate nice GUI Integrated Development Environments (IDEs) that are quite popular today.  These include MS Visual Studio, Eclipse, XCode, etc.  NOTE: the IDE is not the compiler but is merely a nice GUI around the compiler.  Most of the time, the nitty gritty details of managing compiling and linking code is handled by the IDE but not always.  For large systems, even in industry which uses IDEs, the build system is handled separately from the IDE.  Here build refers to the process of compiling and linking your code into the final product (exe, libs, etc.).
+
+In CMS, we use [[https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookScramV1Intro][SCRAM]] (Source Configuration, Release, And Management tool).  This short lesson, motivates the need for a "build" system and then goes into how SCRAM solves the problem for CMSSW.
+---++++ Why do we care?
+C++ is object oriented.  This encourages modular code that can be spread among multiple files.  Unfortunately, nobody updated the old file management file from C to handle this so what we have now is quite the antiquated system -- very crude compared to more recently developed languages.  The next subsections illustrates some of the issues.
+---+++++ Simple one file program 
+Consider the following simple program in a file called =hello.cpp= in the =src= directory.
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+#include <iostream>
+
+int main()
+{
+    std::cout << "hello world!" << std::endl;
+    return 0;
+}
+</verbatim>
+
+Use g++ to compile
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+[rwk7t@tensor lesson4]$ g++ src/hello.cpp 
+</verbatim>
+
+This produces an exe called =a.out=.  To run:
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+[rwk7t@tensor lesson4]$  ./a.out 
+hello world!
+</verbatim>
+
+You can control the name of the output exe with an option to g++.  Here we put the exe in the =bin= directory:
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+[rwk7t@tensor lesson4]$  g++ src/hello.cpp -o bin/hello
+[rwk7t@tensor lesson4]$  ./bin/hello 
+hello world!
+</verbatim>
+
+---+++++ Multiple File programs 
+
+Now what happens if we want to write some reusable functions and put them in separate files.  How does this change our building procedure?  Consider the function =Module1::PrintHello= in a separate file called =module1.cpp=:
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+#include <iostream>
+
+namespace Module1
+{
+    void PrintHello()
+    {
+        std::cout << "hello from module1!" << std::endl;
+    }
+}
+</verbatim>
+
+And the main program that goes with it called =test1.cpp=:
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+#include "module1.cpp"
+
+int main()
+{
+    Module1::PrintHello();
+    return 0;
+}
+</verbatim>
+
+Now we compile into and exe in the =bin= directory:
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+[rwk7t@tensor lesson4]$  ./bin/test1 
+hello from module1!
+</verbatim>
+
+Everything here looks fine.  Now, consider another function added into our program which uses the =Module1::PrintHello= function from =module1.cpp= -- call this =module2.cpp=:
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+#include <iostream>
+#include "module1.cpp" 
+
+namespace Module2
+{
+    void PrintHello()
+    {
+        std::cout << "hello from module2!" << std::endl;
+        Module1::PrintHello();
+    }
+}
+</verbatim>
+
+Now our main program changes to the following which is saved in =test2.cpp=:
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+#include "module1.cpp"
+#include "module2.cpp"
+
+int main()
+{
+    Module1::PrintHello();
+    Module2::PrintHello();
+    return 0;
+}
+</verbatim>
+
+Now compiling will give you an error:
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+[rwk7t@tensor lesson4]$  g++ src/test2.cpp -o bin/test2
+In file included from src/module2.cpp:2:0,
+                 from src/test2.cpp:2:
+src/module1.cpp: In function 'void Module1::PrintHello()':
+src/module1.cpp:5:10: error: redefinition of 'void Module1::PrintHello()'
+In file included from src/test2.cpp:1:0:
+src/module1.cpp:5:10: error: 'void Module1::PrintHello()' previously defined here
+</verbatim>
+
+The reason for the error is module1.cpp has been included twice.  Once in the test2.cpp and once in the module2.cpp.  Recall from C++ that you can declare a function or class many times but you can only define it once.  Here because we are including the definition twice, we get a compile error.
+
+To fix the problem, we forward declare the two functions in =test3.cpp=:
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+namespace Module1 {void PrintHello();}
+namespace Module2 {void PrintHello();}
+
+int main()
+{
+    Module1::PrintHello();
+    Module2::PrintHello();
+    return 0;
+}
+</verbatim>
+
+We also need to foward declare the function in "module2.cpp"
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+#include <iostream>
+
+namespace Module1 {void PrintHello();}
+namespace Module2
+{
+    void PrintHello()
+    {
+        std::cout << "hello from module2!" << std::endl;
+        Module1::PrintHello();
+    }
+}
+</verbatim>
+
+And when we compile, we need to supply the definitions to the compiler.  This is done by adding all three files to the g++ call and now g++ knows to compile all 3 files and then link them together:
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+[rwk7t@tensor lesson4]$  g++ src/test3.cpp src/module1.cpp src/module2.cpp -o bin/test3
+[rwk7t@tensor lesson4]$  ./bin/test3 
+hello from module1!
+hello from module2!
+hello from module1!
+</verbatim>
+
+Now, editing the files and forward declaring is quite combersome so the convention is factor out foward declarations into interface or "header files" usually denoted by =*.h= or =*.hpp=.  So refactoring the modules and main program:
+
+module1.h:
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+#ifndef MODULE1_H
+#define MODULE1_H
+
+namespace Module1
+{
+    void PrintHello();
+}
+
+#endif //MODULE1_H
+</verbatim>
+
+Notice that the header file had the code surrounded some C preprocessor commands (called "header guard").  This really only needed for class definitions since these are not typically forward declared in header files.  This is protect from multiple class definitions.  In this particular example, you wouldn't need them but its good practice.
+
+module1.cpp:
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+#include "module1.h"
+#include <iostream>
+
+namespace Module1
+{
+    void PrintHello()
+    {
+        std::cout << "hello from module1!" << std::endl;
+    }
+}
+</verbatim>
+
+module2.h:
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+#ifndef MODULE2_H
+#define MODULE2_H
+
+namespace Module2
+{
+    void PrintHello();
+}
+
+#endif //MODULE2_H
+</verbatim>
+
+module2.cpp:
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+#include "module2.h" 
+#include "module1.h" 
+#include <iostream>
+
+namespace Module2
+{
+    void PrintHello()
+    {
+        std::cout << "hello from module2!" << std::endl;
+        Module1::PrintHello();
+    }
+}
+</verbatim>
+
+test4.cpp:
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+#include "module1.h"
+#include "module2.h"
+
+int main()
+{
+    Module1::PrintHello();
+    Module2::PrintHello();
+    return 0;
+}
+</verbatim>
+
+It is customary to put the header files in a different folder than the source code.  This is to facilitate a "user interface" that is easy to parse and not polluted with implementation details.  This is merely a convention but it is standard practice.  Because the headers in this example live in the =include= director, we need to tell g++ where to find them.  This is done with the =-I= switch to g++:
+
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+[rwk7t@tensor lesson4]$  g++ src/test4.cpp -I include src/module1.cpp src/module2.cpp -o bin/test4
+[rwk7t@tensor lesson4]$  ./bin/test4 
+hello from module1!
+hello from module2!
+hello from module1!
+</verbatim>
+
+---+++++ Libraries 
+
+In the previous section, we saw how to build an exe that has code spread among multiple file.  What happens though when you have 10, 100, 10k file?  You cannot possibly compile every file every time you wish to build your code!  For intermediate and large systems it might take hours to compile.  For example, compiling CMSSW takes several hours and has to be scheduled. 
+
+To save time, you could compile each piece at a time and then you will only have to link them which can save some building time:
+
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+[rwk7t@tensor lesson4]$  g++ -c src/module1.cpp -Iinclude -o obj/module1.o
+[rwk7t@tensor lesson4]$  g++ -c src/module2.cpp -Iinclude -o obj/module2.o
+[rwk7t@tensor lesson4]$  g++ -c src/test4.cpp -Iinclude -o obj/test4.o
+[rwk7t@tensor lesson4]$  g++ obj/test4.o obj/module1.o obj/module2.o -o bin/test4 
+</verbatim>
+
+This breaks each file into a binary or "object" file by using the -c option.  The binary file does nothing on its own but can be linked against in the last line to create the exe.  However, again compiling every file into its own object file can be cumbersome for intermediate to large systems so the convention is to create a reusable library.
+
+---++++++ Static Libraries 
+
+A static library is essentially where you collect all of the binary files for set of related code and combine it into one file that can be linked against to create you main program.  The main program will essentially pull the binaries that are relevant into the main program and absorb the binary content into the exe file.  In the following example, we pull module1 and module2 into a single reusable static library:
+
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+[rwk7t@tensor lesson4]$  g++ -c src/module1.cpp -Iinclude -o obj/module1.o
+[rwk7t@tensor lesson4]$  g++ -c src/module2.cpp -Iinclude -o obj/module2.o
+[rwk7t@tensor lesson4]$  ar rvs lib/module.a obj/module1.o obj/module2.o 
+ar: creating archive lib/libmodule.a
+a - obj/module1.o
+a - obj/module2.o
+</verbatim>
+
+NOTE: the file extension convention for static libraries is .a for "archive". 
+
+Now you can use this static library to use this reusable package:
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+[rwk7t@tensor lesson4]$  g++ -Iinclude src/test4.cpp lib/libmodule.a 
+[rwk7t@tensor lesson4]$  ./bin/test4 
+hello from module1!
+hello from module2!
+hello from module1!
+</verbatim>
+
+There is an interface that g++ uses to link against libraries.  The following is equivalent to the above:
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+[rwk7t@tensor lesson4]$  g++ -Iinclude src/test4.cpp -L lib -l module 
+[rwk7t@tensor lesson4]$  ./bin/test4 
+hello from module1!
+hello from module2!
+hello from module1!
+</verbatim>
+
+Here =-L= allows you to specify the path to the library and =-l= allows you to specify the actual library you wish to link against.  Notice the =-l= argument does not have the extensions or the lib prefix to the archive file which is implied.  This is because you may have a dynamic and static version of the same library and by default, dynamic is preferred.  The advantage of this method is you don't have to keep repeating the path the libraries which can make you command really long and unreadable.
+
+
+---++++++ Dynamic Libraries 
+
+Static libraries are great for small or intermediate size systems; however, since the binary code is copied to the exe, this can cause "code bloat" and cause the exe to be very large (~GB).  Also, if you use a hierarchical library scheme where some libs are dependent on other libs, then you are duplicating binary code and again causing more bloated binaries.  The solution is to use dynamic libraries (also called shared libraries).  This allows the exe to find the library at runtime.  There is a slight initialization penalty but not really that noticeable with modern computers.  The advantage is the exe will not be small and you don't have to copy around binaries into other libs or exes; however, the down side is now you have to keep track of where the dynamic libraries are and if you wish to run the exe somewhere else (like the grid), you will have to send the appropriate libraries as well. 
+
+To create a dynamic lib:
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+[rwk7t@tensor lesson4]$ g++ -shared obj/module*.o -o lib/libmodule.so
+[rwk7t@tensor lesson4]$ g++ -I include src/test4.cpp -Llib -lmodule
+[rwk7t@tensor lesson4]$ ./bin/test4 
+hello from module1!
+hello from module2!
+hello from module1!
+</verbatim>
+
+NOTE: the file extension convention varies by platform:
+   * Windows: =dll= for dynamic link library
+   * Linux: =so= for shared object
+   * Mac OSX: =dylib= for dynamic library
+
+Finally, exe will look in the same directory or the original place where the dynamic lib is.  If you move it some central place, you will need to ensure that the exe can find it.  You can specify an environment variable called =LD_LIBRARY_PATH= to include the path of the libraries you use frequently and the OS will search there for the shared lib.  This is usually for system wide code or systems that the user sets up (like ROOT or CMSSW).  Mac OSX also has a environment variable also called =DYLD_LIBRARY_PATH= which unfortunately causes mental friction when using a mac.
+
+This only scratches the service of using libraries.
+
+---++++ Build Systems 
+
+To facilitate managing the low level details from the last section, programs and tools called "build systems" have been developed.  This can range from a simple bash script to something from a GUI (like Visual Studio).  Learning a build system can increase you productivity and reduce the mental friction of managing the development, build, test cycle.
+
+---+++++ GNU Make
+
+GNU Make is considered a first step towards a build system.  GNU Make is not a build system pe se; but a tools that can be used to fashion a build system.  This section will not go into any real detail other than to give the most basic example.  Make is old technology from the 1970s and any more modern systems are available.  It is still widely used as a piece of the build system so it is still worth knowing a bit.
+
+Make has the simple structure which is a series of rules:
+
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+target:  dependency1 dependency2 ...
+      <tab> command(s)
+</verbatim>
+
+The goal of the each rule is to create the target.  If the target is older than any of its dependencies then the commands are executed.   You can then build up a series of interconnect rules to build your code.  Consider the following example:
+
+
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+# simple Makefile for test4
+
+# target
+all: bin/test4
+
+# rule to make the exe
+bin/test4: src/test4.cpp lib/libmodule.so
+	g++ -Iinclude src/test4.cpp -Llib -lmodule -o bin/test4
+
+lib/libmodule.so: obj/module1.o obj/module2.o
+	g++ -shared obj/module1.o obj/module2.o -o lib/libmodule.so
+
+obj/module1.o: include/module1.h src/module1.cpp
+	g++ -c src/module1.cpp -Iinclude -o obj/module1.o
+
+obj/module2.o: include/module2.h src/module2.cpp
+	g++ -c src/module2.cpp -Iinclude -o obj/module2.o
+
+# clean up
+clean:
+	if [ -f lib/libmodule.a ]; then rm lib/libmodule.a; fi
+	if [ -f bin/test4 ]; then rm bin/test4; fi
+	if [ -f obj/module1.o ]; then rm obj/module1.o; fi
+	if [ -f obj/module2.o ]; then rm obj/module2.o; fi
+	if [ -f obj/test4.o ]; then rm obj/test4.o; fi
+
+# PHONY means these rules are always out of date
+.PHONY: all clean
+</verbatim>
+
+The ultimate goal is create the =all= rule: 
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+[rwk7t@tensor lesson4]$  make all
+g++ -c src/module1.cpp -Iinclude -o obj/module1.o
+g++ -c src/module2.cpp -Iinclude -o obj/module2.o
+g++ -shared obj/module1.o obj/module2.o -o lib/libmodule.so
+g++ -Iinclude src/test4.cpp -Llib -lmodule -o bin/test4
+</verbatim>
+
+Notice the rules get called in reverse since nothing has been made.  Also, not that if you just type make, the rule =all= is impiled.  So this is convenient since whenever a file is out of date, it will call the appropriate rule and so on until the =all= rule is satisfied.
+
+Also, there is a rule clean which deletes all of the binary and library files:
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+[rwk7t@tensor lesson4]$  make clean
+if [ -f lib/libmodule.a ]; then rm lib/libmodule.a; fi
+if [ -f bin/test4 ]; then rm bin/test4; fi
+if [ -f obj/module1.o ]; then rm obj/module1.o; fi
+if [ -f obj/module2.o ]; then rm obj/module2.o; fi
+if [ -f obj/test4.o ]; then rm obj/test4.o; fi
+</verbatim>
+
+This might seem magical but for even intermediate size systems (like an analysis), this can get out of hand and cumbersome.  Some more digging into Make's features can alleviate some of this but in the end, there is still quite a bit of work to make it work well. 
+
+---+++++ ACLiC 
+
+ROOT for interactive work uses an interactive system that ships with CINT called The Automatic Compiler of Libraries for CINT (ACLiC).  This is the simple
+Also, there is a rule clean which deletes all of the binary and library files:
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+root [0] .L macro.C++
+</verbatim>
+
+More on ACLiC can be found here: http://root.cern.ch/download/doc/ROOTUsersGuideChapters/CINT.pdf
+
+---+++++ SCRAM 
+
+CMSSW uses SCRAM systems (Source Configuration, Release, And Management tool).  The following twikis explain it more detail:
+   * Quick start: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookScramV1Intro
+   * About buildfiles: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookBuildFilesIntro
+   * More in depth info: https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideScram
+
+---+++++ Other systems
 
 ---+++ CMS2
 ---++++ CMS2 Overview
