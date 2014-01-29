@@ -187,11 +187,9 @@ root [0]
 Attaching file ../data/tracking_ntuple.root as _file0...
 root [1] .x macros/eff.C 
 Info in <TCanvas::MakeDefCanvas>:  created default TCanvas with name c1
-</verbatim>
-</verbatim> <img width="596" alt="eff_vs_eta.png" src="%ATTACHURLPATH%/eff_vs_eta.png" height="572" />
+</verbatim> &lt;/verbatim&gt; <img width="596" alt="eff_vs_eta.png" src="%ATTACHURLPATH%/eff_vs_eta.png" height="572" />
 
-As an exercise we're going to make this same plot two more times.  The next example, we're going to compile the macro.  In general it is a good idea to compile you macros because the interpreter (CINT) is not robust and can incorrectly interpret even simple code.  Also, it will greatly increase the execution time if the macro is doing anything significant.  See chapter 7 of the User's Guide for more details. 
-The following macro produces this plot same plot as above but is meant to run compiled: https://github.com/kelleyrw/AnalysisTutorial/tree/master/lesson1/macros/eff_compiled.C
+As an exercise we're going to make this same plot two more times. The next example, we're going to compile the macro. In general it is a good idea to compile you macros because the interpreter (CINT) is not robust and can incorrectly interpret even simple code. Also, it will greatly increase the execution time if the macro is doing anything significant. See chapter 7 of the User's Guide for more details. The following macro produces this plot same plot as above but is meant to run compiled: https://github.com/kelleyrw/AnalysisTutorial/tree/master/lesson1/macros/eff_compiled.C
 
 <verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 [rwk7t@tensor lesson1]$  root
@@ -204,14 +202,11 @@ Info in <TCanvas::Print>: png file plots/h_num_vs_eta_compiled.png has been crea
 Info in <TCanvas::Print>: png file plots/h_den_vs_eta_compiled.png has been created
 Info in <TCanvas::Print>: png file plots/h_eff_vs_eta_compiled.png has been created
 [eff_compiled] writing plots to plots/eff_vs_eta.root
-</verbatim>
-</verbatim> <img width="596" alt="h_num_vs_eta_compiled.png" src="%ATTACHURLPATH%/h_num_vs_eta_compiled.png" height="572" />
-</verbatim> <img width="596" alt="h_den_vs_eta_compiled.png" src="%ATTACHURLPATH%/h_den_vs_eta_compiled.png" height="572" />
-</verbatim> <img width="596" alt="h_eff_vs_eta_compiled.png" src="%ATTACHURLPATH%/h_eff_vs_eta_compiled.png" height="572" />
+</verbatim> &lt;/verbatim&gt; <img width="596" alt="h_num_vs_eta_compiled.png" src="%ATTACHURLPATH%/h_num_vs_eta_compiled.png" height="572" /> &lt;/verbatim&gt; <img width="596" alt="h_den_vs_eta_compiled.png" src="%ATTACHURLPATH%/h_den_vs_eta_compiled.png" height="572" /> &lt;/verbatim&gt; <img width="596" alt="h_eff_vs_eta_compiled.png" src="%ATTACHURLPATH%/h_eff_vs_eta_compiled.png" height="572" />
 
-The final example from this lesson is a very simple "looper".  A looper is simple a macro that manually loops over the entries in a TTree rather than relying on TTree::Draw().  This has the advantage of speed since there will be only one loop over the tree instead of one for each plot.  Also, it has the flexibility to implement arbitrary logic whereas TTree::Draw, while flexible, can still be limited on what you can calculate and plot.   
+The final example from this lesson is a very simple "looper". A looper is simple a macro that manually loops over the entries in a TTree rather than relying on TTree::Draw(). This has the advantage of speed since there will be only one loop over the tree instead of one for each plot. Also, it has the flexibility to implement arbitrary logic whereas TTree::Draw, while flexible, can still be limited on what you can calculate and plot.
 
-The following macro is a simple looper: https://github.com/kelleyrw/AnalysisTutorial/tree/master/lesson1/macros/eff_looper.C.  It breaks up the process into two steps: create the numerator and denominator plots (!CreatePlots) and doing the division to make the efficiency (!FinalPlots).  The purpose of this is making the numerator/denominator is the "slow" part -- you don't want to remake these plots if you all you need is to change the label or something on the efficiency plot.  This is a simple example of breaking up the work flow to keep the analysis running efficiently.  You can, of course, make a function that simply calls both if you want the option of doing it in two steps (exercise left to the reader)
+The following macro is a simple looper: https://github.com/kelleyrw/AnalysisTutorial/tree/master/lesson1/macros/eff_looper.C. It breaks up the process into two steps: create the numerator and denominator plots (!CreatePlots) and doing the division to make the efficiency (!FinalPlots). The purpose of this is making the numerator/denominator is the "slow" part -- you don't want to remake these plots if you all you need is to change the label or something on the efficiency plot. This is a simple example of breaking up the work flow to keep the analysis running efficiently. You can, of course, make a function that simply calls both if you want the option of doing it in two steps (exercise left to the reader)
 <verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 root [2] .L macros/eff_looper.C++
 Info in <TUnixSystem::ACLiC>: creating shared library /Users/rwk7t/temp/.rootbuild//Users/rwk7t/Development/newbies/lesson1/./macros/eff_looper_C.so
@@ -220,26 +215,22 @@ root [4] FinalPlots("plots/counts_vs_eta_looper.root", "plots/eff_vs_eta_looper.
 Info in <TCanvas::Print>: png file plots/h_num_vs_eta_looper.png has been created
 Info in <TCanvas::Print>: png file plots/h_den_vs_eta_looper.png has been created
 Info in <TCanvas::Print>: png file plots/h_eff_vs_eta_looper.png has been created
-</verbatim>
-</verbatim> <img width="596" alt="h_num_vs_eta_looper.png" src="%ATTACHURLPATH%/h_num_vs_eta_looper.png" height="572" />
-</verbatim> <img width="596" alt="h_den_vs_eta_looper.png" src="%ATTACHURLPATH%/h_den_vs_eta_looper.png" height="572" />
-</verbatim> <img width="596" alt="h_eff_vs_eta_looper.png" src="%ATTACHURLPATH%/h_eff_vs_eta_looper.png" height="572" />
+</verbatim> &lt;/verbatim&gt; <img width="596" alt="h_num_vs_eta_looper.png" src="%ATTACHURLPATH%/h_num_vs_eta_looper.png" height="572" /> &lt;/verbatim&gt; <img width="596" alt="h_den_vs_eta_looper.png" src="%ATTACHURLPATH%/h_den_vs_eta_looper.png" height="572" /> &lt;/verbatim&gt; <img width="596" alt="h_eff_vs_eta_looper.png" src="%ATTACHURLPATH%/h_eff_vs_eta_looper.png" height="572" />
 
----+++++Homework
+---+++++ Homework
    * check out, understand, and run the macros from lesson1
-   * modify the macros to also produce the efficiency vs pt.  The only change to the selection is since this is an efficiency vs pT, we should reduce the pT threshold to pT > 0.1 !GeV.
-   * Create resolution plots vs eta and pT.  They are made by x_{reco} - x_{truth}.  Do this using whatever technique you feel is appropriate.  These should looks similar (but not exactly) to:
-      * http://cmsdoc.cern.ch/cms/Physics/tracking/validation/MC/CMSSW_6_1_0/START61_V8_noPU_ootb/RelValTTbar/resolutionsEta.pdf
-	  * http://cmsdoc.cern.ch/cms/Physics/tracking/validation/MC/CMSSW_6_1_0/START61_V8_noPU_ootb/RelValTTbar/resolutionsPt.pdf
+   * modify the macros to also produce the efficiency vs pt. The only change to the selection is since this is an efficiency vs pT, we should reduce the pT threshold to pT &gt; 0.1 !GeV.
+   * Create resolution plots vs eta and pT. They are made by x_{reco} - x_{truth}. Do this using whatever technique you feel is appropriate. These should looks similar (but not exactly) to: 
+      * http://cmsdoc.cern.ch/cms/Physics/tracking/validation/MC/CMSSW_6_1_0/START61_V8_noPU_ootb/RelValTTbar/resolutionsEta.pdf * http://cmsdoc.cern.ch/cms/Physics/tracking/validation/MC/CMSSW_6_1_0/START61_V8_noPU_ootb/RelValTTbar/resolutionsPt.pdf
    * write a brief discuss the features you see in the plots and try to explain them based on what we've gone over in the student given lectures
 
 ---++++ Lesson 2
-This lesson is an example skeleton for organizing an analysis.  This is a short lesson and the main point of this lesson is to show how to organize an analysis in a more structured way and to introduce some of the abstractions that will lead us to the conventions of CMSSW.
+ This lesson is an example skeleton for organizing an analysis. This is a short lesson and the main point of this lesson is to show how to organize an analysis in a more structured way and to introduce some of the abstractions that will lead us to the conventions of CMSSW. 
    * <a target="_blank" href="https://github.com/kelleyrw/AnalysisTutorial/tree/master/lesson2">Lesson 2 example code</a>
-   * This example uses the same simple tracking tree from the previous lesson and also produces the same plots to show, what I consider, a less tedious way.  There will always be an overhead to making plots and doing an analysis; however, with some smart choices it can be less tedious. 
+   * This example uses the same simple tracking tree from the previous lesson and also produces the same plots to show, what I consider, a less tedious way. There will always be an overhead to making plots and doing an analysis; however, with some smart choices it can be less tedious.
 
 ---+++++ Code Layout
-   * In the previous example looper (eff_looper.C), everything was contained in the same file.  Here the code will be re-factored and extended to promote some code re-use.  Below is a list of all the files and directories 
+   * In the previous example looper (eff_looper.C), everything was contained in the same file. Here the code will be re-factored and extended to promote some code re-use. Below is a list of all the files and directories
 
 <verbatim>
 |____compile.C                              File to compile the code using ACLiC
@@ -257,9 +248,9 @@ This lesson is an example skeleton for organizing an analysis.  This is a short 
 | |____TrackingEfficiencyAnalysis.cc      Source file for the main analysis looper
 | |____TRKEFF.cc                          Source file for the TTree branch wrapper class
 </verbatim>
+
    * Note: that I'm using the CMSSW convention that *.C files are intended to be ROOT compiled macros and *.cc files are supposed to be "fully C++" complaint code.
-The main analysis is done in [[https://github.com/kelleyrw/AnalysisTutorial/blob/master/lesson2/source/TrackingEfficiencyAnalysis.cc][TrackingEfficiencyAnalysis.cc]].  This is a C++ class that holds all of the metadata and runs the analysis.  The main reason to make this a class is to keep all of the relevant variables and data together.  If this were a set of functions, you would have to pass a bunch of parameters back and forth -- a class is more more suited for this purpose.  Also, In the class definition below
-<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+The main analysis is done in [[https://github.com/kelleyrw/AnalysisTutorial/blob/master/lesson2/source/TrackingEfficiencyAnalysis.cc][TrackingEfficiencyAnalysis.cc]]. This is a C++ class that holds all of the metadata and runs the analysis. The main reason to make this a class is to keep all of the relevant variables and data together. If this were a set of functions, you would have to pass a bunch of parameters back and forth -- a class is more more suited for this purpose. Also, In the class definition below <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 class TrackingEfficiencyAnalysis
 {
     public:
@@ -291,30 +282,29 @@ class TrackingEfficiencyAnalysis
 };
 </verbatim>
 
-the analysis methods were deliberately chosen.  You will see this methodology again when we deal with CMSSW.
-   * The [[https://github.com/kelleyrw/AnalysisTutorial/blob/master/lesson2/source/TrackingEfficiencyAnalysis.cc#L90][TrackingEfficiencyAnalysis::BeginJob]] function is to be called before the analysis loop begins.  It can be used to setup the initial conditions for the analysis (open files, book histograms, set flags, etc.). 
+the analysis methods were deliberately chosen. You will see this methodology again when we deal with CMSSW.
+   * The [[https://github.com/kelleyrw/AnalysisTutorial/blob/master/lesson2/source/TrackingEfficiencyAnalysis.cc#L90][TrackingEfficiencyAnalysis::BeginJob]] function is to be called before the analysis loop begins. It can be used to setup the initial conditions for the analysis (open files, book histograms, set flags, etc.).
    * The [[https://github.com/kelleyrw/AnalysisTutorial/blob/master/lesson2/source/TrackingEfficiencyAnalysis.cc#L197][TrackingEfficiencyAnalysis::Analyze]] function is the main logic to be performed on an individual event.
-   * The [[https://github.com/kelleyrw/AnalysisTutorial/blob/master/lesson2/source/TrackingEfficiencyAnalysis.cc#L143][TrackingEfficiencyAnalysis::EndJob]] function is to be called after the analysis loop ends.  It can be used to save the results for the analysis (close files, save and histograms, print tables, etc.). 
-   * The [[https://github.com/kelleyrw/AnalysisTutorial/blob/master/lesson2/source/TrackingEfficiencyAnalysis.cc#L317][TrackingEfficiencyAnalysis::ScanChain]] function is the main looper.  Before it loops, it calls the !BeginJob() function.  It then loops over the whole TChain and calls the Analyze() method for each entry in the tree.  Finally, after the loop it calls the !EndJob() method.
+   * The [[https://github.com/kelleyrw/AnalysisTutorial/blob/master/lesson2/source/TrackingEfficiencyAnalysis.cc#L143][TrackingEfficiencyAnalysis::EndJob]] function is to be called after the analysis loop ends. It can be used to save the results for the analysis (close files, save and histograms, print tables, etc.).
+   * The [[https://github.com/kelleyrw/AnalysisTutorial/blob/master/lesson2/source/TrackingEfficiencyAnalysis.cc#L317][TrackingEfficiencyAnalysis::ScanChain]] function is the main looper. Before it loops, it calls the !BeginJob() function. It then loops over the whole TChain and calls the Analyze() method for each entry in the tree. Finally, after the loop it calls the !EndJob() method.
 
 ---+++++ [[https://github.com/kelleyrw/AnalysisTutorial/blob/master/lesson2/include/HistTools.h][HistTools]] -- a starter kit for histogram tools
 
-In order to have some re-usable ROOT tools, I've provided a "starter" set for people.  I have a much more mature version [[https://github.com/kelleyrw/AnalysisTools][here]] but it may not be a bad idea to start doing some of these yourself to familiarize yourself with ROOT.  When you get comfortable you should feel free to rip off from my area on anyone else since the main goal is analysis not tools.  HistTools provides a very basic set of histogram tools.
+In order to have some re-usable ROOT tools, I've provided a "starter" set for people. I have a much more mature version [[https://github.com/kelleyrw/AnalysisTools][here]] but it may not be a bad idea to start doing some of these yourself to familiarize yourself with ROOT. When you get comfortable you should feel free to rip off from my area on anyone else since the main goal is analysis not tools. HistTools provides a very basic set of histogram tools.
 
----+++++ [[https://github.com/kelleyrw/AnalysisTutorial/blob/master/lesson2/include/TRKEFF.h][TRKEFF]] class 
+---+++++ [[https://github.com/kelleyrw/AnalysisTutorial/blob/master/lesson2/include/TRKEFF.h][TRKEFF]] class
 
-This a piece of code that was automatically generated to give wrapper functions to the branches of the this TTree.  It only works on the tree in this example and if the tree itself is changes, then it will need to be regenerated.  The main point is twofold: 
+This a piece of code that was automatically generated to give wrapper functions to the branches of the this TTree. It only works on the tree in this example and if the tree itself is changes, then it will need to be regenerated. The main point is twofold:
    1 It provides a simple interface to access the branches of the tree in a looper without having to call the boiler plate functions everytime (see previous lessons eff_looper.C).
-   1 It provides "lazy evaluation" on the branches.  By default, none of the branches are loaded.  In your analysis logic, it loads the branch the first time you access it then leaves it initialized until you access the next entry in the tree (event).
+   1 It provides "lazy evaluation" on the branches. By default, none of the branches are loaded. In your analysis logic, it loads the branch the first time you access it then leaves it initialized until you access the next entry in the tree (event).
 
 We will discuss this more when we talk about CMS2 in latter lessons.
 
----+++++ Building and Running the code 
-I've provided two ways to build the code.  The first is using ROOT wrapper to gcc called [[http://root.cern.ch/download/doc/ROOTUsersGuideHTML/ch07s09.html][ACLiC]] (the .L macros.C++ thing).  The second example is with GCC directly to show you what is under the hood.  There is no reason you have to stick with these two methods and they have their pluses and minuses; however, this is all that is really needed to get started on analysis.
+---+++++ Building and Running the code
+ I've provided two ways to build the code. The first is using ROOT wrapper to gcc called [[http://root.cern.ch/download/doc/ROOTUsersGuideHTML/ch07s09.html][ACLiC]] (the .L macros.C++ thing). The second example is with GCC directly to show you what is under the hood. There is no reason you have to stick with these two methods and they have their pluses and minuses; however, this is all that is really needed to get started on analysis.
 
----++++++ !ACLiC 
-I've provided a simple macro to compile the code called [[https://github.com/kelleyrw/AnalysisTutorial/blob/master/lesson2/compile.C][compile.C]].  To compile this analysis code, you simple run the macro in ROOT:
-<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+---++++++ !ACLiC
+ I've provided a simple macro to compile the code called [[https://github.com/kelleyrw/AnalysisTutorial/blob/master/lesson2/compile.C][compile.C]]. To compile this analysis code, you simple run the macro in ROOT: <verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 root [0] .x compile.C+
 Info in <TUnixSystem::ACLiC>: creating shared library /Users/rwk7t/temp/.rootbuild//Users/rwk7t/Development/newbies/lesson2/./compile_C.so
 Info in <TUnixSystem::ACLiC>: creating shared library /Users/rwk7t/Development/newbies/lesson2/lib/libHistTools.so
@@ -351,8 +341,8 @@ Info in <TCanvas::Print>: png file plots/h_ptres_vs_eta.png has been created
 Info in <TCanvas::Print>: png file plots/h_ptres_vs_eta_sigma.png has been created
 </verbatim>
 
----++++++ GCC directly 
-To see what is really going on, I provided a simple script that contains a single line to compile this code as a stand alone program (rather than running in ROOT/CINT).  The main reason is to demonstrate that it is possible to compile ROOT objects and classes without the interpreter at all (CINT).  You will find the interpreter has limitations and sometimes you may want to go around it.  One could easily extend this using GNU Make or even a fully flushed out build system or IDE (Ecplipse, Boost Build, CMake, CMSSW's scram, etc.).
+---++++++ GCC directly
+ To see what is really going on, I provided a simple script that contains a single line to compile this code as a stand alone program (rather than running in ROOT/CINT). The main reason is to demonstrate that it is possible to compile ROOT objects and classes without the interpreter at all (CINT). You will find the interpreter has limitations and sometimes you may want to go around it. One could easily extend this using GNU Make or even a fully flushed out build system or IDE (Ecplipse, Boost Build, CMake, CMSSW's scram, etc.).
 
 To compile from the command prompt:
 <verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
@@ -387,9 +377,9 @@ Info in <TCanvas::Print>: png file plots/h_ptres_vs_eta.png has been created
 Info in <TCanvas::Print>: png file plots/h_ptres_vs_eta_sigma.png has been created
 </verbatim>
 
----+++++ Output plots 
+---+++++ Output plots
 
-The output plots will be put in the plots directory.  I've provided a macro called [[https://github.com/kelleyrw/AnalysisTutorial/blob/master/lesson2/macros/FormattedPlots.C][Formated]] to produce a nice version of the residual plots.  First you must load the HistTools so I use them in the macro:
+The output plots will be put in the plots directory. I've provided a macro called [[https://github.com/kelleyrw/AnalysisTutorial/blob/master/lesson2/macros/FormattedPlots.C][Formated]] to produce a nice version of the residual plots. First you must load the HistTools so I use them in the macro:
 
 <verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 root [0] .L lib/libHistTools.so 
@@ -398,25 +388,24 @@ Info in <TUnixSystem::ACLiC>: creating shared library /Users/rwk7t/temp/.rootbui
 Info in <TCanvas::Print>: pdf file plots/sigma_res.pdf has been created
 </verbatim>
 
-This produces formated plots:
-</verbatim> <img width="1000" alt="sigma_res.png" src="%ATTACHURLPATH%/sigma_res.png" height="1500" />
+This produces formated plots: &lt;/verbatim&gt; <img width="1000" alt="sigma_res.png" src="%ATTACHURLPATH%/sigma_res.png" height="1500" />
 
----+++++Homework
+---+++++ Homework
    * check out, understand, and run the code from lesson2
-   * modify the code to also produce the resolution vs pt.  The only change to the selection is since this is an efficiency vs pT, we should reduce the pT threshold to pT > 0.1 !GeV.
+   * modify the code to also produce the resolution vs pt. The only change to the selection is since this is an efficiency vs pT, we should reduce the pT threshold to pT &gt; 0.1 !GeV.
    * modify the macros to produce the nicely formatted plots using log scale.
 
 ---+++ CMSSW
 ---++++ Overview of !CMSSW
-   * Where is the code?
-	   * Repository: https://github.com/cms-sw/cmssw
-   * Where is the LXR?
+   * Where is the code? 
+      * Repository: https://github.com/cms-sw/cmssw
+   * Where is the LXR? 
       * !CMSSW Cross-Reference: http://cmslxr.fnal.gov/lxr/
-   * Where is the Dyoxygen?
+   * Where is the Dyoxygen? 
       * GUI for code: https://cmssdt.cern.ch/SDT/doxygen/
-   * Where is the data?
+   * Where is the data? 
       * Data Aggregation System: https://cmsweb.cern.ch/das/
-      * Example: https://cmsweb.cern.ch/das/request?view=list&limit=10&instance=cms_dbs_prod_global&input=dataset%3D%2F*DYJetsToLL*%2F*%2F*AODSIM* 
+      * Example: https://cmsweb.cern.ch/das/request?view=list&limit=10&instance=cms_dbs_prod_global&input=dataset%3D%2F*DYJetsToLL*%2F*%2F*AODSIM*
       * Can also use the DBS on the command line (after !CMSSW is setup -- see below)
 ---++++ Selected workbook topics Workbook
    * Some of these topics are out of date -- we'll use what we can and I'll supply more relevant examples if they are too far out of date.
@@ -428,7 +417,7 @@ This produces formated plots:
 ---+++++ Chapter 3
    * Ignore PAT
    * work flow of an analysis: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookAnalysisOverviewIntroduction
-   * which release: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookWhichRelease
+   * which release: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookWhichRelease 
       * !CMSSW setup: put this in your .bash_profile
       * <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 source /code/osgcode/cmssoft/cms/cmsset_default.sh
@@ -449,7 +438,7 @@ pushd CMSSW_5_3_2_patch4_Tutorial/src
 cmsenv
 popd
 </verbatim>
-   * Get a ROOT file.  You can find them on the dbs (or DAS) and use xrootd to either open then or copy them:
+   * Get a ROOT file. You can find them on the dbs (or DAS) and use xrootd to either open then or copy them: 
       * Find a file that you want do down load
       * <verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 dbsql find file where dataset=/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM
@@ -458,7 +447,7 @@ dbsql find file where dataset=/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/
       * <verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 root root://xrootd.unl.edu//store/mc/Summer12_DR53X/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/AODSIM/PU_S10_START53_V7A-v1/0000/00037C53-AAD1-E111-B1BE-003048D45F38.root
 </verbatim>
-      * Or copy it locally 
+      * Or copy it locally
       * <verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 xrdcp root://xrootd.unl.edu//store/mc/Summer12_DR53X/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/AODSIM/PU_S10_START53_V7A-v1/0000/00037C53-AAD1-E111-B1BE-003048D45F38.root dy.root
 </verbatim>
@@ -466,7 +455,7 @@ xrdcp root://xrootd.unl.edu//store/mc/Summer12_DR53X/DYJetsToLL_M-50_TuneZ2Star_
       * <verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 root /nfs-7/userdata/edm/53X/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_AODSIM_PU_S10_START53_V7A-v1.root
 </verbatim>
-   * Open a root tree and play with TTree::Draw(): https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookFWLite
+   * Open a root tree and play with TTree::Draw(): https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookFWLite 
       * Example EDM ROOT file: /nfs-7/userdata/edm/53X/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_AODSIM_PU_S10_START53_V7A-v1.root
       * <verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 [rwkelley@uaf-7 lesson3]$  root /nfs-7/userdata/edm/53X/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_AODSIM_PU_S10_START53_V7A-v1.root
@@ -482,7 +471,7 @@ Warning in <TClass::TClass>: no dictionary for class edm::LuminosityBlockID is a
 Warning in <TClass::TClass>: no dictionary for class pair<unsigned int,string> is available
 </verbatim>
 
-What were all these errors?  The cause is CINT/ROOT is independent of !CMSSW and thus does not natively understand any of the !CMSSW specific classes (reco::Track, edm::EventAuxiliary, !TrackingParticle, etc.).  If you are running fully compiled this is not an issue; however, if you want to look at this file via CINT, you will need to load the dictonaries such that ROOT will understand these classes.  Fortunately, this can be accomplished by setting of !CMSSW's FWLite:
+What were all these errors? The cause is CINT/ROOT is independent of !CMSSW and thus does not natively understand any of the !CMSSW specific classes (reco::Track, edm::EventAuxiliary, !TrackingParticle, etc.). If you are running fully compiled this is not an issue; however, if you want to look at this file via CINT, you will need to load the dictonaries such that ROOT will understand these classes. Fortunately, this can be accomplished by setting of !CMSSW's FWLite:
 
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 {
@@ -506,7 +495,7 @@ What were all these errors?  The cause is CINT/ROOT is independent of !CMSSW and
 }
 </verbatim>
 
-Before you load the file, load FWLite.  Now the warnings should disapear.
+Before you load the file, load FWLite. Now the warnings should disapear.
 
 <verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 [rwkelley@uaf-7 lesson3]$  root /nfs-7/userdata/edm/53X/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_AODSIM_PU_S10_START53_V7A-v1.root
@@ -522,39 +511,39 @@ Often, people put this into their .rootlogon.C file such that it is loaded with 
    * Working with real data (JSON's etc...): https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookCollisionsDataAnalysis
 ---+++++ Chapter 4
    * Basics of analysis: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMoreOnCMSSWFramework
-   * Write an EDAnalyzer: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookWriteFrameworkModule
+   * Write an EDAnalyzer: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookWriteFrameworkModule 
       * Implement this module using CMSSW_5_3_2_patch4 (this is what we use for CMS2)
       * DY MC file: /nfs-7/userdata/edm/53X/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_AODSIM_PU_S10_START53_V7A-v1.root
    * Python configuration: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookConfigFileIntro
    * Explain what an EDFilter and EDProducer does (do an example?)
 ---+++++ CMSSW Z Analysis exercise
-   * Write a EDProducer to make a simple ntuple with some basic variables for a quick generator study of the Z-boson
+   * Write a EDProducer to make a simple ntuple with some basic variables for a quick generator study of the Z-boson 
       * keep the p4 of the Z and it's daughter leptons 
-         * gen label --> "genParticles"
-      * match daughter leptons to its corresponding reco objects (if they exist).
-         * muon label --> "muons"
-         * electron label --> "gsfElectrons"
-   * Write an EDFilter to filter out Z --> tau tau events       
-   * Write an EDAnalyzer to make some histograms of the variables quantities above
+         * gen label --&gt; "genParticles"
+      * match daughter leptons to its corresponding reco objects (if they exist). 
+         * muon label --&gt; "muons"
+         * electron label --&gt; "gsfElectrons"
+   * Write an EDFilter to filter out Z --&gt; tau tau events
+   * Write an EDAnalyzer to make some histograms of the variables quantities above 
       * Try to look at the difference between the generator level quantity vs the reco quantity to get a feel for the resolution to measure these quantities (e.g. m_Z vs m_l1l2).
-   * I'd like to see the following plots at least:
+   * I'd like to see the following plots at least: 
       * mass of the Z
-      * Compare the dilepton invariant mass at gen level and reco level
+      * Compare the dilepton invariant mass at gen level and reco level 
          * for ee, &mu;&mu; and both together
       * Compare p<sub>T</sub> and &eta; of the leptons (gen and reco level)
-      * Resolution of the z mass vs z mass  
+      * Resolution of the z mass vs z mass
       * Resolution of the lepton p<sub>T</sub> vs p<sub>T</sub> (e's and &mu;'s separately).
       * Efficiency of reconstructing the lepton vs p<sub>T</sub> (e's and &mu;'s separately).
-   * Please make a few slides summarizing your results.  I will look at them and check your code on Friday.
----+++ Build and SCRAM Lesson
-C was developed in the 1970s and C++ in the 1980s.  These both predate nice GUI Integrated Development Environments (IDEs) that are quite popular today.  These include MS Visual Studio, Eclipse, XCode, etc.  NOTE: the IDE is not the compiler but is merely a nice GUI around the compiler.  Most of the time, the nitty gritty details of managing compiling and linking code is handled by the IDE but not always.  For large systems, even in industry which uses IDEs, the build system is handled separately from the IDE.  Here build refers to the process of compiling and linking your code into the final product (exe, libs, etc.).
+   * Please make a few slides summarizing your results. I will look at them and check your code on Friday.
 
-In CMS, we use [[https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookScramV1Intro][SCRAM]] (Source Configuration, Release, And Management tool).  This short lesson, motivates the need for a "build" system and then goes into how SCRAM solves the problem for CMSSW.
+---+++ Building Lesson
+ C was developed in the 1970s and C++ in the 1980s. These both predate nice GUI Integrated Development Environments (IDEs) that are quite popular today. These include MS Visual Studio, Eclipse, XCode, etc. NOTE: the IDE is not the compiler but is merely a nice GUI around the compiler. Most of the time, the nitty gritty details of managing compiling and linking code is handled by the IDE but not always. For large systems, even in industry which uses IDEs, the build system is handled separately from the IDE. Here build refers to the process of compiling and linking your code into the final product (exe, libs, etc.).
+
+In CMS, we use [[https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookScramV1Intro][SCRAM]] (Source Configuration, Release, And Management tool). This short lesson, motivates the need for a "build" system and then goes into how SCRAM solves the problem for CMSSW.
 ---++++ Why do we care?
-C++ is object oriented.  This encourages modular code that can be spread among multiple files.  Unfortunately, nobody updated the old file management file from C to handle this so what we have now is quite the antiquated system -- very crude compared to more recently developed languages.  The next subsections illustrates some of the issues.
----+++++ Simple one file program 
-Consider the following simple program in a file called =hello.cpp= in the =src= directory.
-<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+ C++ is object oriented. This encourages modular code that can be spread among multiple files. Unfortunately, nobody updated the old file management system from C to handle this so C++ is stuck with quite the antiquated system -- very crude compared to more recently developed languages. The next subsections illustrates some of the issues. 
+---+++++ Simple one file program
+ Consider the following simple program in a file called =hello.cpp= in the =src= directory. <verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 #include <iostream>
 
 int main()
@@ -569,22 +558,22 @@ Use g++ to compile
 [rwk7t@tensor lesson4]$ g++ src/hello.cpp 
 </verbatim>
 
-This produces an exe called =a.out=.  To run:
+This produces an exe called =a.out=. To run:
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 [rwk7t@tensor lesson4]$  ./a.out 
 hello world!
 </verbatim>
 
-You can control the name of the output exe with an option to g++.  Here we put the exe in the =bin= directory:
+You can control the name of the output exe with the option -o to g++. Here we put the exe in the =bin= directory:
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 [rwk7t@tensor lesson4]$  g++ src/hello.cpp -o bin/hello
 [rwk7t@tensor lesson4]$  ./bin/hello 
 hello world!
 </verbatim>
 
----+++++ Multiple File programs 
+---+++++ Multiple File programs
 
-Now what happens if we want to write some reusable functions and put them in separate files.  How does this change our building procedure?  Consider the function =Module1::PrintHello= in a separate file called =module1.cpp=:
+Now what happens if we want to write some reusable functions and put them in separate files. How does this change our building procedure? Consider the function =Module1::PrintHello= in a separate file called =module1.cpp=:
 <verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 #include <iostream>
 
@@ -597,7 +586,7 @@ namespace Module1
 }
 </verbatim>
 
-And the main program that goes with it called =test1.cpp=:
+And the main program that goes with it is called =test1.cpp=:
 <verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 #include "module1.cpp"
 
@@ -614,7 +603,7 @@ Now we compile into and exe in the =bin= directory:
 hello from module1!
 </verbatim>
 
-Everything here looks fine.  Now, consider another function added into our program which uses the =Module1::PrintHello= function from =module1.cpp= -- call this =module2.cpp=:
+Everything here looks fine. Now, consider another function added into our program which uses the =Module1::PrintHello= function from =module1.cpp= -- call this =module2.cpp=:
 <verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 #include <iostream>
 #include "module1.cpp" 
@@ -653,7 +642,7 @@ In file included from src/test2.cpp:1:0:
 src/module1.cpp:5:10: error: 'void Module1::PrintHello()' previously defined here
 </verbatim>
 
-The reason for the error is module1.cpp has been included twice.  Once in the test2.cpp and once in the module2.cpp.  Recall from C++ that you can declare a function or class many times but you can only define it once.  Here because we are including the definition twice, we get a compile error.
+The reason for the error is module1.cpp has been included twice. Once in the test2.cpp and once in the module2.cpp. Recall from C++ that you can *declare* a function or class many times but you can only *define* it once. Here because we are including the definition twice, we get a compile error.
 
 To fix the problem, we forward declare the two functions in =test3.cpp=:
 <verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
@@ -683,7 +672,7 @@ namespace Module2
 }
 </verbatim>
 
-And when we compile, we need to supply the definitions to the compiler.  This is done by adding all three files to the g++ call and now g++ knows to compile all 3 files and then link them together:
+And when we compile, we need to supply the definitions to the compiler. This is done by adding all three files to the g++ call and now g++ knows to compile all 3 files and then link them together:
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 [rwk7t@tensor lesson4]$  g++ src/test3.cpp src/module1.cpp src/module2.cpp -o bin/test3
 [rwk7t@tensor lesson4]$  ./bin/test3 
@@ -692,7 +681,7 @@ hello from module2!
 hello from module1!
 </verbatim>
 
-Now, editing the files and forward declaring is quite combersome so the convention is factor out foward declarations into interface or "header files" usually denoted by =*.h= or =*.hpp=.  So refactoring the modules and main program:
+Now, editing the files and forward declaring is quite combersome so the convention is to factor out foward declarations into interface or "header files" usually denoted by =*.h= or =*.hpp=. So refactoring the modules and main program:
 
 module1.h:
 <verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
@@ -707,7 +696,7 @@ namespace Module1
 #endif //MODULE1_H
 </verbatim>
 
-Notice that the header file had the code surrounded some C preprocessor commands (called "header guard").  This really only needed for class definitions since these are not typically forward declared in header files.  This is protect from multiple class definitions.  In this particular example, you wouldn't need them but its good practice.
+Notice that the header file had the code surrounded some C preprocessor commands (called "header guard"). This really only needed for class definitions since these are typically *defined* in header files. This is protect from multiple class definitions. In this particular example, you wouldn't need them but its good practice.
 
 module1.cpp:
 <verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
@@ -765,7 +754,7 @@ int main()
 }
 </verbatim>
 
-It is customary to put the header files in a different folder than the source code.  This is to facilitate a "user interface" that is easy to parse and not polluted with implementation details.  This is merely a convention but it is standard practice.  Because the headers in this example live in the =include= director, we need to tell g++ where to find them.  This is done with the =-I= switch to g++:
+It is customary to put the header files in a different folder than the source code. This is to facilitate a "user interface" that is easy to parse and not polluted with implementation details. This is merely a convention but it is standard practice. Because the headers in this example live in the =include= director, we need to tell g++ where to find them. This is done with the =-I= switch to g++:
 
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 [rwk7t@tensor lesson4]$  g++ src/test4.cpp -I include src/module1.cpp src/module2.cpp -o bin/test4
@@ -775,9 +764,9 @@ hello from module2!
 hello from module1!
 </verbatim>
 
----+++++ Libraries 
+---+++++ Libraries
 
-In the previous section, we saw how to build an exe that has code spread among multiple file.  What happens though when you have 10, 100, 10k file?  You cannot possibly compile every file every time you wish to build your code!  For intermediate and large systems it might take hours to compile.  For example, compiling CMSSW takes several hours and has to be scheduled. 
+In the previous section, we saw how to build an exe that has code spread among multiple file. What happens though when you have 10, 100, 10k file? You cannot possibly compile every file every time you wish to build your code! For intermediate and large systems it might take hours to compile. For example, compiling CMSSW takes several hours and has to be scheduled. Even ROOT takes ~30 minutes.
 
 To save time, you could compile each piece at a time and then you will only have to link them which can save some building time:
 
@@ -788,11 +777,11 @@ To save time, you could compile each piece at a time and then you will only have
 [rwk7t@tensor lesson4]$  g++ obj/test4.o obj/module1.o obj/module2.o -o bin/test4 
 </verbatim>
 
-This breaks each file into a binary or "object" file by using the -c option.  The binary file does nothing on its own but can be linked against in the last line to create the exe.  However, again compiling every file into its own object file can be cumbersome for intermediate to large systems so the convention is to create a reusable library.
+This breaks each file into a binary or "object" file by using the -c option. The binary file does nothing on its own but can be linked against in the last line to create the exe. However, again compiling every file into its own object file can be cumbersome for intermediate to large systems so the convention is to create a reusable library.
 
----++++++ Static Libraries 
+---++++++ Static Libraries
 
-A static library is essentially where you collect all of the binary files for set of related code and combine it into one file that can be linked against to create you main program.  The main program will essentially pull the binaries that are relevant into the main program and absorb the binary content into the exe file.  In the following example, we pull module1 and module2 into a single reusable static library:
+A static library is essentially where you collect all of the binary files for set of related code and combine it into one file that can be linked against to create you main program. The main program will essentially pull the binaries that are relevant into the main program and absorb the binary content into the exe file. In the following example, we pull module1 and module2 into a single reusable static library:
 
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 [rwk7t@tensor lesson4]$  g++ -c src/module1.cpp -Iinclude -o obj/module1.o
@@ -803,7 +792,7 @@ a - obj/module1.o
 a - obj/module2.o
 </verbatim>
 
-NOTE: the file extension convention for static libraries is .a for "archive". 
+NOTE: the file extension convention for static libraries is .a for "archive".
 
 Now you can use this static library to use this reusable package:
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
@@ -814,7 +803,7 @@ hello from module2!
 hello from module1!
 </verbatim>
 
-There is an interface that g++ uses to link against libraries.  The following is equivalent to the above:
+There is an interface that g++ uses to link against libraries. The following is equivalent to the above:
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 [rwk7t@tensor lesson4]$  g++ -Iinclude src/test4.cpp -L lib -l module 
 [rwk7t@tensor lesson4]$  ./bin/test4 
@@ -823,17 +812,16 @@ hello from module2!
 hello from module1!
 </verbatim>
 
-Here =-L= allows you to specify the path to the library and =-l= allows you to specify the actual library you wish to link against.  Notice the =-l= argument does not have the extensions or the lib prefix to the archive file which is implied.  This is because you may have a dynamic and static version of the same library and by default, dynamic is preferred.  The advantage of this method is you don't have to keep repeating the path the libraries which can make you command really long and unreadable.
+Here =-L= allows you to specify the path to the library and =-l= allows you to specify the actual library you wish to link against. Notice the =-l= argument does not have the extensions or the "lib" prefix to the archive file -- this is implied. This is because you may have a dynamic and static version of the same library and by default, dynamic is preferred. The advantage of this method is you don't have to keep repeating the path the libraries which can make you command really long and unreadable.
 
+---++++++ Dynamic Libraries
 
----++++++ Dynamic Libraries 
-
-Static libraries are great for small or intermediate size systems; however, since the binary code is copied to the exe, this can cause "code bloat" and cause the exe to be very large (~GB).  Also, if you use a hierarchical library scheme where some libs are dependent on other libs, then you are duplicating binary code and again causing more bloated binaries.  The solution is to use dynamic libraries (also called shared libraries).  This allows the exe to find the library at runtime.  There is a slight initialization penalty but not really that noticeable with modern computers.  The advantage is the exe will not be small and you don't have to copy around binaries into other libs or exes; however, the down side is now you have to keep track of where the dynamic libraries are and if you wish to run the exe somewhere else (like the grid), you will have to send the appropriate libraries as well. 
+Static libraries are great for small or intermediate size systems; however, since the binary code is copied to the exe, this can cause "code bloat" and cause the exe to be very large (~GB). Also, if you use a hierarchical library scheme where some libs are dependent on other libs, then you are duplicating binary code and again causing more bloated binaries. The solution is to use dynamic libraries (also called shared libraries). This allows the exe to find the library at runtime. There is a slight initialization penalty but not really that noticeable with modern computers. The advantage is the exe will be small and you don't have to copy around binaries into other libs or exes. This for systems with "standard" shared libaries installed so only the exe needs to be shipped. However, the down side to shared libraries is now you have to keep track of where the dynamic libraries are and if you wish to run the exe somewhere else (like the grid), you will have to send the appropriate libraries as well if they are not already installed somewhere.
 
 To create a dynamic lib:
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 [rwk7t@tensor lesson4]$ g++ -shared obj/module*.o -o lib/libmodule.so
-[rwk7t@tensor lesson4]$ g++ -I include src/test4.cpp -Llib -lmodule
+[rwk7t@tensor lesson4]$ g++ -I include src/test4.cpp -L lib -l module
 [rwk7t@tensor lesson4]$ ./bin/test4 
 hello from module1!
 hello from module2!
@@ -841,21 +829,65 @@ hello from module1!
 </verbatim>
 
 NOTE: the file extension convention varies by platform:
-   * Windows: =dll= for dynamic link library
-   * Linux: =so= for shared object
-   * Mac OSX: =dylib= for dynamic library
+   * Windows: *. =dll= for dynamic link library
+   * Linux: *. =so= for shared object
+   * Mac OSX: *. =dylib= for dynamic library
 
-Finally, exe will look in the same directory or the original place where the dynamic lib is.  If you move it some central place, you will need to ensure that the exe can find it.  You can specify an environment variable called =LD_LIBRARY_PATH= to include the path of the libraries you use frequently and the OS will search there for the shared lib.  This is usually for system wide code or systems that the user sets up (like ROOT or CMSSW).  Mac OSX also has a environment variable also called =DYLD_LIBRARY_PATH= which unfortunately causes mental friction when using a mac.
+Finally, exe will look in it's same directory or the original place where the dynamic lib was during linking. If you move it some central place, you will need to ensure that the exe can find it at runtime. You can specify an environment variable called =LD_LIBRARY_PATH= to include the path of the libraries you use frequently and the OS will search there for the shared lib. This is usually for system wide code or systems that the user sets up (like ROOT or CMSSW). Mac OSX also has a environment variable also called =DYLD_LIBRARY_PATH= which unfortunately causes mental friction when using a mac.
 
 This only scratches the service of using libraries.
 
----++++ Build Systems 
+---+++++ Building an exe with ROOT objects
 
-To facilitate managing the low level details from the last section, programs and tools called "build systems" have been developed.  This can range from a simple bash script to something from a GUI (like Visual Studio).  Learning a build system can increase you productivity and reduce the mental friction of managing the development, build, test cycle.
+There is no reason you have to use ROOT interactively though CINT -- it is really just a set of C++ libraries.  Consider the following simple program called =with_root.cpp=:
+
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+#include "TH1F.h"
+#include "TFile.h"
+
+int main()
+{
+    TFile file("file.root", "RECREATE");
+    TH1F h1("h1", "h1", 100, -5, 5);
+    h1.FillRandom("gaus", 10000);
+    h1.Write();
+    file.Close();
+    return 0;
+}
+</verbatim>
+
+If I try to compile this, I'll get an error since g++ doesn't know where to find the ROOT headers and libraries:
+
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+[rwk7t@tensor lesson4]$  g++ src/with_root.cpp -o bin/with_root                               
+src/with_root.cpp:1:18: fatal error: TH1F.h: No such file or directory
+compilation terminated.
+</verbatim>
+
+
+ROOT ships with a nice command line utility that will give you the appropriate g++ options to pass to your command:
+
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+[rwk7t@tensor lesson4]$  root-config --cflags --libs
+-pthread -std=c++0x -m64 -I/usr/local/cmssw/osx107_amd64_gcc472/cms/cmssw/CMSSW_6_1_2/external/osx107_amd64_gcc472/bin/../../../../../../lcg/root/5.34.03-cms2/include -L/usr/local/cmssw/osx107_amd64_gcc472/cms/cmssw/CMSSW_6_1_2/external/osx107_amd64_gcc472/bin/../../../../../../lcg/root/5.34.03-cms2/lib -lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -lpthread -Wl,-rpath,/usr/local/cmssw/osx107_amd64_gcc472/cms/cmssw/CMSSW_6_1_2/external/osx107_amd64_gcc472/bin/../../../../../../lcg/root/5.34.03-cms2/lib -lm -ldl
+</verbatim>
+
+So to build a standalone exe with ROOT objects, you can do the following:
+
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+[rwk7t@tensor lesson4]$  g++ src/with_root.cpp `root-config --cflags --libs` -o bin/with_root 
+[rwk7t@tensor lesson4]$  ./bin/with_root 
+</verbatim>
+
+The point is you are not stuck with !ACLiC to run ROOT code.
+
+---++++ Build Systems
+
+To facilitate managing the low level details from the last section, programs and tools called "build systems" have been developed. This can range from a simple bash script to something from a GUI (like Visual Studio). Learning a build system can increase your productivity and reduce the mental friction of managing the development, build, test cycle.
 
 ---+++++ GNU Make
 
-GNU Make is considered a first step towards a build system.  GNU Make is not a build system pe se; but a tools that can be used to fashion a build system.  This section will not go into any real detail other than to give the most basic example.  Make is old technology from the 1970s and any more modern systems are available.  It is still widely used as a piece of the build system so it is still worth knowing a bit.
+GNU Make is considered a first step towards a build system. GNU Make is not a build system pe se; but a tools that can be used to fashion a build system. This section will not go into any real detail other than to give the most basic example. Make is old technology from the 1970s and any more modern systems are available. It is still widely used as a piece of the build system so it is still worth knowing a bit.
 
 Make has the simple structure which is a series of rules:
 
@@ -864,8 +896,7 @@ target:  dependency1 dependency2 ...
       <tab> command(s)
 </verbatim>
 
-The goal of the each rule is to create the target.  If the target is older than any of its dependencies then the commands are executed.   You can then build up a series of interconnect rules to build your code.  Consider the following example:
-
+The goal of the each rule is to create the target. If the target is older than any of its dependencies then the commands are executed. You can then build up a series of interconnect rules to build your code. Consider the following example:
 
 <verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 # simple Makefile for test4
@@ -875,30 +906,30 @@ all: bin/test4
 
 # rule to make the exe
 bin/test4: src/test4.cpp lib/libmodule.so
-	g++ -Iinclude src/test4.cpp -Llib -lmodule -o bin/test4
+   g++ -Iinclude src/test4.cpp -Llib -lmodule -o bin/test4
 
 lib/libmodule.so: obj/module1.o obj/module2.o
-	g++ -shared obj/module1.o obj/module2.o -o lib/libmodule.so
+   g++ -shared obj/module1.o obj/module2.o -o lib/libmodule.so
 
 obj/module1.o: include/module1.h src/module1.cpp
-	g++ -c src/module1.cpp -Iinclude -o obj/module1.o
+   g++ -c src/module1.cpp -Iinclude -o obj/module1.o
 
 obj/module2.o: include/module2.h src/module2.cpp
-	g++ -c src/module2.cpp -Iinclude -o obj/module2.o
+   g++ -c src/module2.cpp -Iinclude -o obj/module2.o
 
 # clean up
 clean:
-	if [ -f lib/libmodule.a ]; then rm lib/libmodule.a; fi
-	if [ -f bin/test4 ]; then rm bin/test4; fi
-	if [ -f obj/module1.o ]; then rm obj/module1.o; fi
-	if [ -f obj/module2.o ]; then rm obj/module2.o; fi
-	if [ -f obj/test4.o ]; then rm obj/test4.o; fi
+   if [ -f lib/libmodule.a ]; then rm lib/libmodule.a; fi
+   if [ -f bin/test4 ]; then rm bin/test4; fi
+   if [ -f obj/module1.o ]; then rm obj/module1.o; fi
+   if [ -f obj/module2.o ]; then rm obj/module2.o; fi
+   if [ -f obj/test4.o ]; then rm obj/test4.o; fi
 
 # PHONY means these rules are always out of date
 .PHONY: all clean
 </verbatim>
 
-The ultimate goal is create the =all= rule: 
+The ultimate goal is create the =all= rule:
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 [rwk7t@tensor lesson4]$  make all
 g++ -c src/module1.cpp -Iinclude -o obj/module1.o
@@ -907,9 +938,9 @@ g++ -shared obj/module1.o obj/module2.o -o lib/libmodule.so
 g++ -Iinclude src/test4.cpp -Llib -lmodule -o bin/test4
 </verbatim>
 
-Notice the rules get called in reverse since nothing has been made.  Also, not that if you just type make, the rule =all= is impiled.  So this is convenient since whenever a file is out of date, it will call the appropriate rule and so on until the =all= rule is satisfied.
+Notice the rules get called in reverse since nothing has been made. Also, not that if you just type make, the rule =all= is impiled. So this is convenient since whenever a file is out of date, it will call the appropriate rule and so on until the =all= rule is satisfied.
 
-Also, there is a rule clean which deletes all of the binary and library files:
+Also, there is a user defined rule clean which deletes all of the binary and library files:
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 [rwk7t@tensor lesson4]$  make clean
 if [ -f lib/libmodule.a ]; then rm lib/libmodule.a; fi
@@ -919,26 +950,36 @@ if [ -f obj/module2.o ]; then rm obj/module2.o; fi
 if [ -f obj/test4.o ]; then rm obj/test4.o; fi
 </verbatim>
 
-This might seem magical but for even intermediate size systems (like an analysis), this can get out of hand and cumbersome.  Some more digging into Make's features can alleviate some of this but in the end, there is still quite a bit of work to make it work well. 
+This might seem magical but for even intermediate size systems (like an analysis), this can get out of hand and cumbersome. Some more digging into Make's features can alleviate some of this but in the end, there is still quite a bit of work to get make to work well.
 
----+++++ ACLiC 
+ See: http://oreilly.com/catalog/make3/book/index.csp 
 
-ROOT for interactive work uses an interactive system that ships with CINT called The Automatic Compiler of Libraries for CINT (ACLiC).  This is the simple
-Also, there is a rule clean which deletes all of the binary and library files:
+---+++++ !ACLiC
+
+ROOT for interactive work uses an interactive system that ships with CINT called The Automatic Compiler of Libraries for CINT (!ACLiC).
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 root [0] .L macro.C++
 </verbatim>
 
-More on ACLiC can be found here: http://root.cern.ch/download/doc/ROOTUsersGuideChapters/CINT.pdf
+!ACLiC is nice for simple and mostly standalone code. Building larger systems can be troublesome. More on !ACLiC can be found here: http://root.cern.ch/download/doc/ROOTUsersGuideChapters/CINT.pdf.
 
----+++++ SCRAM 
+The main disadvantage of !ACLiC is it has a hard time parsing complex code, especially with templates. Thus the need to use something more robust for complex systems.
 
-CMSSW uses SCRAM systems (Source Configuration, Release, And Management tool).  The following twikis explain it more detail:
+---+++++ SCRAM
+
+CMSSW uses SCRAM systems (Source Configuration, Release, And Management tool). The following twikis explain it more detail:
    * Quick start: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookScramV1Intro
    * About buildfiles: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookBuildFilesIntro
    * More in depth info: https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideScram
 
 ---+++++ Other systems
+
+There are other systems that can be used as a build system.  One goal of a modern build system is to be "platform independent" -- i.e. not depend on the system that the code is compiled on (Windows, Linux, PS3, iOS, etc.).  Examples of build systems nclude but are not limited to:
+   * CMake: http://www.cmake.org/
+   * BOOST Build (my personal favorite): http://www.boost.org/boost-build2/
+   * The system that ships with IDEs: Visual Studio, Eclipse, Code Blocks, XCode
+
+Check out the wiki page on this: http://en.wikipedia.org/wiki/List_of_build_automation_software
 
 ---+++ CMS2
 ---++++ CMS2 Overview
@@ -967,4 +1008,4 @@ CMSSW uses SCRAM systems (Source Configuration, Release, And Management tool).  
    * extract the yields
    * give a cross section estimate (no systematics)
 
--- Main.RyanKelley - 2014/01/08
+-- Main.RyanKelley - 2014/01/29
