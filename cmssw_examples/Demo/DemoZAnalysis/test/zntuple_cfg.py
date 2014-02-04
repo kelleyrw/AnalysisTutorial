@@ -2,10 +2,16 @@ import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("ZNTUPLE")
 
+# message logger (logorithmic printout)
+process.load("FWCore.MessageLogger.MessageLogger_cfi")
+process.MessageLogger.cerr.FwkReport.limit = cms.untracked.int32(10)
+
+# options
+process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
+
 # source
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
 process.source = cms.Source("PoolSource",
-    # replace 'myfile.root' with the source file you want to use
     fileNames = cms.untracked.vstring(
         'file:/nfs-7/userdata/edm/53X/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_AODSIM_PU_S10_START53_V7A-v1.root'
     )
@@ -26,9 +32,3 @@ process.out = cms.OutputModule("PoolOutputModule",
 # paths
 process.p = cms.Path(process.ZTreeMaker)
 process.e = cms.EndPath(process.out)
-
-# message logger (logorithmic printout)
-# process.load("FWCore.MessageService.MessageLogger_cfi")
-process.MessageLogger = cms.Service("MessageLogger",
-     default = cms.untracked.PSet(limit = cms.untracked.int32(10))
-)
