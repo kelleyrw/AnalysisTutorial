@@ -599,6 +599,7 @@ int main()
 
 Now we compile into and exe in the =bin= directory:
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+[rwk7t@tensor lesson4]$  g++ src/test1.cpp -o bin/test1
 [rwk7t@tensor lesson4]$  ./bin/test1 
 hello from module1!
 </verbatim>
@@ -681,7 +682,7 @@ hello from module2!
 hello from module1!
 </verbatim>
 
-Now, editing the files and forward declaring is quite combersome so the convention is to factor out foward declarations into interface or "header files" usually denoted by =*.h= or =*.hpp=. So refactoring the modules and main program:
+Now, editing the files and forward declaring is quite cumbersome so the convention is to factor out forward declarations into interface or "header files" usually denoted by =*.h= or =*.hpp=. So refactoring the modules and main program:
 
 module1.h:
 <verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
@@ -786,7 +787,7 @@ A static library is essentially where you collect all of the binary files for se
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 [rwk7t@tensor lesson4]$  g++ -c src/module1.cpp -Iinclude -o obj/module1.o
 [rwk7t@tensor lesson4]$  g++ -c src/module2.cpp -Iinclude -o obj/module2.o
-[rwk7t@tensor lesson4]$  ar rvs lib/module.a obj/module1.o obj/module2.o 
+[rwk7t@tensor lesson4]$  ar rvs lib/libmodule.a obj/module1.o obj/module2.o 
 ar: creating archive lib/libmodule.a
 a - obj/module1.o
 a - obj/module2.o
@@ -816,7 +817,7 @@ Here =-L= allows you to specify the path to the library and =-l= allows you to s
 
 ---++++++ Dynamic Libraries
 
-Static libraries are great for small or intermediate size systems; however, since the binary code is copied to the exe, this can cause "code bloat" and cause the exe to be very large (~GB). Also, if you use a hierarchical library scheme where some libs are dependent on other libs, then you are duplicating binary code and again causing more bloated binaries. The solution is to use dynamic libraries (also called shared libraries). This allows the exe to find the library at runtime. There is a slight initialization penalty but not really that noticeable with modern computers. The advantage is the exe will be small and you don't have to copy around binaries into other libs or exes. This for systems with "standard" shared libaries installed so only the exe needs to be shipped. However, the down side to shared libraries is now you have to keep track of where the dynamic libraries are and if you wish to run the exe somewhere else (like the grid), you will have to send the appropriate libraries as well if they are not already installed somewhere.
+Static libraries are great for small or intermediate size systems; however, since the binary code is copied to the exe, this can cause "code bloat" and cause the exe to be very large (~GB). Also, if you use a hierarchical library scheme where some libs are dependent on other libs, then you are duplicating binary code and again causing more bloated binaries. The solution is to use dynamic libraries (also called shared libraries). This allows the exe to find the library at runtime. There is a slight initialization penalty but not really that noticeable with modern computers. The advantage is the exe will be small and you don't have to copy around binaries into other libs or exes. This for systems with "standard" shared libraries installed so only the exe needs to be shipped. However, the down side to shared libraries is now you have to keep track of where the dynamic libraries are and if you wish to run the exe somewhere else (like the grid), you will have to send the appropriate libraries as well if they are not already installed somewhere.
 
 To create a dynamic lib:
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
@@ -833,7 +834,7 @@ NOTE: the file extension convention varies by platform:
    * Linux: *. =so= for shared object
    * Mac OSX: *. =dylib= for dynamic library
 
-Finally, exe will look in it's same directory or the original place where the dynamic lib was during linking. If you move it some central place, you will need to ensure that the exe can find it at runtime. You can specify an environment variable called =LD_LIBRARY_PATH= to include the path of the libraries you use frequently and the OS will search there for the shared lib. This is usually for system wide code or systems that the user sets up (like ROOT or CMSSW). Mac OSX also has a environment variable also called =DYLD_LIBRARY_PATH= which unfortunately causes mental friction when using a mac.
+Finally, exe will look in its same directory or the original place where the dynamic lib was during linking. If you move it to some central place, you will need to ensure that the exe can find it at runtime. You can specify an environment variable called =LD_LIBRARY_PATH= to include the path of the libraries you use frequently and the OS will search there for the shared lib. This is usually for system wide code or systems that the user sets up (like ROOT or CMSSW). Mac OSX also has a environment variable also called =DYLD_LIBRARY_PATH= which unfortunately causes mental friction when using a mac.
 
 This only scratches the service of using libraries.
 
@@ -887,13 +888,15 @@ To facilitate managing the low level details from the last section, programs and
 
 ---+++++ GNU Make
 
-GNU Make is considered a first step towards a build system. GNU Make is not a build system pe se; but a tools that can be used to fashion a build system. This section will not go into any real detail other than to give the most basic example. Make is old technology from the 1970s and any more modern systems are available. It is still widely used as a piece of the build system so it is still worth knowing a bit.
+GNU Make is considered a first step towards a build system. GNU Make is not a build system per se; but a tools that can be used to fashion a build system. This section will not go into any real detail other than to give the most basic example. Make is old technology from the 1970s and many more modern systems are available. It is still widely used as a piece of the build system so it is still worth knowing a bit.
 
 Make has the simple structure which is a series of rules:
 
 <verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 target:  dependency1 dependency2 ...
-      <tab> command(s)
+      <tab> command1
+      <tab> command2
+      ... 
 </verbatim>
 
 The goal of the each rule is to create the target. If the target is older than any of its dependencies then the commands are executed. You can then build up a series of interconnect rules to build your code. Consider the following example:
@@ -919,7 +922,7 @@ obj/module2.o: include/module2.h src/module2.cpp
 
 # clean up
 clean:
-   if [ -f lib/libmodule.a ]; then rm lib/libmodule.a; fi
+   if [ -f lib/libmodule.so ]; then rm lib/libmodule.so; fi
    if [ -f bin/test4 ]; then rm bin/test4; fi
    if [ -f obj/module1.o ]; then rm obj/module1.o; fi
    if [ -f obj/module2.o ]; then rm obj/module2.o; fi
@@ -938,7 +941,7 @@ g++ -shared obj/module1.o obj/module2.o -o lib/libmodule.so
 g++ -Iinclude src/test4.cpp -Llib -lmodule -o bin/test4
 </verbatim>
 
-Notice the rules get called in reverse since nothing has been made. Also, not that if you just type make, the rule =all= is impiled. So this is convenient since whenever a file is out of date, it will call the appropriate rule and so on until the =all= rule is satisfied.
+Notice the rules get called in reverse since nothing has been made. Also, not that if you just type make, the rule =all= is implied. So this is convenient since whenever a file is out of date, it will call the appropriate rule and so on until the =all= rule is satisfied.
 
 Also, there is a user defined rule clean which deletes all of the binary and library files:
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
