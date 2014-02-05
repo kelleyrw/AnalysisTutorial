@@ -331,7 +331,6 @@ void ZTreeAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     h_gen_mll.Fill(l12_p4.mass());
     if (is_mumu)
     {
-        h_gen_mee.Fill(l12_p4.mass());
         h_gen_mmm.Fill(l12_p4.mass());
         h_gen_mu1_pt.Fill(l1_p4.pt());
         h_gen_mu1_eta.Fill(l1_p4.eta());
@@ -346,7 +345,7 @@ void ZTreeAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     }
     if (is_ee)
     {
-        h_gen_mmm.Fill(l12_p4.mass());
+        h_gen_mee.Fill(l12_p4.mass());
         h_gen_e1_pt.Fill(l1_p4.pt());
         h_gen_e1_eta.Fill(l1_p4.eta());
         h_gen_e1_charge.Fill(l1_charge);
