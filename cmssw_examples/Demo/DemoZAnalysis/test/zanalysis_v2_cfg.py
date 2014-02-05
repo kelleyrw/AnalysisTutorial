@@ -20,18 +20,7 @@ process.source = cms.Source("PoolSource",
 # load ZTreeAnalysis
 process.load("Demo.DemoZAnalysis.ZTreeAnalysis_cff")
 
-# output 
-process.out = cms.OutputModule("PoolOutputModule",
-    fileName = cms.untracked.string('ntuples/dy.root'),
-    SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring('p')),
-    outputCommands = cms.untracked.vstring(
-        'drop *',
-        "keep *_ZTreeMaker_*_*"
-    )
-)
-
-# paths
+# paths (no need for output since not landing to disk)
 process.p = cms.Path(process.ZTreeAnalysis)
-process.e = cms.EndPath(process.out)
 
 
