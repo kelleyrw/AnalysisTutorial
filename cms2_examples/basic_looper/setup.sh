@@ -20,5 +20,5 @@ if [ ! "$?" -eq "0" ]; then
 fi
 
 echo
-echo "Setup complete. Type 'root runSample.C' to run looper."
+echo "Setup complete. Type 'root run_sample.C' to run looper."
 echo

@@ -1,18 +1,21 @@
-#include "TChain.h"
-#include "TChainElement.h"
-
 #ifndef SCANCHAIN_H
 #define SCANCHAIN_H
 
-class cms2Looper
+// forward declare
+class TChain;
+
+// Simple class to hold your analysis data
+class CMS2Looper
 {
+    public:
+        // construct:
+        CMS2Looper();
 
-public:
-  cms2Looper();
-  ~cms2Looper();
+        // destroy:
+        ~CMS2Looper();
 
-  int ScanChain( TChain* chain, bool fast = true, int nEvents = -1 );
-
+        // methods:
+        int ScanChain(TChain& chain, long num_events = -1);
 };
 
 #endif

@@ -16,23 +16,19 @@ LDFLAGS += -lGenVector -lEG -lTMVA -lMinuit -lMLP -lXMLIO -lTreePlayer -lMathMor
 # ----------------------------------------------------------------------- #
 
 # add CORE support
-cms2_core := ./CORE
+cms2_core := CORE
 CPPFLAGS  += -I$(cms2_core) 
 LDFLAGS   += -L$(cms2_core) 
 
 # add local libraries
-local_src := ./src
-CPPFLAGS  += -I$(local_src) 
-LDFLAGS   += -L$(local_src) 
+local_src := src
+CPPFLAGS  += -Iinterface
+LDFLAGS   += -L$(local_src)
 
 # add looperTools support
-looper_tools  := ./looperTools
+looper_tools  := looper_tools
 CPPFLAGS  += -I$(looper_tools) 
 LDFLAGS   += -L$(looper_tools) 
-
-# create the dict.cc
-$(rootdict): $(headers)
-	$(call root-cint,$(rootdict),$(headers),$(include_dir),$(link_def),$(defines))
 
 # project specific variables 
 # ----------------------------------------------------------------------- #
@@ -82,6 +78,8 @@ $(lib) : $(objects)
 	$(SHAREDLIB.cc) $@ $^
 
 # root to build the ROOT CINT dictionary
+ScanChain_dict.o : ScanChain_dict.cc
+
 ScanChain_dict.cc : interface/ScanChain.h
-	rootcint -v3 -f $@ -c -DNDEBUG $^ LinkDef.h 
+	rootcint -v3 -f $@ -c -DNDEBUG $^ $(local_src)/LinkDef.h 
 
