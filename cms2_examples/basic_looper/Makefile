@@ -51,6 +51,7 @@ objects := $(subst .cc,.o,$(sources)) ScanChain_dict.o
 # all rule should be first
 .PHONY: all
 all: library 
+	$(MAKE) -C CORE 
 
 # for troubleshooting
 .PHONY: test
@@ -66,7 +67,6 @@ test:
 	@echo CPPFLAGS = $(CPPFLAGS)
 
 # build the library 
-.PHONY: library
 library: $(lib)
 
 .PHONY: clean

@@ -50,7 +50,7 @@ int CMS2Looper::ScanChain(TChain& chain, long num_events)
     //Book Histograms Here//
     //~-~-~-~-~-~-~-~-~-~-//
 
-    TH1F* const h_sample = new TH1F("h_sample", "Example histogram", 200, 0, 200);
+    TH1F* const h_sample = new TH1F("h_sample", "Example histogram;pdg ID", 5, 0, 25);
 
     //~-~-~-~-~-~-~-~-~-~-~-//
     //Set json here for data//
@@ -119,6 +119,7 @@ int CMS2Looper::ScanChain(TChain& chain, long num_events)
             if (foundwz && (pid == 1 || pid == 2 || pid == 3 || pid == 4 || pid == 5 || pid == 6 || pid == 21))
             {  
                 nwzpartons++;
+                h_sample->Fill(pid);
             }
         }
 
