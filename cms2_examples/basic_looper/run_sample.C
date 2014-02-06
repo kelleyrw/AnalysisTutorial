@@ -1,9 +1,3 @@
-#include <iostream>
-#include "TChain.h"
-#include "TSystem.h"
-#include "TStyle.h"
-#include "TROOT.h"
-
 int run_sample(const long num_events = -1)
 {
     // load the library for the class
