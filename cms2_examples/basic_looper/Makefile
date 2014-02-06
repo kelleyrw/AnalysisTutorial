@@ -37,11 +37,11 @@ $(rootdict): $(headers)
 # project specific variables 
 # ----------------------------------------------------------------------- #
 
-lib := libcms2Looper.so
+lib := libcms2_looper.so
 
 
 sources := $(local_src)/CMS2.cc                    \
-		   ScanChain.cc                            \
+		   $(local_src)/ScanChain.cc               \
 		   $(local_src)/goodrun.cc                 \
 		   $(cms2_core)/mcSelections.cc            \
 		   $(looper_tools)/eventFilter.cc          
@@ -82,6 +82,6 @@ $(lib) : $(objects)
 	$(SHAREDLIB.cc) $@ $^
 
 # root to build the ROOT CINT dictionary
-ScanChain_dict.cc : ScanChain.h
+ScanChain_dict.cc : interface/ScanChain.h
 	rootcint -v3 -f $@ -c -DNDEBUG $^ LinkDef.h 
 

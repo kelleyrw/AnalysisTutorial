@@ -3,12 +3,13 @@
 #include "TStyle.h"
 #include "TROOT.h"
 
-#include "ScanChain.h"
+#include "interface/ScanChain.h"
 
 int runSample()
 {
 
-  gSystem->Load("libcms2Looper.so");
+  std::cout<<__LINE__<<std::endl;
+  gSystem->Load("libcms2_looper.so");
 
   gROOT ->SetStyle("Plain");
   gStyle->SetOptStat(111111);
