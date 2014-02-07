@@ -31,7 +31,7 @@
 
 // construct:
 CMS2Looper::CMS2Looper()
-    : outfilename("hists")
+    : outfilename("hists.root")
 {
 }
 
@@ -59,8 +59,7 @@ void CMS2Looper::BeginJob()
  //~-~-~-~~-~-~-~-~-~-~-~-~-~-~-//
 void CMS2Looper::EndJob()
 {
-    std::cout << "[CMS2Looper] Saving hists to output file: " 
-              << Form("output/%s.root", outfilename.c_str()) << std::endl;
+    std::cout << "[CMS2Looper] Saving hists to output file: " << outfilename << std::endl;
     SaveHists(hists, outfilename, "RECREATE");
     return;
 }
