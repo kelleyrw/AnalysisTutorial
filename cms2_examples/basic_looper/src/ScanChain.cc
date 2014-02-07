@@ -25,51 +25,58 @@
 // CORE
 #include "mcSelections.h"
 
-//stuff from looper tools
+// stuff from looper tools
 #include "eventFilter.h"
-#include "hist_tools.h"
+#include "HistTools.h"
 
 // construct:
 CMS2Looper::CMS2Looper()
+    : outfilename("hists")
 {
-  outfilename = "hists";
 }
 
-CMS2Looper::CMS2Looper( std::string filename )
+CMS2Looper::CMS2Looper(const std::string& filename)
+    : outfilename(filename)
 {
-  outfilename = filename;
 }
 
 // destroy:
 CMS2Looper::~CMS2Looper()
 {
-  std::cout<<"Saving hists to output file: "<<Form("output/%s.root", outfilename.c_str())<<std::endl;
-  TFile outfile(Form("output/%s.root", outfilename.c_str()), "RECREATE");
-  save_hists(hists, outfile);
-  outfile.Close();
 }
 
-//~-~-~-~-~-~-~-~-~-~-//
-//Book Histograms Here//
-//~-~-~-~-~-~-~-~-~-~-//
-void CMS2Looper::book_hists()
+ //~-~-~-~~-~-~-~-~-~-~-~-~-~-~-//
+// Stuff to do before job starts
+ //~-~-~-~~-~-~-~-~-~-~-~-~-~-~-//
+void CMS2Looper::BeginJob()
 {
-
-  // TH1F* const h_sample = new TH1F("h_sample", "Example histogram;pdg ID", 5, 0, 25);
-  book_hist( hists, "h_sample", "Example histogram;pdg ID", 25, 0, 25);
-
-  return;
+    AddHist(hists, new TH1F("h_sample", "Example histogram;pdg ID", 25, 0, 25));
+    return;
 }
 
+ //~-~-~-~~-~-~-~-~-~-~-~-~-~-~-//
+// Stuff to do after job finishes
+ //~-~-~-~~-~-~-~-~-~-~-~-~-~-~-//
+void CMS2Looper::EndJob()
+{
+    std::cout << "[CMS2Looper] Saving hists to output file: " 
+              << Form("output/%s.root", outfilename.c_str()) << std::endl;
+    SaveHists(hists, outfilename, "RECREATE");
+    return;
+}
+
+
+// ------------------------------------ //
+// Analyze per event 
+// ------------------------------------ //
 int CMS2Looper::ScanChain(TChain& chain, long num_events)
 {
-
     // Benchmark
     TBenchmark bmark;
     bmark.Start("benchmark");
 
-	//Book hists
-	book_hists();
+    // Stuff to do before job starts
+	BeginJob();
 
     //~-~-~-~-~-~-~-~-~-~-~-//
     //Set json here for data//
@@ -137,7 +144,7 @@ int CMS2Looper::ScanChain(TChain& chain, long num_events)
             foundwz = (pid == 23);
 
 			// h_sample->Fill(pid);
-			fill_under_overflow(hists.at("h_sample"), pid);
+			hists.at("h_sample")->Fill(pid);
 
             if (foundwz && (pid == 1 || pid == 2 || pid == 3 || pid == 4 || pid == 5 || pid == 6 || pid == 21))
             {  
@@ -152,8 +159,8 @@ int CMS2Looper::ScanChain(TChain& chain, long num_events)
 
     }//end event loop
 
-	// // Draw Example Histogram
-    // hists.at(h_sample)->Draw();
+    // Stuff to do after job finishes
+	BeginJob();
 
     // return
     bmark.Stop("benchmark");
