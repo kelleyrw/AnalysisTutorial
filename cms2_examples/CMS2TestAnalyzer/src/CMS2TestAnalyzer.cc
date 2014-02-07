@@ -62,7 +62,7 @@ class CMS2TestAnalyzer : public edm::EDAnalyzer
 // constructors and destructor
 CMS2TestAnalyzer::CMS2TestAnalyzer(const edm::ParameterSet& iConfig)
     : m_min_ntracks(iConfig.getUntrackedParameter<unsigned int>("min_ntracks", 0))
-    , m_verbose(iConfig.getUntrackedParameter<unsigned int>("verbose", true))
+    , m_verbose(iConfig.getUntrackedParameter<bool>("verbose", true))
     , h_demo(NULL)
 {
    //now do what ever initialization is needed
