@@ -2,10 +2,7 @@
 #define SCANCHAIN_H
 
 #include <string>
-<<<<<<< HEAD
 #include <map>
-=======
->>>>>>> 7decbc79fda0a5dcdb5e11993ac17025de2ab2ec
 
 // forward declare
 class TChain;
