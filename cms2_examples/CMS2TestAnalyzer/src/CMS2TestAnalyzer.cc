@@ -25,6 +25,7 @@ Created:         Tue Feb 05 2014
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 #include "CMS2/NtupleMacrosHeader/interface/CMS2.h"
+#include "CMS2/NtupleMacrosCore/interface/eventSelections.h"
 
 // class declaration
 // ------------------------------------------------------------------ //
@@ -54,12 +55,14 @@ class CMS2TestAnalyzer : public edm::EDAnalyzer
 
         // member data:
         unsigned int m_min_ntracks;
+        const bool m_verbose;
         TH1D* h_demo;
 };
 
 // constructors and destructor
 CMS2TestAnalyzer::CMS2TestAnalyzer(const edm::ParameterSet& iConfig)
     : m_min_ntracks(iConfig.getUntrackedParameter<unsigned int>("min_ntracks", 0))
+    , m_verbose(iConfig.getUntrackedParameter<unsigned int>("verbose", true))
     , h_demo(NULL)
 {
    //now do what ever initialization is needed
@@ -74,8 +77,15 @@ CMS2TestAnalyzer::~CMS2TestAnalyzer()
 // ------------ method called for each event  ------------
 void CMS2TestAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
-    using namespace edm;
+    // set the event -- MANDATORY
     cms2.SetEvent(iEvent);
+
+    // require standard cleaning 
+    if (!cleaning_standardNovember2011()) 
+    {
+        if (m_verbose) {std::cout << "fails November2011 cleaning requirement" << std::endl;}
+        return;
+    }
     std::cout << "number of tracks " << tas::trks_trk_p4().size() << std::endl;
 }
 

@@ -5,6 +5,7 @@
 <use name="CommonTools/UtilAlgos"/>
 <use name="PhysicsTools/UtilAlgos"/>
 <use name="CMS2/NtupleMacrosHeader"/>
+<use name="CMS2/NtupleMacrosCore"/>
 <use name="CMS2/Dictionaries"/>
 <use name="root"/>
 <flags EDM_PLUGIN="1"/>
