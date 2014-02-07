@@ -25,12 +25,18 @@
 // CORE
 #include "mcSelections.h"
 
-//stuff from looper tools
+// stuff from looper tools
 #include "eventFilter.h"
-
+#include "HistTools.h"
 
 // construct:
 CMS2Looper::CMS2Looper()
+    : outfilename("hists")
+{
+}
+
+CMS2Looper::CMS2Looper(const std::string& filename)
+    : outfilename(filename)
 {
 }
 
@@ -39,18 +45,38 @@ CMS2Looper::~CMS2Looper()
 {
 }
 
+ //~-~-~-~~-~-~-~-~-~-~-~-~-~-~-//
+// Stuff to do before job starts
+ //~-~-~-~~-~-~-~-~-~-~-~-~-~-~-//
+void CMS2Looper::BeginJob()
+{
+    AddHist(hists, new TH1F("h_sample", "Example histogram;pdg ID", 25, 0, 25));
+    return;
+}
+
+ //~-~-~-~~-~-~-~-~-~-~-~-~-~-~-//
+// Stuff to do after job finishes
+ //~-~-~-~~-~-~-~-~-~-~-~-~-~-~-//
+void CMS2Looper::EndJob()
+{
+    std::cout << "[CMS2Looper] Saving hists to output file: " 
+              << Form("output/%s.root", outfilename.c_str()) << std::endl;
+    SaveHists(hists, outfilename, "RECREATE");
+    return;
+}
+
+
+// ------------------------------------ //
+// Analyze per event 
+// ------------------------------------ //
 int CMS2Looper::ScanChain(TChain& chain, long num_events)
 {
-
     // Benchmark
     TBenchmark bmark;
     bmark.Start("benchmark");
 
-    //~-~-~-~-~-~-~-~-~-~-//
-    //Book Histograms Here//
-    //~-~-~-~-~-~-~-~-~-~-//
-
-    TH1F* const h_sample = new TH1F("h_sample", "Example histogram;pdg ID", 5, 0, 25);
+    // Stuff to do before job starts
+	BeginJob();
 
     //~-~-~-~-~-~-~-~-~-~-~-//
     //Set json here for data//
@@ -117,10 +143,12 @@ int CMS2Looper::ScanChain(TChain& chain, long num_events)
             const unsigned int pid = abs(tas::genps_id().at(idx));
             foundwz = (pid == 23);
 
+			// h_sample->Fill(pid);
+			hists.at("h_sample")->Fill(pid);
+
             if (foundwz && (pid == 1 || pid == 2 || pid == 3 || pid == 4 || pid == 5 || pid == 6 || pid == 21))
             {  
                 nwzpartons++;
-                h_sample->Fill(pid);
             }
         }
 
@@ -128,10 +156,11 @@ int CMS2Looper::ScanChain(TChain& chain, long num_events)
         {
             dumpDocLines();
         }
-    }
 
-    // Example Histograms
-    h_sample->Draw();
+    }//end event loop
+
+    // Stuff to do after job finishes
+	BeginJob();
 
     // return
     bmark.Stop("benchmark");

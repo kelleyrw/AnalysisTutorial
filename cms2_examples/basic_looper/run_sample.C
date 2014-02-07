@@ -1,6 +1,10 @@
 int run_sample(const long num_events = -1)
 {
     // load the library for the class
+/*     gSystem->AddDynamicPath("CORE"); */
+/*     gSystem->Load(Form("%s/libboost_system.so"    , pac_path.c_str())); */
+/*     gSystem->Load(Form("%s/libboost_filesystem.so", pac_path.c_str())); */
+/*     gSystem->Load(Form("%s/libRootTools.so"       , pac_path.c_str())); */
     gSystem->Load("libcms2_looper.so");
 
     // simple style
