@@ -1,0 +1,10 @@
+<Flags CPPDEFINES="CMS2_USE_CMSSW=1"/>
+<use name="FWCore/Framework"/>
+<use name="FWCore/PluginManager"/>
+<use name="FWCore/ParameterSet"/>
+<use name="CommonTools/UtilAlgos"/>
+<use name="PhysicsTools/UtilAlgos"/>
+<use name="CMS2/NtupleMacrosHeader"/>
+<use name="CMS2/Dictionaries"/>
+<use name="root"/>
+<flags EDM_PLUGIN="1"/>
