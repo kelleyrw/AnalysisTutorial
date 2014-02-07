@@ -12,6 +12,16 @@ else
 	exit 1
 fi
 
+echo
+if [ -d "output" ]; then
+	echo "looper output will be stored in `pwd`/output/"
+else
+	echo "Creating `pwd`/output/"
+	mkdir output
+	echo "looper output will be stored in `pwd`/output/"
+fi
+
+echo
 echo "Compiling Looper:"
 make -j5
 if [ ! "$?" -eq "0" ]; then
