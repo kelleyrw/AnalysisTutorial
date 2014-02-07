@@ -27,16 +27,38 @@
 
 //stuff from looper tools
 #include "eventFilter.h"
-
+#include "hist_tools.h"
 
 // construct:
 CMS2Looper::CMS2Looper()
 {
+  outfilename = "hists";
+}
+
+CMS2Looper::CMS2Looper( std::string filename )
+{
+  outfilename = filename;
 }
 
 // destroy:
 CMS2Looper::~CMS2Looper()
 {
+  std::cout<<"Saving hists to output file: "<<Form("output/%s.root", outfilename.c_str())<<std::endl;
+  TFile outfile(Form("output/%s.root", outfilename.c_str()), "RECREATE");
+  save_hists(hists, outfile);
+  outfile.Close();
+}
+
+//~-~-~-~-~-~-~-~-~-~-//
+//Book Histograms Here//
+//~-~-~-~-~-~-~-~-~-~-//
+void CMS2Looper::book_hists()
+{
+
+  // TH1F* const h_sample = new TH1F("h_sample", "Example histogram;pdg ID", 5, 0, 25);
+  book_hist( hists, "h_sample", "Example histogram;pdg ID", 25, 0, 25);
+
+  return;
 }
 
 int CMS2Looper::ScanChain(TChain& chain, long num_events)
@@ -46,11 +68,8 @@ int CMS2Looper::ScanChain(TChain& chain, long num_events)
     TBenchmark bmark;
     bmark.Start("benchmark");
 
-    //~-~-~-~-~-~-~-~-~-~-//
-    //Book Histograms Here//
-    //~-~-~-~-~-~-~-~-~-~-//
-
-    TH1F* const h_sample = new TH1F("h_sample", "Example histogram;pdg ID", 5, 0, 25);
+	//Book hists
+	book_hists();
 
     //~-~-~-~-~-~-~-~-~-~-~-//
     //Set json here for data//
@@ -117,10 +136,12 @@ int CMS2Looper::ScanChain(TChain& chain, long num_events)
             const unsigned int pid = abs(tas::genps_id().at(idx));
             foundwz = (pid == 23);
 
+			// h_sample->Fill(pid);
+			fill_under_overflow(hists.at("h_sample"), pid);
+
             if (foundwz && (pid == 1 || pid == 2 || pid == 3 || pid == 4 || pid == 5 || pid == 6 || pid == 21))
             {  
                 nwzpartons++;
-                h_sample->Fill(pid);
             }
         }
 
@@ -128,10 +149,11 @@ int CMS2Looper::ScanChain(TChain& chain, long num_events)
         {
             dumpDocLines();
         }
-    }
 
-    // Example Histograms
-    h_sample->Draw();
+    }//end event loop
+
+	// // Draw Example Histogram
+    // hists.at(h_sample)->Draw();
 
     // return
     bmark.Stop("benchmark");

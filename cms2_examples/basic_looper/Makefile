@@ -42,7 +42,8 @@ sources := $(local_src)/CMS2.cc                    \
            $(local_src)/ScanChain.cc               \
            $(local_src)/goodrun.cc                 \
            $(cms2_core)/mcSelections.cc            \
-           $(looper_tools)/eventFilter.cc
+           $(looper_tools)/eventFilter.cc          \
+           $(looper_tools)/hist_tools.cc
 objects := $(subst .cc,.o,$(sources)) ScanChain_dict.o
 deps    := $(subst .cc,.d,$(sources)) ScanChain_dict.d
 
