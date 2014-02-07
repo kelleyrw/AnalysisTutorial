@@ -2,7 +2,7 @@
 
 if [ ! "$CMSSW_BASE" == "" ]; then
 	if [ -d "CORE" ]; then
-		echo "Simlink to CORE exists at $CMSSW_BASE/src/CMS2/NtupleMacros/CORE"
+		echo "CORE exists at $CMSSW_BASE/src/CMS2/NtupleMacros/CORE"
 	else
 		echo "Creating simlink to CORE from $CMSSW_BASE/src/CMS2/NtupleMacros/CORE"
 		ln -s "$CMSSW_BASE/src/CMS2/NtupleMacros/CORE"

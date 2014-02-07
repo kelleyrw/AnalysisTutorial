@@ -1,5 +1,6 @@
 # simple make file to compile the Z_looper
 
+# ----------------------------------------------------------------------- #
 # low level stuff that independent of this project
 # ----------------------------------------------------------------------- #
 
@@ -12,13 +13,14 @@ SHAREDLIB.cc = $(CXX) $(ROOTLIBS) $(CPPFLAGS) $(LDFLAGS) $(SOFLAGS) $(TARGET_ARC
 # ROOT is missing the GenVector in its default setup 
 LDFLAGS += -lGenVector -lEG -lTMVA -lMinuit -lMLP -lXMLIO -lTreePlayer -lMathMore
 
-# CMS2 specific includes 
+# ----------------------------------------------------------------------- #
+# CMS2 specific includes
 # ----------------------------------------------------------------------- #
 
 # add CORE support
 cms2_core := CORE
-CPPFLAGS  += -I$(cms2_core) 
-LDFLAGS   += -L$(cms2_core) 
+CPPFLAGS  += -I$(cms2_core) -I$(cms2_core)/CORE
+LDFLAGS   += -L$(cms2_core)
 
 # add local libraries
 local_src := src
@@ -27,9 +29,10 @@ LDFLAGS   += -L$(local_src)
 
 # add looperTools support
 looper_tools  := looper_tools
-CPPFLAGS  += -I$(looper_tools) 
-LDFLAGS   += -L$(looper_tools) 
+CPPFLAGS  += -I$(looper_tools)
+LDFLAGS   += -L$(looper_tools)
 
+# ----------------------------------------------------------------------- #
 # project specific variables 
 # ----------------------------------------------------------------------- #
 
@@ -37,21 +40,23 @@ lib := libcms2_looper.so
 
 
 sources := $(local_src)/CMS2.cc                    \
-		   $(local_src)/ScanChain.cc               \
-		   $(local_src)/goodrun.cc                 \
-		   $(cms2_core)/mcSelections.cc            \
-		   $(looper_tools)/eventFilter.cc          
+           $(local_src)/ScanChain.cc               \
+           $(local_src)/goodrun.cc                 \
+           $(cms2_core)/mcSelections.cc            \
+           $(looper_tools)/eventFilter.cc
 
 objects := $(subst .cc,.o,$(sources)) ScanChain_dict.o
+deps    := $(subst .cc,.d,$(sources)) ScanChain_dict.d
 
 
+# ----------------------------------------------------------------------- #
 # rules 
 # ----------------------------------------------------------------------- #
 
 # all rule should be first
 .PHONY: all
 all: library 
-	$(MAKE) -C CORE 
+	$(MAKE) -C CORE
 
 # for troubleshooting
 .PHONY: test
@@ -82,4 +87,15 @@ ScanChain_dict.o : ScanChain_dict.cc
 
 ScanChain_dict.cc : interface/ScanChain.h
 	rootcint -v3 -f $@ -c -DNDEBUG $^ $(local_src)/LinkDef.h 
+
+# ----------------------------------------------------------------------- #
+# check dependencies
+# ----------------------------------------------------------------------- #
+
+-include $(deps)
+
+%.d: %.cc
+	@$(CXX) -M $(CXXFLAGS) $< > $@.$$$$;                \
+	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
+	rm -f $@.$$$$
 

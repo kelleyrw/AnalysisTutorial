@@ -1,7 +1,7 @@
 // Usage:
 
 // > ./setup.sh
-// > root -b runSample.C
+// > root -b run_sample.C
 
 // C++
 #include <iostream>
@@ -92,6 +92,7 @@ int CMS2Looper::ScanChain(TChain& chain, long num_events)
                 continue;
             }
 
+            // check for duplicates
             DorkyEventIdentifier id = {tas::evt_run(), tas::evt_event(), tas::evt_lumiBlock()};
             if (is_duplicate(id))
             {
