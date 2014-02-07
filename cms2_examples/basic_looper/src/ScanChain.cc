@@ -43,10 +43,6 @@ CMS2Looper::CMS2Looper(const std::string& filename)
 // destroy:
 CMS2Looper::~CMS2Looper()
 {
-    TH1F h_dummy("h_dummy", "Example histogram;pdg ID", 5, 0, 25);
-    TFile output(outfilename.c_str(), "RECREATE");
-    h_dummy.Write();
-    output.Close();
 }
 
  //~-~-~-~~-~-~-~-~-~-~-~-~-~-~-//
