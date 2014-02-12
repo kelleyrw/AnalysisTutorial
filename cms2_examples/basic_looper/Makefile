@@ -87,7 +87,7 @@ $(lib) : $(objects)
 ScanChain_dict.o : ScanChain_dict.cc
 
 ScanChain_dict.cc : interface/ScanChain.h
-	rootcint -v3 -f $@ -c  -I$(cms2_core) -DNDEBUG $^ $(local_src)/LinkDef.h 
+	rootcint -v3 -f $@ -c -I$(cms2_core) -DNDEBUG $^ $(local_src)/LinkDef.h 
 
 # ----------------------------------------------------------------------- #
 # check dependencies
