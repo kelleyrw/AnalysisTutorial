@@ -17,9 +17,14 @@ LDFLAGS += -lGenVector -lEG -lTMVA -lMinuit -lMLP -lXMLIO -lTreePlayer -lMathMor
 # CMS2 specific includes
 # ----------------------------------------------------------------------- #
 
+# add MiniFWLite support
+minifwlite := Tools/MiniFWLite
+LDFLAGS     += -L$(minifwlite) -lMiniFWLite
+
 # add CORE support
 cms2_core    := CORE
 CPPFLAGS     += -I$(cms2_core)
+LDFLAGS      += -L$(cms2_core) -lCMS2NtupleMacrosCORE
 
 # add local libraries
 local_src := src
@@ -34,10 +39,8 @@ CPPFLAGS  += -I$(looper_tools)
 # ----------------------------------------------------------------------- #
 
 lib      := libcms2_looper.so
-sources  := $(local_src)/CMS2.cc                    \
-            $(local_src)/ScanChain.cc               \
+sources  := $(local_src)/ScanChain.cc               \
             $(local_src)/goodrun.cc                 \
-            $(cms2_core)/mcSelections.cc            \
             $(looper_tools)/eventFilter.cc          \
             $(looper_tools)/HistTools.cc
 objects  := $(subst .cc,.o,$(sources)) ScanChain_dict.o
@@ -50,22 +53,28 @@ deps     := $(subst .cc,.d,$(sources)) ScanChain_dict.d
 # all rule should be first
 .PHONY: all
 all: library 
+	@if [[ $(DYLD_LIBRARY_PATH) == *CORE* ]]; then export DYLD_LIBRARY_PATH=$(DYLD_LIBRARY_PATH):$(PWD)/CORE; fi
+	@if [[ $(DYLD_LIBRARY_PATH) == *CORE* ]]; then export LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(PWD)/CORE; fi
+	@if [[ $(DYLD_LIBRARY_PATH) == *MiniFWLite* ]]; then export DYLD_LIBRARY_PATH=$(DYLD_LIBRARY_PATH):$(PWD)/Tools/MiniFWLite; fi
+	@if [[ $(DYLD_LIBRARY_PATH) == *MiniFWLite* ]]; then export LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(PWD)/Tools/MiniFWLite; fi
 
 # for troubleshooting
 .PHONY: test
 test: 
-	@echo "lib          = $(lib)"
-	@echo "sources      = $(sources)"
-	@echo "objects      = $(objects)"
-	@echo "SHAREDLIB.cc = $(SHAREDLIB.cc)"
-	@echo "local_src    = $(local_src)"
-	@echo "cms2_core    = $(cms2_core)"
-	@echo "looper_tools = $(looper_tools)"
-	@echo "LDFLAGS      = $(LDFLAGS)"
-	@echo "CPPFLAGS     = $(CPPFLAGS)"
-	@echo "CXXFLAGS     = $(CXXFLAGS)"
-	@echo "CXX          = $(CXX)"
-	@echo "CPP          = $(CPP)"
+	@echo "lib               = $(lib)"
+	@echo "sources           = $(sources)"
+	@echo "objects           = $(objects)"
+	@echo "SHAREDLIB.cc      = $(SHAREDLIB.cc)"
+	@echo "local_src         = $(local_src)"
+	@echo "cms2_core         = $(cms2_core)"
+	@echo "looper_tools      = $(looper_tools)"
+	@echo "LDFLAGS           = $(LDFLAGS)"
+	@echo "CPPFLAGS          = $(CPPFLAGS)"
+	@echo "CXXFLAGS          = $(CXXFLAGS)"
+	@echo "CXX               = $(CXX)"
+	@echo "CPP               = $(CPP)"
+	@echo "LD_LIBRARY_PATH   = $(LD_LIBRARY_PATH)"
+	@echo "DYLD_LIBRARY_PATH = $(DYLD_LIBRARY_PATH)"
 
 # build the library 
 library: $(lib) 
@@ -80,7 +89,7 @@ clean:
 	@if [ -f ScanChain_dict.d  ]; then rm ScanChain_dict.d ; fi 
 
 # actual rule to build the library
-$(lib) : $(objects)
+$(lib) : $(objects) 
 	$(SHAREDLIB.cc) $@ $^
 
 # root to build the ROOT CINT dictionary

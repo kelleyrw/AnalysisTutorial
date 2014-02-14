@@ -1,6 +1,23 @@
 int run_sample(const long num_events = -1)
 {
     // load the library for the class
+/*     if (!TString(gSystem->GetDynamicPath()).Contains("CORE")) */
+/*     { */
+/*         cout << "adding CORE to dynamic path" << endl; */
+/*         gSystem->AddDynamicPath("/Users/rwk7t/Development/newbies/cms2_examples/basic_looper/CORE"); */
+/*     } */
+/*     if (!TString(gSystem->GetDynamicPath()).Contains("MiniFWLite")) */
+/*     { */
+/*         cout << "adding CORE to dynamic path" << endl; */
+/*         gSystem->AddDynamicPath("/Users/rwk7t/Development/newbies/cms2_examples/basic_looper/Tools/MiniFWLite"); */
+/*     } */
+/*     if (!TString(gSystem->GetIncludePath()).Contains("CORE")) */
+/*     { */
+/*         cout << "adding CORE to include path" << endl; */
+/*         gSystem->AddIncludePath("-I/Users/rwk7t/Development/newbies/cms2_examples/basic_looper/interface"); */
+/*         gSystem->AddIncludePath("-I/Users/rwk7t/Development/newbies/cms2_examples/basic_looper/CORE"); */
+/*     } */
+/*     gSystem->Load("CORE/libCMS2NtupleMacrosCORE.so"); */
     gSystem->Load("libcms2_looper.so");
 
     // simple style
