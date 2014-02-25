@@ -1,8 +1,0 @@
-<flags CPPDEFINES="CMS2_USE_CMSSW=1"/>
-<use name="Packages/HistTools"/>
-<use name="Packages/LooperTools"/>
-<use name="CMS2/NtupleMacrosCore"/>
-<export>
-  <lib name="1"/>
-</export>
-
