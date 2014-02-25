@@ -11,8 +11,7 @@ int main()
     const long num_events = -1;
 
     // simple style
-    gROOT->SetStyle("Plain");
-    gStyle->SetOptStat(111111);
+    SetStyle();
 
     LoadFWLite();
     TChain chain("Events");

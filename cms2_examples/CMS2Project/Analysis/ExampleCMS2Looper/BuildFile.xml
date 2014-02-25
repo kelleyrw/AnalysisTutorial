@@ -3,6 +3,8 @@
 <use name="Packages/LooperTools"/>
 <use name="CMS2/NtupleMacrosCore"/>
 <export>
+  <use name="Packages/HistTools"/>
+  <use name="Packages/LooperTools"/>
+  <use name="CMS2/NtupleMacrosCore"/>
   <lib name="1"/>
 </export>
-
