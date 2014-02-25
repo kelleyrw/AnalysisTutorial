@@ -1,0 +1,7 @@
+<use name="root"/>
+<use name="CMS2/NtupleMacrosHeader"/>
+<use name="Packages/LooperTools"/>
+<environment>
+  <use name="Analysis/ExampleCMS2Looper"/>
+  <bin name="run_sample" file="run_sample.cc"/>
+</environment>

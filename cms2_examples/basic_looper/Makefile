@@ -52,11 +52,37 @@ deps     := $(subst .cc,.d,$(sources)) ScanChain_dict.d
 
 # all rule should be first
 .PHONY: all
-all: library 
-	@if [[ $(DYLD_LIBRARY_PATH) == *CORE* ]]; then export DYLD_LIBRARY_PATH=$(DYLD_LIBRARY_PATH):$(PWD)/CORE; fi
-	@if [[ $(DYLD_LIBRARY_PATH) == *CORE* ]]; then export LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(PWD)/CORE; fi
-	@if [[ $(DYLD_LIBRARY_PATH) == *MiniFWLite* ]]; then export DYLD_LIBRARY_PATH=$(DYLD_LIBRARY_PATH):$(PWD)/Tools/MiniFWLite; fi
-	@if [[ $(DYLD_LIBRARY_PATH) == *MiniFWLite* ]]; then export LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(PWD)/Tools/MiniFWLite; fi
+all: env library 
+
+# setup the environment
+export TEST
+TEST := "if [[ $${LD_LIBRARY_PATH} != *CORE* ]]; then \
+	echo \"Adding CORE to LD_LIBRARY_PATH\"; \
+	echo before $${LD_LIBRARY_PATH}; \
+	export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:$${PWD}/CORE; \
+	echo after in rule $${LD_LIBRARY_PATH}; \
+else \
+	echo \"CORE already added to LD_LIBRARY_PATH\"; \
+fi"
+VAR := eval $$TEST
+
+.PHONY: env
+env:
+	$(VAR)
+
+
+#	"if [[ $${LD_LIBRARY_PATH} != *CORE* ]]; then \
+#	echo \"Adding CORE to LD_LIBRARY_PATH\"; \
+#	echo before $${LD_LIBRARY_PATH}; \
+#	export LD_LIBRARY_PATH=$${LD_LIBRARY_PATH}:$${PWD}/CORE; \
+#	echo after in rule $${LD_LIBRARY_PATH}; \
+#else \
+#	echo \"CORE already added to LD_LIBRARY_PATH\"; \
+#fi"
+#   	echo after $${LD_LIBRARY_PATH}
+#if [[ $(LD_LIBRARY_PATH)   != *CORE*       ]]; then echo "Adding CORE to LD_LIBRARY_PATH"        ; export LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(PWD)/CORE                ; fi
+#if [[ $(DYLD_LIBRARY_PATH) != *MiniFWLite* ]]; then echo "Adding MiniFWLite to DYLD_LIBRARY_PATH"; export DYLD_LIBRARY_PATH=$(DYLD_LIBRARY_PATH):$(PWD)/Tools/MiniFWLite; fi
+#if [[ $(LD_LIBRARY_PATH)   != *MiniFWLite* ]]; then echo "Adding MiniFWLite to LD_LIBRARY_PATH"  ; export LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(PWD)/Tools/MiniFWLite    ; fi
 
 # for troubleshooting
 .PHONY: test

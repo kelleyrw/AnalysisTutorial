@@ -840,7 +840,7 @@ This only scratches the service of using libraries.
 
 ---+++++ Building an exe with ROOT objects
 
-There is no reason you have to use ROOT interactively though CINT -- it is really just a set of C++ libraries.  Consider the following simple program called =with_root.cpp=:
+There is no reason you have to use ROOT interactively though CINT -- it is really just a set of C++ libraries. Consider the following simple program called =with_root.cpp=:
 
 <verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 #include "TH1F.h"
@@ -864,7 +864,6 @@ If I try to compile this, I'll get an error since g++ doesn't know where to find
 src/with_root.cpp:1:18: fatal error: TH1F.h: No such file or directory
 compilation terminated.
 </verbatim>
-
 
 ROOT ships with a nice command line utility that will give you the appropriate g++ options to pass to your command:
 
@@ -955,7 +954,7 @@ if [ -f obj/test4.o ]; then rm obj/test4.o; fi
 
 This might seem magical but for even intermediate size systems (like an analysis), this can get out of hand and cumbersome. Some more digging into Make's features can alleviate some of this but in the end, there is still quite a bit of work to get make to work well.
 
- See: http://oreilly.com/catalog/make3/book/index.csp 
+See: http://oreilly.com/catalog/make3/book/index.csp
 
 ---+++++ !ACLiC
 
@@ -972,12 +971,170 @@ The main disadvantage of !ACLiC is it has a hard time parsing complex code, espe
 
 CMSSW uses SCRAM systems (Source Configuration, Release, And Management tool). The following twikis explain it more detail:
    * Quick start: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookScramV1Intro
-   * About buildfiles: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookBuildFilesIntro
-   * More in depth info: https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideScram
+   * About buildfiles:
+      * <span style="background-color: transparent; color: blue; text-decoration: underline">https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookBuildFilesIntro</span>
+      * <span style="background-color: transparent">%BLUE%<u>https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBuildFile</u>%ENDCOLOR%</span>
+      * <span style="background-color: transparent">More in depth info: </span><span style="background-color: transparent">https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideScram</span>
+
+---+++++ SCRAM !BuildFiles -- Short Tutorial
+
+SCRAM is a build system that is a wrapper around make.  Recall that that CMSSW is broken into =Subsystem/package= (e.g. Reconstruction/TrackReco or Demo/DemoZAnalysis).  This is historical from the ORCA days (the predecessor to CMSSW).  To first order, each package will become a shared library (*.so) and it will live in the $CMSSW_BASE/lib/$SCRAM_ARCH directory (e.g. on my mac -- CMSSW_6_1_2/lib/osx107_amd64_gcc472/).  
+
+<verbatim>
+	Subsytem1 --> package 1 --> BuildFile.xml --> libSubsystem1Package1.so
+	          --> package 2 --> BuildFile.xml --> libSubsystem1Package2.so
+	          --> package 3 --> BuildFile.xml --> libSubsystem1Package3.so
+			  ....
+	Subsytem2 --> package 1 --> BuildFile.xml --> libSubsystem2Package1.so
+			  ....
+</verbatim>
+
+You can do more fancy things like build a standalone executable or plugin.  This is beyond the scope of this tutorial -- see the twiki's if you want to go there.  I've done some of this and its not terrible.
+
+---++++++ EDM Plugin
+
+To use SCRAM, you present to the system the =BuildFile.xml= (or =CMS.BuildFile=) which is a declarative statement about which libraries you need to include to build this package.  Consider the following example of an analysis:
+
+<verbatim>
+	Analysis  	     C++ class           Subystem/Package they live in
+		|-------> reco::GenParticles --> DataFormats/HepMCCandidate 
+              --> reco::Muons        --> DataFormats/MuonReco
+              --> reco::GsfElectrons --> DataFormats/EGammaReco
+              --> edm::EDAnalyzer    --> FWCore/Framework
+              --> edm::Event         --> FWCore/Framework
+              --> edm::ParameterSet  --> FWCore/ParameterSet
+              --> TH1D               --> ROOT
+              --> TFileService       --> PhysicsTools/UtilAlgos
+              ....
+</verbatim>
+
+To properly compile and *LINK* this analysis package, consider the following !BuildFile.xml in the $CMSSW_BASE/src/Ryan/Analysis":
+
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+<use name="FWCore/Framework"/>
+<use name="FWCore/PluginManager"/>
+<use name="FWCore/ParameterSet"/>
+<use name="DataFormats/HepMCCandidate"/>
+<use name="DataFormats/MuonReco"/>
+<use name="DataFormats/EgammaReco"/>
+<use name="PhysicsTools/UtilAlgos"/>
+<use name="root"/>
+<flags EDM_PLUGIN="1"/>
+</verbatim>
+
+This !BuildFile declares library called libRyanAnalysis.so, which is also an EDM plugin that cmsRun will understand (EDProducer, EDAnalyzer, EDFilter, ...).  This is registered by the plugin manager at compile time.
+
+   * The lines with =&lt;use name="Subsystem/package"&gt;= means to include and link against this library
+   * The lines with =&lt;flags EDM_PLUGIN="1"/&gt;= means to promote this library to a edm plugin 
+   * The "1" means to use the directory structure to resolve the Subsystem/Package (i.e. "Subsystem/Package")
+      * you could have named it something different but this is conventional.
+
+So when you run cmsRun, the plugin can be used in the python configuration, loaded at runtime and do whatever the plugin was designed to do.
+
+These dependencies change as you write more or change your code.  It takes some experience to build up knowledge of where all the different packages are in CMSSW -- the LXR and DOxygen are the best places to figure this out.
+
+---++++++ Reusable Library 
+
+Not all the code in CMSSW is an EDM plugin.  Sometimes, you want to just make a reusable library that other packages use (e.g. data formats or analysis tools).  This is simple in SCRAM.  You just don't declare a EDM_PLUGIN and "export" the lib:
+
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+<use name="rootcore"/>
+<use name="boost"/>
+<use name="gsl"/>
+<use name="AnalysisTools/LanguageTools"/>
+<export>
+  <lib name="1"/>
+  <use name="root"/>
+</export>
+</verbatim>
+
+Here I include the packages that are needed and export the library name.  Again, the "1" for lib name  means to use the directory structure to resolve the Subsystem/Package (i.e. "Subsystem/Package").  By exporting, I'm saying there will be a library available to everyone of name "Subsystem/Package" (e.g. !AnalysisTools/!RootTools).  
+
+---++++++ Purpose of Exporting
+
+Consider that we wrote a reusable library called =MyTools= that we want to expose to "clients" in our system.  Consider the following awesome drawing:
+
+<img src="%ATTACHURLPATH%/export_example.png" alt="export_example.png" width='800' height='600' />
+
+Here, the implementation (below the squiggly line) of =MyTools= uses three different packages: ROOT, the BOOST C++ libraries and GNU Scientific Library (GSL).  The =MyTools= package used these three package in the implementation of the code but not necessarily in the interface.  In the interface (above the squiggly line), it only uses ROOT.  For example, consider the following pseudo-code from =MyTools=:
+
+!MyAwesomePlotMaker.h
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+#ifndef MYAWESOMEPLOTTOOLS_H
+#define MYAWESOMEPLOTTOOLS_H
+#include "TH1F.h"
+
+namespace MyTools
+{
+	TH1F MyAwesomePlotMaker();
+}
+#endif // MYAWESOMEPLOTTOOLS_H
+</verbatim>
+
+!MyAwesomePlotMaker.cc
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+#include "MyAwesomePlotMaker.h"
+#include "TH1F.h"
+#include "boost/shared_ptr.hpp"
+#include "gsl/gsl_matrix.h"
+
+namespace MyTools
+{
+	TH1F MyAwesomePlotMaker()
+	{
+		// awesome code that does everything
+		...
+	}
+}
+</verbatim>
+
+To properly link against these, the following lines are needed in the !BuildFile.xml:
+
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+<use name="rootcore"/>
+<use name="boost"/>
+<use name="gsl"/>
+</verbatim>
+
+However, the user or "client" of the =MyTools= package, does not need to know about Boost and GSL since these are now binaries are linked dynamically to =MyTools=.  However, whenever you use something from another package in the interface (header files) of your package, you will need to tell the client about it.  For example, if in my tools I included
+
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+#include "TH1F.h"
+</verbatim>
+
+Now, the client of =MyTools= has to also know about ROOT.  If he just includes the =MyTools= package, he will get a linker error.  To fix this he needs to explicitly include ROOT as a dependency in the client's !BuildFile.xml.  This is *not* sustainable since the client would have to figure out that he needed to include ROOT and whenever you use =MyTools=.  This is error prone and inelegant since what if =MyTools= adds another dependency --> if there are 1000 "clients" of =MyTools=, are you going to change the 1000 build files that included =MyTools=?
+
+The way SCRAM deals with this is using "export".   When I export my lib, I also export the dependencies that the client needs to link this lib:
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+<export>
+  <lib name="1"/>
+  <use name="root"/>
+</export>
+</verbatim>
+
+Here, I exposing my library called =Subsystem/package= and also whenever you use this library, you will also get ROOT with it.  So if the interface to =MyTools= changes and you need another package in the interface, you just have to change the !BuildFile.xml for that package.  So now, the picture of the build decencies will look like: 
+
+<img src="%ATTACHURLPATH%/export_example2.png" alt="export_example2.png" width='800' height='600' />
+
+Client now gets the ROOT dependency implicitly.  The final !BuildFile.xml to realize this picture will look like:
+
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+<use name="rootcore"/>
+<use name="boost"/>
+<use name="gsl"/>
+<export>
+  <use name="root"/>
+  <lib name="1"/>
+</export>
+</verbatim>
+
+Unfortunately, in practice, people are not aware and/or disciplined enough to use the export properly.  But you should be aware and try to use this feature.  This is also standard practice in commercial C++ systems.
+
+FYI, in my opinion, the =BOOST build= system handle this problem particularly well and is not tied to CMSSW...
 
 ---+++++ Other systems
 
-There are other systems that can be used as a build system.  One goal of a modern build system is to be "platform independent" -- i.e. not depend on the system that the code is compiled on (Windows, Linux, PS3, iOS, etc.).  Examples of build systems nclude but are not limited to:
+There are other systems that can be used as a build system. One goal of a modern build system is to be "platform independent" -- i.e. not depend on the system that the code is compiled on (Windows, Linux, PS3, iOS, etc.). Examples of build systems nclude but are not limited to:
    * CMake: http://www.cmake.org/
    * BOOST Build (my personal favorite): http://www.boost.org/boost-build2/
    * The system that ships with IDEs: Visual Studio, Eclipse, Code Blocks, XCode
@@ -1011,4 +1168,6 @@ Check out the wiki page on this: http://en.wikipedia.org/wiki/List_of_build_auto
    * extract the yields
    * give a cross section estimate (no systematics)
 
--- Main.RyanKelley - 2014/01/29
+-- Main.RyanKelley - 2014/02/14
+
+
