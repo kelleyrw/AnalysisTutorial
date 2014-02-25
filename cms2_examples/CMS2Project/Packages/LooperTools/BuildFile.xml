@@ -1,0 +1,7 @@
+<use name="root"/>
+<use name="FWCore/FWLite"/>
+<export>
+  <use name="FWCore/FWLite"/>
+  <lib name="1"/>
+</export>
+
