@@ -1,5 +1,5 @@
-#ifndef SCANCHAIN_H
-#define SCANCHAIN_H
+#ifndef CMS2LOOPER_H
+#define CMS2LOOPER_H
 
 #include <string>
 #include <map>
@@ -8,7 +8,7 @@
 class TChain;
 class TH1;
 
-// convenenice typedef for a simple histogram container
+// histogram tools 
 #include "Packages/HistTools/interface/HistTools.h"
 
 // Simple class to hold your analysis data
