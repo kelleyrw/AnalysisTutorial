@@ -93,7 +93,7 @@ void CMS2Looper::EndJob()
 // ------------------------------------ //
 // loop over event 
 // ------------------------------------ //
-void CMS2Looper::ScanChain(TChain& chain, long num_events)
+void CMS2Looper::ScanChain(TChain& chain, const long num_events)
 {
     // Benchmark
     TBenchmark bmark;
@@ -117,54 +117,79 @@ void CMS2Looper::ScanChain(TChain& chain, long num_events)
     // Loop over events to Analyze//
     //~-~-~-~-~-~-~-~-~-~-~-~-~-~-//
 
-    // initialize the chain
-    cms2.Init(&chain);
-    TTreeCache::SetLearnEntries(10);
-    chain.SetCacheSize(128*1024*1024);
-
     // number of events to run on
-    num_events = (num_events < 0 or num_events > chain.GetEntries() ? chain.GetEntries() : num_events);
+    const unsigned long num_events_chain = (num_events < 0 or num_events > chain.GetEntries() ? chain.GetEntries() : num_events);
 
     // count the total and duplicates events
     unsigned long num_events_total = 0;
     unsigned long num_duplicates   = 0;
 
-    // loop over events
-    for (long event = 0; event != num_events; ++event)
+    // files list --> TChain doesn't propoerly with CMS2.h so 
+    // we have to looper manually over the files :(
+    TObjArray* const list_of_files = chain.GetListOfFiles();
+    TIter file_iter(list_of_files);
+    TFile* current_file = NULL;
+
+    // loop over files in the chain
+    while ((current_file = (TFile*)file_iter.Next()))
     {
-        // Get Event Content
-        chain.LoadTree(event);
-        cms2.GetEntry(event);
-        ++num_events_total;
+        // get the trees in each file
+        TFile* const file = TFile::Open(current_file->GetTitle());
+        TTree* const tree = dynamic_cast<TTree*>(file->Get("Events"));
 
-        //parse events from json
-        if (tas::evt_isRealData())
+        // initialize the chain
+        cms2.Init(tree);
+        TTreeCache::SetLearnEntries(10);
+        chain.SetCacheSize(128*1024*1024);
+
+        // Loop over Events in current file
+        if (num_events_total >= num_events_chain) {break;}
+        const long num_events_tree = tree->GetEntriesFast();
+
+        // loop over events
+        for (long event = 0; event != num_events_tree; ++event)
         {
-            // for read data, check that the run is good
-            if (!goodrun_json(tas::evt_run(), tas::evt_lumiBlock()))
+            // quit if the total is > the number in the chain
+            if (num_events_total >= num_events_chain) {continue;}
+
+            // Get Event Content
+            tree->LoadTree(event);
+            cms2.GetEntry(event);
+            ++num_events_total;
+
+            //parse events from json
+            if (tas::evt_isRealData())
             {
-                continue;
+                // for read data, check that the run is good
+                if (!goodrun_json(tas::evt_run(), tas::evt_lumiBlock()))
+                {
+                    continue;
+                }
+
+                // check for duplicates
+                const DorkyEventIdentifier id = {tas::evt_run(), tas::evt_event(), tas::evt_lumiBlock()};
+                if (is_duplicate(id))
+                {
+                    // cout << "\t! ERROR: found duplicate." << endl;
+                    num_duplicates++;
+                    continue;
+                }
             }
 
-            // check for duplicates
-            DorkyEventIdentifier id = {tas::evt_run(), tas::evt_event(), tas::evt_lumiBlock()};
-            if (is_duplicate(id))
-            {
-                // cout << "\t! ERROR: found duplicate." << endl;
-                num_duplicates++;
-                continue;
-            }
-        }
+            // Progress
+            CMS2::progress(num_events_total, num_events_chain);
 
-        // Progress
-        CMS2::progress(num_events_total, num_events);
+            //~-~-~-~-~-~-~-//
+            // Analysis Code//
+            //~-~-~-~-~-~-~-//
+            Analyze(event);
 
-        //~-~-~-~-~-~-~-//
-        // Analysis Code//
-        //~-~-~-~-~-~-~-//
-        Analyze(event);
-        
-    }//end event loop
+        } //end event loop
+
+        // cleanup
+        file->Close();
+
+    } // end file loop
 
     // Stuff to do after job finishes
 	EndJob();

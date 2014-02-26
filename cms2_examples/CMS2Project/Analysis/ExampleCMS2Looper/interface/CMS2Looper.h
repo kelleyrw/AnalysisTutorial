@@ -23,7 +23,7 @@ class CMS2Looper
         ~CMS2Looper();
 
         // methods:
-        void ScanChain(TChain& chain, long num_events = -1);
+        void ScanChain(TChain& chain, const long num_events = -1);
         void SetRunList(const std::string& runlist);
 
     private:
