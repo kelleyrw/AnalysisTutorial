@@ -123,6 +123,7 @@ void CMS2Looper::ScanChain(TChain& chain, const long num_events)
     // count the total and duplicates events
     unsigned long num_events_total = 0;
     unsigned long num_duplicates   = 0;
+    unsigned long num_bad_events   = 0;
 
     // files list --> TChain doesn't propoerly with CMS2.h so 
     // we have to looper manually over the files :(
@@ -165,6 +166,7 @@ void CMS2Looper::ScanChain(TChain& chain, const long num_events)
                 {
                     if (!goodrun_json(tas::evt_run(), tas::evt_lumiBlock()))
                     {
+                        num_bad_events++;
                         continue;
                     }
                 }
@@ -202,6 +204,7 @@ void CMS2Looper::ScanChain(TChain& chain, const long num_events)
     std::cout << std::endl;
     std::cout << num_events_total << " Events Processed" << std::endl;
     std::cout << num_duplicates   << " Duplicate Events" << std::endl;
+    std::cout << num_bad_events   << " Bad Events"       << std::endl;
     std::cout << "------------------------------" << std::endl;
     std::cout << "CPU  Time:	" << Form("%.01f", bmark.GetCpuTime("benchmark") ) << std::endl;
     std::cout << "Real Time:	" << Form("%.01f", bmark.GetRealTime("benchmark")) << std::endl;
