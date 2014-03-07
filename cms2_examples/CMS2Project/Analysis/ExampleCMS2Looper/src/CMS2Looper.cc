@@ -57,27 +57,27 @@ void CMS2Looper::BeginJob()
 // ------------------------------------ //
 void CMS2Looper::Analyze(const long event)
 {
-    bool foundwz = false;
-    unsigned int nwzpartons = 0;
-
-    for (size_t idx = 0; idx < tas::genps_id().size(); idx++)
-    {
-        const unsigned int pid = abs(tas::genps_id().at(idx));
-        foundwz = (pid == 23);
-
-        // h_sample->Fill(pid);
-        hists.at("h_sample")->Fill(pid);
-
-        if (foundwz && (pid == 1 || pid == 2 || pid == 3 || pid == 4 || pid == 5 || pid == 6 || pid == 21))
-        {  
-            nwzpartons++;
-        }
-    }
-
-    if (nwzpartons > 3)
-    {
-        dumpDocLines();
-    }
+    bool foundz = false;                                                      
+    unsigned int nwzpartons = 0;                                               
+                                                                               
+    for (size_t idx = 0; idx < tas::genps_id().size(); idx++)                  
+    {                                                                          
+        const unsigned int pid = abs(tas::genps_id().at(idx));                 
+        foundz = (pid == 23);                                                 
+                                                                               
+        // h_sample->Fill(pid);                                                
+        hists.at("h_sample")->Fill(pid);                                       
+                                                                               
+        if (foundz && (pid == 1 || pid == 2 || pid == 3 || pid == 4 || pid == 5 || pid == 6 || pid == 21))
+        {                                                                      
+            nwzpartons++;                                                      
+        }                                                                      
+    }                                                                          
+                                                                               
+    if (nwzpartons > 3)                                                        
+    {                                                                          
+        dumpDocLines();                                                        
+    }                                                                          
 }
 
 // ------------------------------------ //
@@ -161,9 +161,12 @@ void CMS2Looper::ScanChain(TChain& chain, const long num_events)
             if (tas::evt_isRealData())
             {
                 // for read data, check that the run is good
-                if (!goodrun_json(tas::evt_run(), tas::evt_lumiBlock()))
+                if (!runlist_filename.empty())
                 {
-                    continue;
+                    if (!goodrun_json(tas::evt_run(), tas::evt_lumiBlock()))
+                    {
+                        continue;
+                    }
                 }
 
                 // check for duplicates
