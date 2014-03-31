@@ -840,7 +840,7 @@ This only scratches the service of using libraries.
 
 ---+++++ Building an exe with ROOT objects
 
-There is no reason you have to use ROOT interactively though CINT -- it is really just a set of C++ libraries.  Consider the following simple program called =with_root.cpp=:
+There is no reason you have to use ROOT interactively though CINT -- it is really just a set of C++ libraries. Consider the following simple program called =with_root.cpp=:
 
 <verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 #include "TH1F.h"
@@ -864,7 +864,6 @@ If I try to compile this, I'll get an error since g++ doesn't know where to find
 src/with_root.cpp:1:18: fatal error: TH1F.h: No such file or directory
 compilation terminated.
 </verbatim>
-
 
 ROOT ships with a nice command line utility that will give you the appropriate g++ options to pass to your command:
 
@@ -917,7 +916,7 @@ lib/libmodule.so: obj/module1.o obj/module2.o
 obj/module1.o: include/module1.h src/module1.cpp
    g++ -c src/module1.cpp -Iinclude -o obj/module1.o
 
-obj/module2.o: include/module2.h src/module2.cpp
+obj/module2.o: include/module2.h src/module2.cpp include/module1.h src/module1.cpp
    g++ -c src/module2.cpp -Iinclude -o obj/module2.o
 
 # clean up
@@ -955,7 +954,7 @@ if [ -f obj/test4.o ]; then rm obj/test4.o; fi
 
 This might seem magical but for even intermediate size systems (like an analysis), this can get out of hand and cumbersome. Some more digging into Make's features can alleviate some of this but in the end, there is still quite a bit of work to get make to work well.
 
- See: http://oreilly.com/catalog/make3/book/index.csp 
+See: http://oreilly.com/catalog/make3/book/index.csp
 
 ---+++++ !ACLiC
 
@@ -972,12 +971,170 @@ The main disadvantage of !ACLiC is it has a hard time parsing complex code, espe
 
 CMSSW uses SCRAM systems (Source Configuration, Release, And Management tool). The following twikis explain it more detail:
    * Quick start: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookScramV1Intro
-   * About buildfiles: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookBuildFilesIntro
-   * More in depth info: https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideScram
+   * About buildfiles: 
+      * <span style="background-color: transparent; color: blue; text-decoration: underline">https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookBuildFilesIntro</span>
+      * <span style="background-color: transparent">%BLUE%<u>https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBuildFile</u>%ENDCOLOR%</span>
+      * <span style="background-color: transparent">More in depth info: </span><span style="background-color: transparent">https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideScram</span>
+
+---+++++ SCRAM !BuildFiles -- Short Tutorial
+
+SCRAM is a build system that is a wrapper around make. Recall that that CMSSW is broken into =Subsystem/package= (e.g. Reconstruction/TrackReco or Demo/DemoZAnalysis). This is historical from the ORCA days (the predecessor to CMSSW). To first order, each package will become a shared library (*.so) and it will live in the $CMSSW_BASE/lib/$SCRAM_ARCH directory (e.g. on my mac -- CMSSW_6_1_2/lib/osx107_amd64_gcc472/).
+
+<verbatim>
+   Subsytem1 --> package 1 --> BuildFile.xml --> libSubsystem1Package1.so
+             --> package 2 --> BuildFile.xml --> libSubsystem1Package2.so
+             --> package 3 --> BuildFile.xml --> libSubsystem1Package3.so
+           ....
+   Subsytem2 --> package 1 --> BuildFile.xml --> libSubsystem2Package1.so
+           ....
+</verbatim>
+
+You can do more fancy things like build a standalone executable or plugin. This is beyond the scope of this tutorial -- see the twiki's if you want to go there. I've done some of this and its not terrible.
+
+---++++++ EDM Plugin
+
+To use SCRAM, you present to the system the =BuildFile.xml= (or =CMS.BuildFile=) which is a declarative statement about which libraries you need to include to build this package. Consider the following example of an analysis:
+
+<verbatim>
+   Analysis          C++ class           Subystem/Package they live in
+      |-------> reco::GenParticles --> DataFormats/HepMCCandidate 
+              --> reco::Muons        --> DataFormats/MuonReco
+              --> reco::GsfElectrons --> DataFormats/EGammaReco
+              --> edm::EDAnalyzer    --> FWCore/Framework
+              --> edm::Event         --> FWCore/Framework
+              --> edm::ParameterSet  --> FWCore/ParameterSet
+              --> TH1D               --> ROOT
+              --> TFileService       --> PhysicsTools/UtilAlgos
+              ....
+</verbatim>
+
+To properly compile and *LINK* this analysis package, consider the following !BuildFile.xml in the $CMSSW_BASE/src/Ryan/Analysis":
+
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+<use name="FWCore/Framework"/>
+<use name="FWCore/PluginManager"/>
+<use name="FWCore/ParameterSet"/>
+<use name="DataFormats/HepMCCandidate"/>
+<use name="DataFormats/MuonReco"/>
+<use name="DataFormats/EgammaReco"/>
+<use name="PhysicsTools/UtilAlgos"/>
+<use name="root"/>
+<flags EDM_PLUGIN="1"/>
+</verbatim>
+
+This !BuildFile declares library called libRyanAnalysis.so, which is also an EDM plugin that cmsRun will understand (EDProducer, EDAnalyzer, EDFilter, ...). This is registered by the plugin manager at compile time.
+
+   * The lines with =&lt;use name="Subsystem/package"&gt;= means to include and link against this library
+   * The lines with =&lt;flags EDM_PLUGIN="1"/&gt;= means to promote this library to a edm plugin
+   * The "1" means to use the directory structure to resolve the Subsystem/Package (i.e. "Subsystem/Package") 
+      * you could have named it something different but this is conventional.
+
+So when you run cmsRun, the plugin can be used in the python configuration, loaded at runtime and do whatever the plugin was designed to do.
+
+These dependencies change as you write more or change your code. It takes some experience to build up knowledge of where all the different packages are in CMSSW -- the LXR and DOxygen are the best places to figure this out.
+
+---++++++ Reusable Library
+
+Not all the code in CMSSW is an EDM plugin. Sometimes, you want to just make a reusable library that other packages use (e.g. data formats or analysis tools). This is simple in SCRAM. You just don't declare a EDM_PLUGIN and "export" the lib:
+
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+<use name="rootcore"/>
+<use name="boost"/>
+<use name="gsl"/>
+<use name="AnalysisTools/LanguageTools"/>
+<export>
+  <lib name="1"/>
+  <use name="root"/>
+</export>
+</verbatim>
+
+Here I include the packages that are needed and export the library name. Again, the "1" for lib name means to use the directory structure to resolve the Subsystem/Package (i.e. "Subsystem/Package"). By exporting, I'm saying there will be a library available to everyone of name "Subsystem/Package" (e.g. !AnalysisTools/!RootTools).
+
+---++++++ Purpose of Exporting
+
+Consider that we wrote a reusable library called =MyTools= that we want to expose to "clients" in our system. Consider the following awesome drawing:
+
+<img width="800" alt="export_example.png" src="%ATTACHURLPATH%/export_example.png" height="600" />
+
+Here, the implementation (below the squiggly line) of =MyTools= uses three different packages: ROOT, the BOOST C++ libraries and GNU Scientific Library (GSL). The =MyTools= package used these three package in the implementation of the code but not necessarily in the interface. In the interface (above the squiggly line), it only uses ROOT. For example, consider the following pseudo-code from =MyTools=:
+
+!MyAwesomePlotMaker.h
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+#ifndef MYAWESOMEPLOTTOOLS_H
+#define MYAWESOMEPLOTTOOLS_H
+#include "TH1F.h"
+
+namespace MyTools
+{
+   TH1F MyAwesomePlotMaker();
+}
+#endif // MYAWESOMEPLOTTOOLS_H
+</verbatim>
+
+!MyAwesomePlotMaker.cc
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+#include "MyAwesomePlotMaker.h"
+#include "TH1F.h"
+#include "boost/shared_ptr.hpp"
+#include "gsl/gsl_matrix.h"
+
+namespace MyTools
+{
+   TH1F MyAwesomePlotMaker()
+   {
+      // awesome code that does everything
+      ...
+   }
+}
+</verbatim>
+
+To properly link against these, the following lines are needed in the !BuildFile.xml:
+
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+<use name="rootcore"/>
+<use name="boost"/>
+<use name="gsl"/>
+</verbatim>
+
+However, the user or "client" of the =MyTools= package, does not need to know about Boost and GSL since these are now binaries are linked dynamically to =MyTools=. However, whenever you use something from another package in the interface (header files) of your package, you will need to tell the client about it. For example, if in my tools I included
+
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+#include "TH1F.h"
+</verbatim>
+
+Now, the client of =MyTools= has to also know about ROOT. If he just includes the =MyTools= package, he will get a linker error. To fix this he needs to explicitly include ROOT as a dependency in the client's !BuildFile.xml. This is *not* sustainable since the client would have to figure out that he needed to include ROOT and whenever you use =MyTools=. This is error prone and inelegant since what if =MyTools= adds another dependency --&gt; if there are 1000 "clients" of =MyTools=, are you going to change the 1000 build files that included =MyTools=?
+
+The way SCRAM deals with this is using "export". When I export my lib, I also export the dependencies that the client needs to link this lib:
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+<export>
+  <lib name="1"/>
+  <use name="root"/>
+</export>
+</verbatim>
+
+Here, I exposing my library called =Subsystem/package= and also whenever you use this library, you will also get ROOT with it. So if the interface to =MyTools= changes and you need another package in the interface, you just have to change the !BuildFile.xml for that package. So now, the picture of the build decencies will look like:
+
+<img width="800" alt="export_example2.png" src="%ATTACHURLPATH%/export_example2.png" height="600" />
+
+Client now gets the ROOT dependency implicitly. The final !BuildFile.xml to realize this picture will look like:
+
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+<use name="rootcore"/>
+<use name="boost"/>
+<use name="gsl"/>
+<export>
+  <use name="root"/>
+  <lib name="1"/>
+</export>
+</verbatim>
+
+Unfortunately, in practice, people are not aware and/or disciplined enough to use the export properly. But you should be aware and try to use this feature. This is also standard practice in commercial C++ systems.
+
+FYI, in my opinion, the =BOOST build= system handle this problem particularly well and is not tied to CMSSW...
 
 ---+++++ Other systems
 
-There are other systems that can be used as a build system.  One goal of a modern build system is to be "platform independent" -- i.e. not depend on the system that the code is compiled on (Windows, Linux, PS3, iOS, etc.).  Examples of build systems nclude but are not limited to:
+There are other systems that can be used as a build system. One goal of a modern build system is to be "platform independent" -- i.e. not depend on the system that the code is compiled on (Windows, Linux, PS3, iOS, etc.). Examples of build systems nclude but are not limited to:
    * CMake: http://www.cmake.org/
    * BOOST Build (my personal favorite): http://www.boost.org/boost-build2/
    * The system that ships with IDEs: Visual Studio, Eclipse, Code Blocks, XCode
@@ -985,30 +1142,273 @@ There are other systems that can be used as a build system.  One goal of a moder
 Check out the wiki page on this: http://en.wikipedia.org/wiki/List_of_build_automation_software
 
 ---+++ CMS2
----++++ CMS2 Overview
-   * what is cms2?
-   * where is the code?
----+++++ CMS2 ntuples
-   * where are our ntuples
-   * play with an ntuple to make some plots: TTree::Draw()
-   * how to produce cms2 ntuples
----+++++ Writing a Looper
-   * give them a skeleton looper and have them fill in the appropriate values to make something meaningful (gen level stuff?)
+
+CMS2 is the name of the ntupling and supporting framework used by the UCSD/UCSB/FNAL group (a.k.a TAS or SNT). The work flow is to produce, for the whole group, a set of standard CMS2 style ntuples using CMSSW. The ntuples are analysis ready with the relevant variables needed to get started on a physics analysis but are general enough to be flexible. An individual analysis (e.g. Same-Sign dileptons) would take these ntuples and make further selections to produce the final analysis.
+
+---++++ Where is the CMS2 code?
+
+The code is now kept in github: https://github.com/cmstas
+
+---++++ How do I produce CMS2 ntuples?
+
+The CMS2 ntuples are produced via cmsRun from CMSSW. The instructions are kept on the SNT twiki: http://www.t2.ucsd.edu/tastwiki/bin/view/CMS/NtupleMakingInstructions
+
+---++++ Where are they kept?
+
+The ntuples are produced by various members of the group (usually students/postdocs ;) ) and are kept in a central place:
+   * MC ntuples: http://www.t2.ucsd.edu/tastwiki/bin/view/CMS/WebHome#Monte_Carlo
+   * Data ntuples: http://www.t2.ucsd.edu/tastwiki/bin/view/CMS/WebHome#8_TeV_Data
+If you are charged to create ntuples, please ensure that this twiki is up to date with *ALL* the field filled in. If you don't know the value to put in a field -- ask someone!
+
+---++++ Example CMS2 Looper
+
+This section outlines how to checkout and compile the example CMS2 looper. Note that there is no "standard" way to build this code in this group -- the user is on his own to figure it out. This example uses SCRAM since it is supported by the CMS collaboration and you can get help via hypernews. If you decide to use something else (!ACLiC, make, cmake, boost build, IDE, etc.), then you are on your own.
+
+First decide where to put the code in your file system. This example will assume that you created an directory called =cms2_project_example= folder.
+
+Create a base level project directory:
+
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+mkdir cms2_project_example
+cd cms2_project_example
+</verbatim>
+
+Check out the AnalysisTutorial code:
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+git clone https://github.com/kelleyrw/AnalysisTutorial.git 
+</verbatim>
+
+Create a CMSSW release area and setup the environment:
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+scramv1 p -n CMSSW_5_3_2_patch4_cms2example CMSSW CMSSW_5_3_2_patch4
+cd CMSSW_5_3_2_patch4_cms2example/src
+cmsenv
+</verbatim>
+
+Checkout and compile the CMS2 CORE and Dictionaries:
+
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+git clone https://github.com/cmstas/Dictionaries.git CMS2/Dictionaries
+git clone https://github.com/cmstas/CORE.git CMS2/NtupleMacrosCore
+cd CMS2/NtupleMacrosCore
+git pull
+git checkout scram_compliant
+./setup/setupCoreForSCRAM.sh setup/cms2_ntuple_postprocess_05.03.23.root 
+cd $CMSSW_BASE/src
+</verbatim>
+
+CORE is the setup of common code the group shares to ensure reproducibility. It is mainly for implementing selections and corrections to physics objects (e.g. JEC). Also, to facilitate easy access to the ntuples's branches in the looper code, CMS2.h/cc are automatically generated. CORE uses CMS2.h heavily.
+
+Note: CMS2.cc is actually quite slow to compile since it is ~33k lines long, thus the reason for it being made its own library.
+
+Copy the Analysis code over to the CMSSW area (For your code, depending on how you set it up, you could just check it out directly).
+
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+cp -r ../../AnalysisTutorial/cms2_examples/CMS2Project/* .
+</verbatim>
+
+Compile the code one last time to make sure all the modules are compiled:
+
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+scram b -j20
+</verbatim>
+
+There should be three directories in your analysis area:
+   1 CMS2: this the CMS2 code 
+      * Dictionaries: class definitions so that ROOT can understand the non-ROOT native CMS2 types.
+      * !NtupleMacrosCore: the "sandbox" for the CORE common code
+      * !NtupleMacrosHeader: the "sandbox" for the CMS2.h/cc that was produced by the setup script from CORE.
+   1 Packages: this is a "starter" reusable toolkit. Feel free to run with this... 
+      * !HistTools: A set of basic ROOT histogram helper functions and classes.
+      * !LooperTools: A set of basic tools for writing a looper (not necessarily CMS2 specific)
+      * ... add whatever other packages you feel you need...
+   1 Analysis: for the analysis specific code 
+      * !ExampleCMS2Looper: the actual example looper
+      * ...add as many analyses as you need...
+
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+.
+|____CMS2
+| |____Dictionaries
+| |____NtupleMacrosCore
+| |____NtupleMacrosHeader
+|____Packages
+| |____HistTools
+| |____LooperTools
+|____Analysis
+| |____ExampleCMS2Looper
+</verbatim>
+
+There two examples of running the looper. Interactively use the ROOT non-compiled script:
+
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+cd Analysis/ExampleCMS2Looper
+root -b -q -l macros/run_sample.C 
+</verbatim>
+
+Also, there is an example of a fully compiled executable which is defined in bin/run_sample.cc:
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+run_sample
+</verbatim>
 
 ---+++ A full analysis example -- measuring the Z cross section
----++++ Motivate the selection
-   * discussion on final state
-   * discuss the backgrounds
-   * look at some event displays of Z MC events
----++++ Discuss the appropriate objects and selections
-   * event selection
-   * muon selection (ID, isolation, etc.)
-   * electron selection (ID, isolation, etc.)
-   * give a reference to the actual values and have them give a discussion on what the different components mean.
----++++ Run Analysis
-   * have them implement the above selections
-   * give them a subset of the data to run on (small enough to run interactively)
-   * extract the yields
-   * give a cross section estimate (no systematics)
 
--- Main.RyanKelley - 2014/01/29
+Goal measure the &sigma;(pp &rightarrow; Z) x BR(Z &rightarrow; ee/&mu;&mu;) for a subset of the 8 !TeV data.  We will use MC for all backgrounds and ignore details such as scale factors.
+
+---++++ References 
+
+   * Z &rightarrow; ee/&mu;&mu; analysis note for 8 !TeV Data [[%ATTACHURL%/AN2012_067_v6.pdf][AN2012_067_v6]]
+      * read sections 1-5, 8, 10
+      * The actual data yields are obscurely in the appendix: tables 44 and 45
+   * Some old but still useful references:
+      * Particle Flow Algorithms:
+         * http://cms-physics.web.cern.ch/cms-physics/public/PFT-09-001-pas.pdf
+         * https://cds.cern.ch/record/1279341/files/PFT-10-002-pas.pdf
+         * https://cds.cern.ch/record/1279347/files/PFT-10-003-pas.pdf
+      * Electron Reconstruction and Identification:
+         * https://twiki.cern.ch/twiki/bin/viewauth/CMS/EgammaPOG
+         * https://twiki.cern.ch/twiki/bin/viewauth/CMS/EgIdentification
+         * https://twiki.cern.ch/twiki/bin/viewauth/CMS/ElectronRecoPrinciples
+         * [[%ATTACHURL%/NOTE2006_040.pdf][NOTE2006_040.pdf]]: Electron Reco and ID
+      * Electron Isolation:
+         * https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideEgammaIsolation
+         * https://twiki.cern.ch/twiki/bin/viewauth/CMS/EgammaPFBasedIsolation
+         * https://twiki.cern.ch/twiki/bin/viewauth/CMS/EgammaEARhoCorrection
+      * Muon Reconstruction and Identification:
+         * https://twiki.cern.ch/twiki/bin/viewauth/CMS/MuonPOG
+         * https://twiki.cern.ch/twiki/bin/viewauth/CMS/MuonReferenceEffs
+         * https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideMuonId
+         * [[%ATTACHURL%/AN2008_098_v1.pdf][AN2008_098_v1.pdf]]: Muon ID
+         * [[%ATTACHURL%/MuonReco.pdf][MuonReco.pdf]]: Muon Reconstruction
+      * Muon Isolation:
+         * https://twiki.cern.ch/twiki/bin/viewauth/CMS/MuonIsolation
+
+---++++ Datasets for Exercise 
+
+   * We will use 8 !TeV dataset run2012A 06Aug2012 (82 pb<sup>-1</sup>).  This is small enough to finish interactively:
+      * data: http://www.t2.ucsd.edu/tastwiki/bin/view/CMS/2012Data8TeV_slim_Winter13#Run2012A_06Aug2012_v1_series_run
+
+Single muon data 
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+    TChain chain("Events");
+    chain.Add("/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/SingleMu_Run2012A-recover-06Aug2012-v1_AOD/merged/*.root");
+</verbatim>
+
+Single electron data 
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+    TChain chain("Events");
+    chain.Add("/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/SingleElectron_Run2012A-recover-06Aug2012-v1_AOD/merged/*.root");
+</verbatim>
+
+      * Good run list:
+         * [[%ATTACHURL%/Cert_190782-190949_8TeV_06Aug2012ReReco_Collisions12_cms2.txt][Cert_190782-190949_8TeV_06Aug2012ReReco_Collisions12_cms2.txt]]: Flat CMS2 friendly JSON
+         * [[%ATTACHURL%/Cert_190782-190949_8TeV_06Aug2012ReReco_Collisions12.json][Cert_190782-190949_8TeV_06Aug2012ReReco_Collisions12.json]]: JSON file
+         * [[%ATTACHURL%/Cert_190782-190949_8TeV_06Aug2012ReReco_Collisions12.lumi][Cert_190782-190949_8TeV_06Aug2012ReReco_Collisions12.lumi]]: Luminosity measurement
+
+   * mc: http://www.t2.ucsd.edu/tastwiki/bin/view/CMS/Summer12MonteCarlo53X_Slim_Winter13
+      * We are using only a subset of the full dataset since this is an exercise and we want this to run interactively
+
+Drell-Yan
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+    TChain chain("Events");
+    chain.Add("/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12_DR53X-PU_S10_START53_V7A-v1/V05-03-23/merged_ntuple_1[0-9].root");
+</verbatim>
+
+W + Jets &rightarrow; l + &nu;
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+    TChain chain("Events");
+    chain.Add("/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball_Summer12_DR53X-PU_S10_START53_V7A-v1/V05-03-28/merged_ntuple_1[0-9].root");
+</verbatim>
+
+tt(bar) &rightarrow; 2l + 2&nu; 
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+    TChain chain("Events");
+    chain.Add("/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/TTJets_FullLeptMGDecays_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v2/V05-03-24/merged_ntuple_1[0-9].root");
+</verbatim>
+
+tt(bar) &rightarrow; l + &nu; + jj 
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+    TChain chain("Events");
+    chain.Add("/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/TTJets_SemiLeptMGDecays_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A_ext-v1/V05-03-24/merged_ntuple_1[0-9].root");
+</verbatim>
+
+tt(bar) &rightarrow; hadronic 
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+    TChain chain("Events");
+    chain.Add("/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/TTJets_HadronicMGDecays_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A_ext-v1/V05-03-24/merged_ntuple_1[0-9].root");
+</verbatim>
+
+QCD muon enriched (use for &mu;&mu; analysis).  For now, let's ignore QCD for ee analysis since it requires more statistics than is practical without using the grid.
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+    TChain chain("Events");
+    chain.Add("/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/QCD_Pt_20_MuEnrichedPt_15_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v3/V05-03-18_slim/merged_ntuple_1[0-9].root");
+</verbatim>
+
+WW &rightarrow; 2l + 2&nu;
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+    TChain chain("Events");
+    chain.Add("/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/WWJetsTo2L2Nu_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1/V05-03-23/merged_ntuple_1[0-9].root");
+</verbatim>
+
+WZ &rightarrow; 2l + 2q
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+    TChain chain("Events");
+    chain.Add("/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/WZJetsTo2L2Q_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1/V05-03-23/merged_ntuple_1[0-9].root");
+</verbatim>
+
+WZ &rightarrow; 3l + &nu;
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+    TChain chain("Events");
+    chain.Add("/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/WZJetsTo3LNu_TuneZ2_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1/V05-03-23/merged_ntuple_1[0-9].root");
+</verbatim>
+
+ZZ &rightarrow; 2l + 2&nu;
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+    TChain chain("Events");
+    chain.Add("/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/ZZJetsTo2L2Nu_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v3/V05-03-23/merged_ntuple_1[0-9].root");
+</verbatim>
+
+ZZ &rightarrow; 2l + 2q
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+    TChain chain("Events");
+    chain.Add("/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/ZZJetsTo2L2Q_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1/V05-03-23/merged_ntuple_1[0-9].root");
+</verbatim>
+
+ZZ &rightarrow; 4l
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+    TChain chain("Events");
+    chain.Add("/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/ZZJetsTo2L2Nu_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v3/V05-03-23/merged_ntuple_1[0-9].root");
+</verbatim>
+
+---++++ Deliverables
+   1 Due Friday 3/14: Set of slides to summarize their understanding of what we went over.  Make sure you cover the following:
+      * How is a cross section measured --> what are the pieces?
+      * What is the signal?
+      * What is a "prompt" lepton?
+      * What are the major backgrounds for this analysis?  Why are they backgrounds?
+   1 Due Friday 3/14: A spreadsheet of the expected number of events for the signal and the background
+      * Cross Sections can be found here: https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat8TeV
+         * PDF print out if you don't have CERN access yet: [[%ATTACHURL%/StandardModelCrossSectionsat8TeVTwiki.pdf][StandardModelCrossSectionsat8TeVTwiki.pdf]]
+      * An example spreadsheet can be found here: [[%ATTACHURL%/ZAnalysis_Expected_Events.xlsx][ZAnalysis_Expected_Events.xlsx]]
+   1 Due: Friday 4/11: m_{ll} plots and table of yields:
+      * A total of 5 plots -- m_{ee} and m_{&mu;&mu;} plot of
+         * gen level with 2 true opposite-signed and same-flavor leptons (OSSF)
+         * reco level with opposite-signed and same-flavor leptons (OSSF) -- no gen matching requirement
+           * Select all OSSF lepton pairs (no disambiguation yet)
+      * data overlaid with a stacked plot of all the backgrounds.
+      * Background should be normalized to the lumi*cross-section
+         * The gen level plots/yields should have numbers that are consistent with your spreadsheet numbers
+   1 Due Wednesday 4/16 or Friday 4/18:  Write up a 20 minute presentation on the e/&mu; ID or Isolation.  
+      * ~3/4 of talk should be on: What is it and why do we need it?  What are the variables involved?  
+      * ~1/4 of talk should be on: How do I implement it using CMS2 ntuples.
+      * schedule:
+         * Dan: electron identification (wednesday)
+         * Dylan: electron Isolation (wednesday)
+         * Mark: muon identification (Friday)
+         * Liam: muon isolation (Friday)
+   1 Due Friday 4/25: Implement a cut flow
+   1 Due Friday 4/2: Final results
+   1 Due Friday 5/8: Cross check results using functions from CORE
+   1 Due Friday 5/16: Slides of the Results at the level of a "full status report"
+
+-- Main.RyanKelley - 2015/03/31
