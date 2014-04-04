@@ -1251,61 +1251,256 @@ Also, there is an example of a fully compiled executable which is defined in bin
 run_sample
 </verbatim>
 
+---++++ Normalizing MC Samples
+
+In order to get a proper prediction for the Monte Carlo samples (MC), we need to properly normalize the number of events to the number we would have expected from data given an integrated luminosity (L). Normally, we can calculate the expected number of events by using the theoretical cross-section:
+
+N = L x &sigma;
+
+However, in MC, we usually don't have a sample that has N events. Since this is MC and we're really after the PDF(s) of the N and all the other kinematical variables associated with this process (e.g. # jets, parton p<sub>T</sub>, etc.), we need as many events as practical. Some of these MC samples are quite large and can be O(TB) for AOD level samples.
+
+Since the number of event generated N<sub>gen</sub> is usually quite larger than N, we need a way to scale our observations from this MC sample to what we would have expected if it were real data. Consider the following:
+
+N = N x (N<sub>gen</sub> / N<sub>gen</sub>)
+
+= N<sub>gen</sub> x (N / N<sub>gen</sub>)
+
+= N<sub>gen</sub> x (L x &sigma;/N<sub>gen</sub>)
+
+= N<sub>gen</sub> x L x (&sigma;/N<sub>gen</sub>)
+
+= N<sub>gen</sub> x L x scale1fb
+
+Basically, we rewrite the equation to factor the MC dependent variables into one number we call "scale1fb". This is the number we store in our CMS2 ntuples so that we can weight each event so that our distributions (histograms) have the correct normalization.
+
+---+++++ Scale1fb TTree::Draw example
+
+Here I show a couple of examples of using scale1fb using TTree::Draw statements. A consider the following example code fragment:
+
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+TChain chain("Events");
+chain.Add("/nfs-7/userdata/rwkelley/cms2/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12_DR53X-PU_S10_START53_V7A-v1.root");
+
+// integrated luminosity
+const double lumi = 0.082; //fb^-1
+
+// get the raw number of entries for true e^+e^- events
+const TCut selection   = "Sum$(genps_status==3 && genps_id==11)>=1 && Sum$(genps_status==3 && genps_id==-11)>=1";
+const double raw_count = chain.GetEntries(selection);
+
+// information from twiki: http://www.t2.ucsd.edu/tastwiki/bin/view/CMS/Summer12MonteCarlo53X_Slim_Winter13#Drell_Yan
+const double xsec       = 3532.81; // pb
+const double kfactor    = 1.0;     // kinematically dependent factor to scale to a higher order calc -- not really used as much
+const double filt_eff   = 1.0;     // Filter efficiency for the generator level (done during MC generation at the CMSSW level)
+const double nevts_file = chain.GetEntries();
+
+// scale1fb = the factor the weight each event to get scale # events / fb^-1
+const double scale1fb = (xsec * kfactor * 1000.0f * filt_eff)/nevts_file;
+
+// output
+std::cout << "raw_count    = " << raw_count << "\n";
+std::cout << "scale1fb     = " << scale1fb << "\n";
+std::cout << "scaled count = lumi * scale1fb * raw_count = " << lumi*scale1fb*raw_count << "\n\n";
+</verbatim>
+
+Here, I calculate the scale1fb by hand for demonstration purposes. Notice that there are other factors that went into the scalefb:
+ | *variable*   | *description*                                                                                                                                   | 
+ | =xsec=       | The production cross-section x BR for this MC sample.                                                                                           | 
+ | =kfactor=    | Kinematically dependent factor to scale the xsec for higher order affect -- not used as much now.                                               | 
+ | =filt_eff=   | The efficiency at the generator level. A non-unity value indicates that not all events that are generated are kept and then run throw sim/reco. | 
+ | =nevts_file= | The number of events in this cms2 level file                                                                                                    | 
+
+The result of this for lumi = 0.082 pb<sup>-1</sup> is:
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+raw_count    = 23332
+scale1fb     = 56.5367
+scaled count = lumi * scale1fb * raw_count = 108167
+</verbatim>
+
+This seems high. From our exercise earlier, we estimated that number of Z &rarr; e<sup>+</sup>e<sup>-</sup> events to be ~96k (if you includes &tau; &rarr; e&nu; decays). What did we do wrong?
+
+We did not account for the fact that the MC sample was filtered when the ntuple was created from the AOD to the CMS2. Specifically, in general, the N<sub>AOD</sub> &ne; N<sub>CMS2</sub>. To get an accurate scale1fb, you need the number of events before the CMS2 ntuple making procedure filtered out some events. To correct for this, we need to get the CMS2 filter efficiency from the [[http://www.t2.ucsd.edu/tastwiki/bin/view/CMS/Summer12MonteCarlo53X_Slim_Winter13#Drell_Yan][twiki]]. We correct the scale1fb by:
+
+scalefb' = scale1fb x (N<sub>CMS2</sub> / N<sub>AOD</sub>)
+
+In code:
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+const double nevts_aod  = 30459503; 
+const double nevts_cms2 = 27137253;
+const double cms2_filter_eff = nevts_cms2/nevts_aod;
+std::cout << "properly scale count = lumi * scale1fb * raw_count * cms2_filter_eff = " << lumi*scale1fb*raw_count*cms2_filter_eff << "\n\n";
+</verbatim>
+
+This gives:
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+properly scale count = lumi * scale1fb * raw_count * cms2_filter_eff = 96369.5
+</verbatim>
+
+This is much more consistent.
+
+In practice, when the CMS2 ntuples are generated with the scale1fb using the N<sub>AOD</sub> and is stored in the branch called =evt_scale1fb=. This and the following related branches are added to the ntuples in the "post-processing" step of generating the ntuples:
+ | *variable*      | *description*                                                     | 
+ | =evt_scale1fb=  | event weight to scale to N expected for 1 fb<sup>-1</sub> of data | 
+ | =evt_nEvts=     | Number of events generated N<sub>AOD</sub>                        | 
+ | =evt_kfactor=   | Factor to scale LO to NLO+ -- a bit antiquated but historical     | 
+ | =evt_filt_eff=  | Filter efficiency at the generator level                          | 
+ | =evt_xsec_excl= | Exclusive cross-section                                           | 
+ | =evt_xsec_incl= | Inclusive cross-section                                           | 
+
+Repeating the above exercise using the branches stored in the ntuple:
+
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+// scale1fb correction since we used a subset of the events
+const double scale = nevts_cms2/nevts_file; 
+
+// get the scaled entries
+const TCut scaled_selection  = Form("%f*%f*evt_scale1fb*(Sum$(genps_status==3 && genps_id==11)>=1 && Sum$(genps_status==3 && genps_id==-11)>=1)", lumi, scale);
+TH1D* const h_scale1fb_count = new TH1D("h_scale1fb_count", "h_scale1fb_count", 3, -0.5, 2.5);
+chain.Draw("1>>h_scale1fb_count", scaled_selection, "goff");
+
+std::cout << "hist entries    = " << h_scale1fb_count->GetEntries()   << "\n";
+std::cout << "scale1fb        = " << chain.GetMaximum("evt_scale1fb") << "\n";
+std::cout << "applying weight = " << scaled_selection.GetTitle()      << "\n";
+std::cout << "scale1fb_count  = " << h_scale1fb_count->Integral()     << "\n";
+</verbatim>
+
+Again -- when working on the full cms2 ntuples, you do not have to do the following and scaling with =evt_scale1fb= is sufficient. However, since we are using a subset of the cms2 ntuples, we still have to account for the cms2 filter efficiency and have to scale again since =evt_scale1fb= was calculated using the whole sample -- not one file.
+
+scale1fb 1 file = (&sigma;/N<sub>file_if_aod</sub>)
+
+where N<sub>file_if_aod</sub> is the # events on this file before it was skimmed by the CMS2 ntuple making filter (which we didn't store anywhere).
+
+N<sub>file_if_aod</sub> = N<sub>file</sub> x ( N<sub>aod</sub>/N<sub>cms2</sub>)
+
+= N<sub>aod</sub> x ( N<sub>file</sub>/N<sub>cms2</sub>)
+
+so
+
+scale1fb 1 file = (&sigma;/N<sub>AOD</sub>) x (N<sub>cms2</sub>/N<sub>file</sub>)
+
+scale1fb 1 file = evt_scale1fb x (N<sub>cms2</sub>/N<sub>file</sub>)
+
+The result is:
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+hist entries    = 23332
+scale1fb        = 0.115984
+applying weight = 0.082000*434.286380*evt_scale1fb*(Sum$(genps_status==3 && genps_id==11)>=1 && Sum$(genps_status==3 && genps_id==-11)>=1)
+scale1fb_count  = 96369.6
+</verbatim>
+
+The full example code can be found [[https://github.com/kelleyrw/DrellYan/blob/master/macros/dy_scale1fb_example.C][here]].
+
+---+++++ Scale1fb TTree looper example 
+
+The above example is useful for quick studies on the command line.  Also, this can be done in looper code when filling histograms.
+
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+void DrellYanLooper::Analyze(const long event)
+{
+    // select e+e- events (NOTE: no test for Z)
+    bool contains_eplus  = false;
+    bool contains_eminus = false;
+    bool is_ee           = false;
+    for (size_t idx = 0; idx < tas::genps_id().size() && !is_ee; ++idx)
+    {
+        if (tas::genps_status().at(idx) != 3) {continue;}
+        if (tas::genps_id().at(idx) ==  11  ) {contains_eminus = true;}
+        if (tas::genps_id().at(idx) == -11  ) {contains_eplus  = true;}
+        is_ee = (contains_eplus && contains_eminus);
+    }
+    if (!is_ee) {return;}
+
+    // --------------------------------------------------------- //
+    // scale factor to scale assuming running on full MC sample 
+    // --------------------------------------------------------- //
+
+    const double lumi = 0.082; //fb^-1
+    const double scale_full = lumi * tas::evt_scale1fb();
+    hc["h_ee_yield_full"]->Fill(1.0, scale_full);
+
+    // --------------------------------------------------------- //
+    // scale1fb correction since we used a subset of the events
+    // --------------------------------------------------------- //
+
+    // information from twiki: http://www.t2.ucsd.edu/tastwiki/bin/view/CMS/Summer12MonteCarlo53X_Slim_Winter13#Drell_Yan
+    const double nevts_aod   = tas::evt_nEvts();       // number of events run in CMSSW job to make ntuple
+    const double nevts_cms2  = 27137253;               // number of events after the CMS2 level filter
+    const double nevts_file  = m_num_events;           // number of events in the current job
+    const double nevts_scale = nevts_cms2/nevts_file;  // scale up the weight to account for using subset of full dataset 
+
+    const float scale_subset = scale_full * nevts_scale;
+    hc["h_ee_yield_sub"]->Fill(1.0, scale_subset);
+}
+</verbatim>
+
+The result is:
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+[rwkelley@uaf-7 DrellYan]$  dy_scale1fb_example 
+Loading CMSSW FWLite.
+running drell-yan looper...
+raw  count   = 23332
+full count   = 221.903
+subset count = 96369.6
+</verbatim>
+
+Here the "full count" is the yield assuming that the input was the full dataset.  Since we ran on a subset of the full dataset, we had to scale it.
+
 ---+++ A full analysis example -- measuring the Z cross section
 
-Goal measure the &sigma;(pp &rightarrow; Z) x BR(Z &rightarrow; ee/&mu;&mu;) for a subset of the 8 !TeV data.  We will use MC for all backgrounds and ignore details such as scale factors.
+Goal measure the &sigma;(pp &rarr; Z) x BR(Z &rarr; ee/&mu;&mu;) for a subset of the 8 !TeV data. We will use MC for all backgrounds and ignore details such as scale factors.
 
----++++ References 
+---++++ References
 
-   * Z &rightarrow; ee/&mu;&mu; analysis note for 8 !TeV Data [[%ATTACHURL%/AN2012_067_v6.pdf][AN2012_067_v6]]
+   * Z &rarr; ee/&mu;&mu; analysis note for 8 !TeV Data [[%ATTACHURL%/AN2012_067_v6.pdf][AN2012_067_v6]] 
       * read sections 1-5, 8, 10
       * The actual data yields are obscurely in the appendix: tables 44 and 45
-   * Some old but still useful references:
-      * Particle Flow Algorithms:
+   * Some old but still useful references: 
+      * Particle Flow Algorithms: 
          * http://cms-physics.web.cern.ch/cms-physics/public/PFT-09-001-pas.pdf
          * https://cds.cern.ch/record/1279341/files/PFT-10-002-pas.pdf
          * https://cds.cern.ch/record/1279347/files/PFT-10-003-pas.pdf
-      * Electron Reconstruction and Identification:
+      * Electron Reconstruction and Identification: 
          * https://twiki.cern.ch/twiki/bin/viewauth/CMS/EgammaPOG
          * https://twiki.cern.ch/twiki/bin/viewauth/CMS/EgIdentification
          * https://twiki.cern.ch/twiki/bin/viewauth/CMS/ElectronRecoPrinciples
          * [[%ATTACHURL%/NOTE2006_040.pdf][NOTE2006_040.pdf]]: Electron Reco and ID
-      * Electron Isolation:
+      * Electron Isolation: 
          * https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideEgammaIsolation
          * https://twiki.cern.ch/twiki/bin/viewauth/CMS/EgammaPFBasedIsolation
          * https://twiki.cern.ch/twiki/bin/viewauth/CMS/EgammaEARhoCorrection
-      * Muon Reconstruction and Identification:
+      * Muon Reconstruction and Identification: 
          * https://twiki.cern.ch/twiki/bin/viewauth/CMS/MuonPOG
          * https://twiki.cern.ch/twiki/bin/viewauth/CMS/MuonReferenceEffs
          * https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideMuonId
          * [[%ATTACHURL%/AN2008_098_v1.pdf][AN2008_098_v1.pdf]]: Muon ID
          * [[%ATTACHURL%/MuonReco.pdf][MuonReco.pdf]]: Muon Reconstruction
-      * Muon Isolation:
+      * Muon Isolation: 
          * https://twiki.cern.ch/twiki/bin/viewauth/CMS/MuonIsolation
 
----++++ Datasets for Exercise 
+---++++ Datasets for Exercise
 
-   * We will use 8 !TeV dataset run2012A 06Aug2012 (82 pb<sup>-1</sup>).  This is small enough to finish interactively:
+   * We will use 8 !TeV dataset run2012A 06Aug2012 (82 pb<sup>-1</sup>). This is small enough to finish interactively: 
       * data: http://www.t2.ucsd.edu/tastwiki/bin/view/CMS/2012Data8TeV_slim_Winter13#Run2012A_06Aug2012_v1_series_run
 
-Single muon data 
+Single muon data
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
     TChain chain("Events");
     chain.Add("/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/SingleMu_Run2012A-recover-06Aug2012-v1_AOD/merged/*.root");
 </verbatim>
 
-Single electron data 
+Single electron data
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
     TChain chain("Events");
     chain.Add("/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/SingleElectron_Run2012A-recover-06Aug2012-v1_AOD/merged/*.root");
 </verbatim>
 
-      * Good run list:
+   * 
+      * Good run list: 
          * [[%ATTACHURL%/Cert_190782-190949_8TeV_06Aug2012ReReco_Collisions12_cms2.txt][Cert_190782-190949_8TeV_06Aug2012ReReco_Collisions12_cms2.txt]]: Flat CMS2 friendly JSON
          * [[%ATTACHURL%/Cert_190782-190949_8TeV_06Aug2012ReReco_Collisions12.json][Cert_190782-190949_8TeV_06Aug2012ReReco_Collisions12.json]]: JSON file
          * [[%ATTACHURL%/Cert_190782-190949_8TeV_06Aug2012ReReco_Collisions12.lumi][Cert_190782-190949_8TeV_06Aug2012ReReco_Collisions12.lumi]]: Luminosity measurement
 
-   * mc: http://www.t2.ucsd.edu/tastwiki/bin/view/CMS/Summer12MonteCarlo53X_Slim_Winter13
+   * mc: http://www.t2.ucsd.edu/tastwiki/bin/view/CMS/Summer12MonteCarlo53X_Slim_Winter13 
       * We are using only a subset of the full dataset since this is an exercise and we want this to run interactively
 
 Drell-Yan
@@ -1314,94 +1509,97 @@ Drell-Yan
     chain.Add("/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12_DR53X-PU_S10_START53_V7A-v1/V05-03-23/merged_ntuple_1[0-9].root");
 </verbatim>
 
-W + Jets &rightarrow; l + &nu;
+W + Jets &rarr; l + &nu;
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
     TChain chain("Events");
     chain.Add("/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball_Summer12_DR53X-PU_S10_START53_V7A-v1/V05-03-28/merged_ntuple_1[0-9].root");
 </verbatim>
 
-tt(bar) &rightarrow; 2l + 2&nu; 
+tt(bar) &rarr; 2l + 2&nu;
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
     TChain chain("Events");
     chain.Add("/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/TTJets_FullLeptMGDecays_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v2/V05-03-24/merged_ntuple_1[0-9].root");
 </verbatim>
 
-tt(bar) &rightarrow; l + &nu; + jj 
+tt(bar) &rarr; l + &nu; + jj
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
     TChain chain("Events");
     chain.Add("/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/TTJets_SemiLeptMGDecays_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A_ext-v1/V05-03-24/merged_ntuple_1[0-9].root");
 </verbatim>
 
-tt(bar) &rightarrow; hadronic 
+tt(bar) &rarr; hadronic
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
     TChain chain("Events");
     chain.Add("/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/TTJets_HadronicMGDecays_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A_ext-v1/V05-03-24/merged_ntuple_1[0-9].root");
 </verbatim>
 
-QCD muon enriched (use for &mu;&mu; analysis).  For now, let's ignore QCD for ee analysis since it requires more statistics than is practical without using the grid.
+QCD muon enriched (use for &mu;&mu; analysis). For now, let's ignore QCD for ee analysis since it requires more statistics than is practical without using the grid.
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
     TChain chain("Events");
     chain.Add("/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/QCD_Pt_20_MuEnrichedPt_15_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v3/V05-03-18_slim/merged_ntuple_1[0-9].root");
 </verbatim>
 
-WW &rightarrow; 2l + 2&nu;
+WW &rarr; 2l + 2&nu;
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
     TChain chain("Events");
     chain.Add("/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/WWJetsTo2L2Nu_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1/V05-03-23/merged_ntuple_1[0-9].root");
 </verbatim>
 
-WZ &rightarrow; 2l + 2q
+WZ &rarr; 2l + 2q
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
     TChain chain("Events");
     chain.Add("/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/WZJetsTo2L2Q_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1/V05-03-23/merged_ntuple_1[0-9].root");
 </verbatim>
 
-WZ &rightarrow; 3l + &nu;
+WZ &rarr; 3l + &nu;
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
     TChain chain("Events");
     chain.Add("/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/WZJetsTo3LNu_TuneZ2_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1/V05-03-23/merged_ntuple_1[0-9].root");
 </verbatim>
 
-ZZ &rightarrow; 2l + 2&nu;
+ZZ &rarr; 2l + 2&nu;
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
     TChain chain("Events");
     chain.Add("/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/ZZJetsTo2L2Nu_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v3/V05-03-23/merged_ntuple_1[0-9].root");
 </verbatim>
 
-ZZ &rightarrow; 2l + 2q
+ZZ &rarr; 2l + 2q
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
     TChain chain("Events");
     chain.Add("/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/ZZJetsTo2L2Q_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1/V05-03-23/merged_ntuple_1[0-9].root");
 </verbatim>
 
-ZZ &rightarrow; 4l
+ZZ &rarr; 4l
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
     TChain chain("Events");
-    chain.Add("/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/ZZJetsTo2L2Nu_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v3/V05-03-23/merged_ntuple_1[0-9].root");
+    chain.Add("/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/ZZJetsTo4L_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1/V05-03-23/merged_ntuple_1[0-9].root");
 </verbatim>
 
 ---++++ Deliverables
-   1 Due Friday 3/14: Set of slides to summarize their understanding of what we went over.  Make sure you cover the following:
-      * How is a cross section measured --> what are the pieces?
+   1 Due Friday 3/14: Set of slides to summarize their understanding of what we went over. Make sure you cover the following: 
+      * How is a cross section measured --&gt; what are the pieces?
       * What is the signal?
       * What is a "prompt" lepton?
-      * What are the major backgrounds for this analysis?  Why are they backgrounds?
-   1 Due Friday 3/14: A spreadsheet of the expected number of events for the signal and the background
-      * Cross Sections can be found here: https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat8TeV
+      * What are the major backgrounds for this analysis? Why are they backgrounds?
+   1 Due Friday 3/14: A spreadsheet of the expected number of events for the signal and the background 
+      * Cross Sections can be found here: https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat8TeV 
          * PDF print out if you don't have CERN access yet: [[%ATTACHURL%/StandardModelCrossSectionsat8TeVTwiki.pdf][StandardModelCrossSectionsat8TeVTwiki.pdf]]
       * An example spreadsheet can be found here: [[%ATTACHURL%/ZAnalysis_Expected_Events.xlsx][ZAnalysis_Expected_Events.xlsx]]
-   1 Due: Friday 4/11: m_{ll} plots and table of yields:
-      * A total of 5 plots -- m_{ee} and m_{&mu;&mu;} plot of
-         * gen level with 2 true opposite-signed and same-flavor leptons (OSSF)
-         * reco level with opposite-signed and same-flavor leptons (OSSF) -- no gen matching requirement
-           * Select all OSSF lepton pairs (no disambiguation yet)
-      * data overlaid with a stacked plot of all the backgrounds.
-      * Background should be normalized to the lumi*cross-section
-         * The gen level plots/yields should have numbers that are consistent with your spreadsheet numbers
-   1 Due Wednesday 4/16 or Friday 4/18:  Write up a 20 minute presentation on the e/&mu; ID or Isolation.  
-      * ~3/4 of talk should be on: What is it and why do we need it?  What are the variables involved?  
+   1 Due: Friday 4/11: m_{ll} plots and table of yields: 
+      * A total of 4 plots 
+         * m_{ee} gen level with 2 true opposite-signed and same-flavor leptons (OSSF) normalized properly (luminosity*cross section) 
+            * numbers should be consistent with your spreadsheet numbers
+         * m_{mm} same as above
+         * reco m_{ee} plot with opposite-signed and same-flavor leptons (OSSF) 
+            * no gen matching requirement
+            * Select all OSSF lepton pairs (no disambiguation yet)
+            * data overlaid with a stacked plot of all the backgrounds
+            * Background should be normalized to the lumi*cross-section
+         * reco m_{mm} plot same as above
+   1 Due Wednesday 4/16 or Friday 4/18: Write up a 20 minute presentation on the e/&mu; ID or Isolation. 
+      * ~3/4 of talk should be on: What is it and why do we need it? What are the variables involved?
       * ~1/4 of talk should be on: How do I implement it using CMS2 ntuples.
-      * schedule:
+      * schedule: 
          * Dan: electron identification (wednesday)
          * Dylan: electron Isolation (wednesday)
          * Mark: muon identification (Friday)
@@ -1411,4 +1609,5 @@ ZZ &rightarrow; 4l
    1 Due Friday 5/8: Cross check results using functions from CORE
    1 Due Friday 5/16: Slides of the Results at the level of a "full status report"
 
--- Main.RyanKelley - 2015/03/31
+-- Main.RyanKelley - 2015/04/04
+
