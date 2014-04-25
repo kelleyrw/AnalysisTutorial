@@ -13,6 +13,7 @@ function run_create_baby
 	local log="logs/${sample}.log"
 	cmd="root -b -q -l \"macros/create_baby.C(\\\"$sample\\\", \\\"$input\\\", \\\"$output\\\", \\\"$json\\\", $nevts, $lumi, $verbose)\""
 	mkdir -p logs 
+	mkdir -p babies 
 	echo $cmd
 	eval $cmd >& $log & 
 }
