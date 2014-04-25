@@ -1149,7 +1149,7 @@ CMS2 is the name of the ntupling and supporting framework used by the UCSD/UCSB/
 
 The code is now kept in github: https://github.com/cmstas
 
----++++ How do I produce CMS2 ntuples?
+---++++ how do I produce CMS2 ntuples?
 
 The CMS2 ntuples are produced via cmsRun from CMSSW. The instructions are kept on the SNT twiki: http://www.t2.ucsd.edu/tastwiki/bin/view/CMS/NtupleMakingInstructions
 
@@ -1309,7 +1309,7 @@ There should be three directories in your analysis area:
 The code for the example baby maker is located:
    * https://github.com/kelleyrw/AnalysisTutorial/tree/master/cms2_examples/CMS2Project/Analysis/ExampleCMS2BabyMaker
 
-The main logic to fill the tree is in the class CMS2BabyMaker:
+The main logic to fill the tree is in the class !CMS2BabyMaker:
    * https://github.com/kelleyrw/AnalysisTutorial/blob/master/cms2_examples/CMS2Project/Analysis/ExampleCMS2BabyMaker/interface/CMS2BabyMaker.h
    * https://github.com/kelleyrw/AnalysisTutorial/blob/master/cms2_examples/CMS2Project/Analysis/ExampleCMS2BabyMaker/src/CMS2BabyMaker.cc
 
@@ -1318,19 +1318,19 @@ The main logic to fill the tree is in the class CMS2BabyMaker:
 To run interactively use the ROOT non-compiled script =create_baby.C=:
 https://github.com/kelleyrw/AnalysisTutorial/blob/master/cms2_examples/CMS2Project/Analysis/ExampleCMS2BabyMaker/macros/create_baby.C
 
+The arguments to create_baby.C are:
+
+   * =const std::string& sample_name=      --> sample name to allow for sample dependent logic
+   * =const std::string& input_filename=   --> input TTree files 
+   * =const std::string& output_filename=  --> output baby TTree path
+   * =const std::string& runlist_filename= --> good run list
+   * =const long num_events = -1=          --> number of events to run on
+   * =const double lumi = 1.0=             --> luminosity in fb^-1 
+   * =const bool verbose = false=          --> toggle on/off extra debugging printout
+
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 root -b -q "macros/create_baby.C(\"dyll\", \"/nfs-7/userdata/rwkelley/cms2/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12_DR53X-PU_S10_START53_V7A-v1.root\", \"babies/dyll.root\", \"json/Merged_190456-208686_8TeV_PromptReReco_Collisions12_goodruns.txt\", -1, 0.082, 0)"
 </verbatim>
-
-The arguments to create_baby.C are:
-
-    * =const std::string& sample_name=      --> sample name to allow for sample dependent logic
-    * =const std::string& input_filename=   --> input TTree files 
-    * =const std::string& output_filename=  --> output baby TTree path
-    * =const std::string& runlist_filename= --> good run list
-    * =const long num_events = -1=          --> number of events to run on
-    * =const double lumi = 1.0=             --> luminosity in fb^-1 
-    * =const bool verbose = false=          --> toggle on/off extra debugging printout
 
 ---+++++ running the code in parallel? 
 

@@ -286,9 +286,9 @@ void CMS2BabyMaker::Analyze(const long event, const std::string& current_filenam
                 // which are radiated by charged pions from the tau decay but thats
                 // hadronic and we don't care for those 
                 int nu_count = 0;
-                for (const int id : tas::genps_lepdaughter_id().at(gen_idx))
+                for (const int& d_id : tas::genps_lepdaughter_id().at(gen_idx))
                 {
-                    if (abs(id)==12 || abs(id)==14) ++nu_count;
+                    if (abs(d_id)==12 || abs(d_id)==14) ++nu_count;
                 }
                 if (nu_count < 1) {continue;}
 
