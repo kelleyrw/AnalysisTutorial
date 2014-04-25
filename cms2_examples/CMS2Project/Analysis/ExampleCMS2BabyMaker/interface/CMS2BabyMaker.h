@@ -30,15 +30,15 @@ class TreeInfo
         std::string dataset;
         std::string filename;
         bool is_real_data;
-        float scale1fb;
-        float scale1fb_cms2;
-        float lumi;
-        float xsec;
-        float nevts_aod;
-        float nevts_cms2;
-        float nevts_file;
-        float kfactor;
-        float filt_eff;
+        double scale1fb;
+        double scale1fb_cms2;
+        double lumi;
+        double xsec;
+        double nevts_aod;
+        double nevts_cms2;
+        double nevts_file;
+        double kfactor;
+        double filt_eff;
 
         // Gen hypothesis specific info 
         bool is_gen_z;
