@@ -12,7 +12,6 @@
 #include "TROOT.h"
 #include "TTreeCache.h"
 #include "Math/VectorUtil.h"
-#include "TDatabasePDG.h"
 
 // CMS2
 #include "CMS2/NtupleMacrosHeader/interface/CMS2.h"
@@ -163,13 +162,17 @@ CMS2BabyMaker::CMS2BabyMaker
 // ------------------------------------ //
 // Stuff to do before job starts
 // ------------------------------------ //
+
 void CMS2BabyMaker::BeginJob()
 {
     // Set all the branches to the TTree
     m_info.SetBranches(m_tree);
 }
 
+// ------------------------------------ //
 // simple gen information 
+// ------------------------------------ //
+
 struct GenInfo
 {
     LorentzVector p4;
@@ -191,14 +194,14 @@ bool CompareGenHyp(const GenHyp& hyp1, const GenHyp& hyp2)
     int hyp1_type = -1;
     switch (hyp1.lep1.id*hyp2.lep2.id)
     {
-        case -121: hyp1_type = 1; break; // ee
-        case -169: hyp1_type = 2; break; // mu mu
+        case -11*11: hyp1_type = 1; break; // ee
+        case -13*13: hyp1_type = 2; break; // mu mu
     }
     int hyp2_type = -1;
     switch (hyp2.lep1.id*hyp2.lep2.id)
     {
-        case -121: hyp2_type = 1; break; // ee
-        case -169: hyp2_type = 2; break; // mu mu
+        case -11*11: hyp2_type = 1; break; // ee
+        case -13*13: hyp2_type = 2; break; // mu mu
     }
 
     // choose mm over ee over tau tau
@@ -220,6 +223,7 @@ bool CompareGenHyp(const GenHyp& hyp1, const GenHyp& hyp2)
 // ------------------------------------ //
 // Stuff to do on each event 
 // ------------------------------------ //
+
 void CMS2BabyMaker::Analyze(const long event, const std::string& current_filename)
 {
     if (m_verbose)
@@ -342,8 +346,8 @@ void CMS2BabyMaker::Analyze(const long event, const std::string& current_filenam
 
             // assign info 
             m_info.is_gen_z        = (gen_hyp.lep1.mom_id==23 && gen_hyp.lep2.mom_id==23);
-            m_info.is_gen_ee       = (gen_hyp.lep1.id*gen_hyp.lep2.id == -121);
-            m_info.is_gen_mm       = (gen_hyp.lep1.id*gen_hyp.lep2.id == -169);
+            m_info.is_gen_ee       = (gen_hyp.lep1.id*gen_hyp.lep2.id == -11*11);
+            m_info.is_gen_mm       = (gen_hyp.lep1.id*gen_hyp.lep2.id == -13*13);
             m_info.gen_p4          = (gen_hyp.lep1.p4 + gen_hyp.lep2.p4);
             m_info.gen_lep1_p4     = gen_hyp.lep1.p4;
             m_info.gen_lep1_id     = gen_hyp.lep1.id;
@@ -367,6 +371,7 @@ void CMS2BabyMaker::Analyze(const long event, const std::string& current_filenam
 // ------------------------------------ //
 // Stuff to do after job finishes
 // ------------------------------------ //
+
 void CMS2BabyMaker::EndJob()
 {
     std::cout << "[CMS2BabyMaker] Saving hists to output file: " << m_output_filename << std::endl;
@@ -379,6 +384,7 @@ void CMS2BabyMaker::EndJob()
 // ------------------------------------ //
 // loop over event 
 // ------------------------------------ //
+
 void CMS2BabyMaker::ScanChain(TChain& chain, const long num_events)
 {
     // Benchmark
