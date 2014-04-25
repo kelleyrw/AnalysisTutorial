@@ -1173,7 +1173,7 @@ mkdir cms2_project_example
 cd cms2_project_example
 </verbatim>
 
-Check out the AnalysisTutorial code:
+Check out the [[https://github.com/kelleyrw/AnalysisTutorial/tree/master/cms2_examples/CMS2Project/Analysis/ExampleCMS2Looper][AnalysisTutorial]] code:
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 git clone https://github.com/kelleyrw/AnalysisTutorial.git 
 </verbatim>
@@ -1224,6 +1224,7 @@ There should be three directories in your analysis area:
       * ... add whatever other packages you feel you need...
    1 Analysis: for the analysis specific code 
       * !ExampleCMS2Looper: the actual example looper
+      * !ExampleCMS2BabyMaker: an example baby maker (see next section) 
       * ...add as many analyses as you need...
 
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
@@ -1239,16 +1240,83 @@ There should be three directories in your analysis area:
 | |____ExampleCMS2Looper
 </verbatim>
 
-There two examples of running the looper. Interactively use the ROOT non-compiled script:
+---++++ Example CMS2 Baby Maker
+
+This builds off the concepts in the previous subsection on CMS2 Loopers.  In many cases, it may make more sense to create a small ntuple (a.k.a a "baby"), that is a more cooked and less flexible version of the original CMS2 ntuple.  These are usually very analysis specific and is usually both a skim and translation of the general CMS2 variables into more specific analysis variables.  The babies have the following advantages:
+   * the final variables you need for your analysis already calculated
+   * small and light wait (all of my SS babies fit on my laptop)
+   * remaking plots with different binning is trivial
+   * great for specific studies
+
+The main disadvantage of a baby is in when you run into a situtaion where you need a varaible from the CMS2 that you didn't store -- at that point you will have to re-run and re-create your baby ntuples.
+
+---+++++ checkout the code 
+
+This is the same workflow as before for the: [[http://www.t2.ucsd.edu/twiki2/bin/view/UCSDTier2/AnalysisTutorial#Example_CMS2_Looper][CMS2 Looper]].
+
+There should be three directories in your analysis area:
+   1 CMS2: this the CMS2 code 
+      * Dictionaries: class definitions so that ROOT can understand the non-ROOT native CMS2 types.
+      * !NtupleMacrosCore: the "sandbox" for the CORE common code
+      * !NtupleMacrosHeader: the "sandbox" for the CMS2.h/cc that was produced by the setup script from CORE.
+   1 Packages: this is a "starter" reusable toolkit. Feel free to run with this... 
+      * !HistTools: A set of basic ROOT histogram helper functions and classes.
+      * !LooperTools: A set of basic tools for writing a looper (not necessarily CMS2 specific)
+      * ... add whatever other packages you feel you need...
+   1 Analysis: for the analysis specific code 
+      * !ExampleCMS2Looper: an example looper (see previous section)
+      * !ExampleCMS2BabyMaker: an example baby maker
+      * ...add as many analyses as you need...
 
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
-cd Analysis/ExampleCMS2Looper
-root -b -q -l macros/run_sample.C 
+.
+|____CMS2
+| |____Dictionaries
+| |____NtupleMacrosCore
+| |____NtupleMacrosHeader
+|____Packages
+| |____HistTools
+| |____LooperTools
+|____Analysis
+| |____ExampleCMS2Looper
+| |____ExampleCMSBabyMaker
 </verbatim>
 
-Also, there is an example of a fully compiled executable which is defined in bin/run_sample.cc:
+---+++++ how does it work? 
+
+The code for the example baby maker is located:
+   * https://github.com/kelleyrw/AnalysisTutorial/tree/master/cms2_examples/CMS2Project/Analysis/ExampleCMS2BabyMaker
+
+The main logic to fill the tree is in the class CMS2BabyMaker:
+   * https://github.com/kelleyrw/AnalysisTutorial/blob/master/cms2_examples/CMS2Project/Analysis/ExampleCMS2BabyMaker/interface/CMS2BabyMaker.h
+   * https://github.com/kelleyrw/AnalysisTutorial/blob/master/cms2_examples/CMS2Project/Analysis/ExampleCMS2BabyMaker/src/CMS2BabyMaker.cc
+
+---+++++ running the code? 
+
+To run interactively use the ROOT non-compiled script =create_baby.C=:
+https://github.com/kelleyrw/AnalysisTutorial/blob/master/cms2_examples/CMS2Project/Analysis/ExampleCMS2BabyMaker/macros/create_baby.C
+
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
-run_sample
+root -b -q "macros/create_baby.C(\"dyll\", \"/nfs-7/userdata/rwkelley/cms2/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12_DR53X-PU_S10_START53_V7A-v1.root\", \"babies/dyll.root\", \"json/Merged_190456-208686_8TeV_PromptReReco_Collisions12_goodruns.txt\", -1, 0.082, 0)"
+</verbatim>
+
+---+++++ running the code in parallel? 
+
+The code can be run in parallel by using the script =create_babies_all.sh=:
+https://github.com/kelleyrw/AnalysisTutorial/blob/master/cms2_examples/CMS2Project/Analysis/ExampleCMS2BabyMaker/scripts/create_babies_all.sh
+
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+./scripts/create_babies_all.sh
+</verbatim>
+
+---+++++ examples on the ROOT interpreter 
+
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+// raw 
+tree->Draw("gen_p4.mass()>>(150, 0, 150)", "is_gen_ee");
+
+// scaled
+tree->Draw("gen_p4.mass()>>(150, 0, 150)", "lumi*scale1fb*is_gen_ee");
 </verbatim>
 
 ---++++ Normalizing MC Samples
@@ -1722,5 +1790,5 @@ It is often a good idea (if you can), to check your results in more than one way
 }
 </verbatim>
 
--- Main.RyanKelley - 2015/04/22
+-- Main.RyanKelley - 2015/04/25
 
