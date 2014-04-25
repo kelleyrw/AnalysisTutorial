@@ -1,0 +1,4 @@
+<use name="Analysis/ExampleCMS2BabyMaker"/>
+<environment>
+  <bin name="create_baby" file="create_baby.cc"/>
+</environment>

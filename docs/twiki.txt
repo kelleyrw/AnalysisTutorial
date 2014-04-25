@@ -1482,19 +1482,13 @@ Goal measure the &sigma;(pp &rarr; Z) x BR(Z &rarr; ee/&mu;&mu;) for a subset of
    * We will use 8 !TeV dataset run2012A 06Aug2012 (82 pb<sup>-1</sup>). This is small enough to finish interactively: 
       * data: http://www.t2.ucsd.edu/tastwiki/bin/view/CMS/2012Data8TeV_slim_Winter13#Run2012A_06Aug2012_v1_series_run
 
-Single muon data
+Single electron/muon data
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
     TChain chain("Events");
     chain.Add("/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/SingleMu_Run2012A-recover-06Aug2012-v1_AOD/merged/*.root");
-</verbatim>
-
-Single electron data
-<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
-    TChain chain("Events");
     chain.Add("/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/SingleElectron_Run2012A-recover-06Aug2012-v1_AOD/merged/*.root");
 </verbatim>
-
-   * 
+ 
       * Good run list: 
          * [[%ATTACHURL%/Cert_190782-190949_8TeV_06Aug2012ReReco_Collisions12_cms2.txt][Cert_190782-190949_8TeV_06Aug2012ReReco_Collisions12_cms2.txt]]: Flat CMS2 friendly JSON
          * [[%ATTACHURL%/Cert_190782-190949_8TeV_06Aug2012ReReco_Collisions12.json][Cert_190782-190949_8TeV_06Aug2012ReReco_Collisions12.json]]: JSON file
@@ -1585,29 +1579,148 @@ ZZ &rarr; 4l
       * Cross Sections can be found here: https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat8TeV 
          * PDF print out if you don't have CERN access yet: [[%ATTACHURL%/StandardModelCrossSectionsat8TeVTwiki.pdf][StandardModelCrossSectionsat8TeVTwiki.pdf]]
       * An example spreadsheet can be found here: [[%ATTACHURL%/ZAnalysis_Expected_Events.xlsx][ZAnalysis_Expected_Events.xlsx]]
-   1 Due: Friday 4/11: m_{ll} plots and table of yields: 
+   1 Due: Friday 4/25: m_{ll} plots and table of yields: 
       * A total of 4 plots 
-         * m_{ee} gen level with 2 true opposite-signed and same-flavor leptons (OSSF) normalized properly (luminosity*cross section) 
+         * gen level ee yields and m_{ee} plot 
+            * count events with 2 true opposite-signed and same-flavor leptons (OSSF) normalized properly (luminosity*cross section) 
+            * only select one hypothesis per event in processes that could have more than one OSSF pair
             * numbers should be consistent with your spreadsheet numbers
          * m_{mm} same as above
          * reco m_{ee} plot with opposite-signed and same-flavor leptons (OSSF) 
             * no gen matching requirement
-            * Select all OSSF lepton pairs (no disambiguation yet)
+            * Select all OSSF lepton pairs (no hypothesis choice yet)
             * data overlaid with a stacked plot of all the backgrounds
             * Background should be normalized to the lumi*cross-section
          * reco m_{mm} plot same as above
-   1 Due Wednesday 4/16 or Friday 4/18: Write up a 20 minute presentation on the e/&mu; ID or Isolation. 
+   1 Due Friday 4/25: A Draft of your talk for the following deliverable.
+   1 Due Tuesday 4/29 or Friday 5/2: Write up a 20 minute presentation on the e/&mu; ID or Isolation. 
       * ~3/4 of talk should be on: What is it and why do we need it? What are the variables involved?
       * ~1/4 of talk should be on: How do I implement it using CMS2 ntuples.
       * schedule: 
-         * Dan: electron identification (wednesday)
-         * Dylan: electron Isolation (wednesday)
-         * Mark: muon identification (Friday)
+         * Dan: electron identification (Tuesday)
+         * Mark: muon identification (Tuesday)
+         * Elizabeth: electron Isolation (Friday)
          * Liam: muon isolation (Friday)
-   1 Due Friday 4/25: Implement a cut flow
-   1 Due Friday 4/2: Final results
-   1 Due Friday 5/8: Cross check results using functions from CORE
-   1 Due Friday 5/16: Slides of the Results at the level of a "full status report"
+   1 Due Friday 5/9: Implement a cut flow, kinematic and N-1 plots.
+   1 Due Friday 5/16: Final results
+   1 Due Friday 5/23: Cross check results using functions from CORE
+   1 Due Friday 5/30: Slides of the Results at the level of a "full status report"
 
--- Main.RyanKelley - 2015/04/04
+---++++ FAQ 
+
+The following questions have been repeatedly asked so I wanted to write the answer down in a central place.
+
+---+++++ Do I chain the data into one chain or keep them separate?
+
+You can of course chain them all up into one huge chain and use some logic to parse which dataset is which; however, I would advise against it.  The disadvantage to this technique is two-fold:
+   1 The job will take much longer to run.  
+   1 The analysis code has to be more complicated to handle the different cases.  More potential for bugs...
+
+I would design the code to run on each dataset separately and produce either a set of plots and/or a baby ntuple.  This way each dataset can be a separate job and if you need to regenerate a single dataset (e.g. add more files or change the MC you use), you do not have to run all the jobs again. 
+
+---+++++ What is the most efficient work flow?
+
+This is of course user preference and there is no canonical answer.  I will describe what I like to do:
+   * Write a looper that will produce either a set of plots or a baby
+   * Write a main program that will call this looper and take as arguments dataset dependent metadata:
+      * dataset to run on
+      * input files
+      * output files
+      * number of events
+      * other dataset dependent issues... 
+   * Write a script (bash, python, or whatever), to call the jobs in parallel on the uaf.  I personally like to use python for this but whatever you are most comfortable with.  The following is a psuedo-script to illustrate my point:
+
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+#!/bin/bash
+
+nevts=-1
+
+root -q -b -l "macros/run_sample.C ($nevts, \"data\" , \"output/data_baby.root\")"  >& logs/data_example.log &
+root -q -b -l "macros/run_sample.C ($nevts, \"dyll\" , \"output/dyll_baby.root\")"  >& logs/dyll_example.log &
+root -q -b -l "macros/run_sample.C ($nevts, \"wjets\", \"output/wjets_baby.root\")" >& logs/wjets_example.log &
+# ...
+</verbatim>
+
+   * write a ROOT compiled macro (i.e. .L macro.C++) that will make the yield tables from the output ROOT files above.  I have this script possess an option to produce latex code that i can cut and paste into !LaTex/!LaTexIt to make nice tables.	
+   * write a ROOT compiled macro (i.e. .L macro.C++) that will make the overlay plots from the output ROOT files above.  I have this script possess an option to print different plot types: png, eps, pdf.
+      * I find that eps make the nicest looking plots in ppt
+      * Most people use pdf for papers 
+      * I like png for quick plots because I want to look at them without the delay it takes OSX's finder to convert and display them. 
+   * Take the final plots and table and drop them into your ppt/paper. 
+
+---+++++ How do I present the answer?
+
+I would like you to append the results to your DY slides.  The slides are meant to be a running documentation of your progress.  Please add some meaning observations and not just dumps numbers and plots on a table.  Also, you should compare them to the numbers you expect from the both the AN and the your excel exercise.
+
+---+++++ Where is the definition of the CMS2 branches? 
+
+This is a tough question.  In an ideal world, we'd have a department to document our code and dataformats; however, this is physics code so that is never going to happen.  You will basically need to learn to read the CMS2 ntuple maker code to interpret what each branch means:
+
+https://github.com/cmstas/NtupleMaker/tree/master/src
+
+I suggest (if you haven't already), check out this code so that you can grep it for the branches you need to look at.
+
+---+++++ What branches should I use?
+You can see what branches are available by:
+
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+Events->GetListOfAliases()->ls()
+</verbatim>
+
+However, a the following blocks witll be important for this analysis
+   * =genps_*= is the generater level code
+   * =evt_*= is the event level information such as scale1fb, run, event, etc.
+   * =mus_*= reco muon information
+   * =els_*= reco electron information
+   * =hyp_*= the dilepton hypothesis block.  These are convenience branches produced for every reco ee, eµ, or µµ pair in the event.
+
+---+++++ Should I make a baby ntuple?
+
+I would suggest making a baby to facilitate this analysis.  A baby is usually a simple ntuples with the "final" answer and high level variables to make plots of relevant variables.  It is usually not meant for details studies -- for these, you usually drop back down to CMS2 level or even AOD.
+
+---+++++ Should I use TTree::Draw or should I use the looper code?
+
+I would like you to at least do this with looper code.  Looper code is more complicated initially but is more efficient and more flexible.  This is why we went through it in so much detail.  With that said, it is not a bad ideal to also do this with TTree::Draw as cross-check and to gain that facility.  For quick studies, it can be much quicker to a few plots with TTree::Draw.
+
+---+++++ Should I include uncertainties
+
+Yes, any measured number should at least have an associated statistical uncertainty.  Systematic uncertainties are beyond the scope of this exercise and we shall ingore them.
+
+---+++++ How I check my Gen yield?
+
+It is often a good idea (if you can), to check your results in more than one way.  You can do this on the ROOT command line doing the following:
+
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+{
+    // data
+    TChain chain("Events");
+    chain.Add("/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12_DR53X-PU_S10_START53_V7A-v1/V05-03-23/merged_ntuple_1[0-9].root");
+    const double nevts_cms2 = 27137253;
+    const double nevts_file = chain.GetEntries(); 
+    const double lumi       = 0.082;
+
+    // selections
+    TCut raw_ee    = "Sum$(genps_status==3 && genps_id==11)>=1 && Sum$(genps_status==3 && genps_id==-11)>=1";
+    TCut scaled_ee = Form("%f*evt_scale1fb*(Sum$(genps_status==3 && genps_id==11)>=1 && Sum$(genps_status==3 && genps_id==-11)>=1)", lumi*nevts_cms2/nevts_file);
+    cout << "raw_ee = " << raw_ee.GetTitle() << endl;
+    cout << "scaled_ee = " << scaled_ee.GetTitle() << endl;
+
+    // raw yields
+    const double y_raw_ee = chain.GetEntries(raw_ee);
+    cout << "raw ee yield = " << y_raw_ee << endl;
+
+    // scaled yields
+    TH1D* h_gen_yield = new TH1D("h_gen_yield", "h_gen_yield;m_{ee}(GeV);# events", 3, 0, 3);
+    chain.Draw("1>>h_gen_yield", scaled_ee, "goff");
+    h_gen_yield.Draw();
+    cout << "scaled ee yield = " << h_gen_yield->Integral(0, -1) << endl;
+
+    // another way to get scaled yields
+    const double evt_scale1fb = chain.GetMaximum("evt_scale1fb");
+    const double event_scale = lumi * evt_scale1fb * nevts_cms2/nevts_file;
+    cout << "scaled ee yield (v2) = " << y_raw_ee * event_scale << endl;
+}
+</verbatim>
+
+-- Main.RyanKelley - 2015/04/22
 
