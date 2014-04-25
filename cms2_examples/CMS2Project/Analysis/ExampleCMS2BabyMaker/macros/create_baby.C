@@ -19,7 +19,7 @@ int create_baby
     chain.Add(input_filename.c_str());
 
     // correction factor for using subset of CMS2 events
-    double nevts_corr 1.0;
+    double nevts_corr = 1.0;
     if (sample_name == "dyll   ") nevts_corr = (27137253.0/static_cast<double>(chain.GetEntries()));
     if (sample_name == "wjets  ") nevts_corr = (14890630.0/static_cast<double>(chain.GetEntries()));
     if (sample_name == "ttdil  ") nevts_corr = (11902045.0/static_cast<double>(chain.GetEntries()));

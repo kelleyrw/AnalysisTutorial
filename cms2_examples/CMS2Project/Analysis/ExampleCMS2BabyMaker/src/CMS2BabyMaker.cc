@@ -17,12 +17,8 @@
 // CMS2
 #include "CMS2/NtupleMacrosHeader/interface/CMS2.h"
 
-// CORE
-#include "CMS2/NtupleMacrosCore/interface/mcSelections.h"
-
 // stuff from packages 
 #include "Packages/LooperTools/interface/GoodRun.h"
-#include "Packages/HistTools/interface/HistTools.h"
 #include "Packages/LooperTools/interface/DorkyEventIdentifier.h"
 
 // -------------------------------------------------//
@@ -273,17 +269,46 @@ void CMS2BabyMaker::Analyze(const long event, const std::string& current_filenam
             if (cms2.genps_status().at(gen_idx) != 3) {continue;}
         
             // only keep charged leptons
-            const int id            = tas::genps_id().at(gen_idx);
-            const int abs_id        = abs(id); 
-            const bool is_lep       = (abs_id == 11 || abs_id==13);
-            if (not is_lep) {continue;}
+            const int id = tas::genps_id().at(gen_idx);
+            if (abs(id) == 11 || abs(id) == 13)
+            {
+                // create the GenInfo object 
+                const int charge        = -1*id/abs(id); // e.g. 11 == e^- and -11 == e+
+                const LorentzVector& p4 = tas::genps_p4().at(gen_idx);
+                const int mom_id        = tas::genps_id_mother().at(gen_idx);
+                const GenInfo gen_info{p4, id, charge, mom_id}; 
+                gen_infos.push_back(gen_info);
+            }
+            if (abs(id) == 15)
+            {
+                // only consider tau --> nu_tau + nu_lep + lep events
+                // we count neutrino's because that guarantees that 
+	            // there is a corresponding lepton and that it comes from
+	            // a leptonic tau decay. You can get electrons from converted photons
+	            // which are radiated by charged pions from the tau decay but thats
+	            // hadronic and we don't care for those 
+                int nu_count = 0;
+                for (const int id : tas::genps_lepdaughter_id().at(gen_idx))
+                {
+                    if (abs(id)==12 || abs(id)==14) ++nu_count;
+                }
+                if (nu_count < 1) {continue;}
 
-            // create the GenInfo object 
-            const int charge        = -1*id/abs_id; // e.g. 11 == e^- and -11 == e+
-            const LorentzVector& p4 = tas::genps_p4().at(gen_idx);
-            const int mom_id        = tas::genps_id_mother().at(gen_idx);
-            GenInfo gen_info{p4, id, charge, mom_id}; 
-            gen_infos.push_back(gen_info);
+                // now find the lepton
+                for (size_t d_idx = 0; d_idx != tas::genps_lepdaughter_id().at(gen_idx).size(); ++d_idx)
+                {
+                    const int d_id = tas::genps_lepdaughter_id().at(gen_idx).at(d_idx);
+                    if (abs(d_id)==11 || abs(d_id)==13)
+                    {
+                        const int d_charge        = -1*d_id/abs(d_id); // e.g. 11 == e^- and -11 == e+
+                        const LorentzVector& d_p4 = tas::genps_lepdaughter_p4().at(gen_idx).at(d_idx);
+                        const int d_mom_id        = id; 
+                        const GenInfo gen_info{d_p4, d_id, d_charge, d_mom_id}; 
+                        gen_infos.push_back(gen_info);
+                        break;
+                    }
+                }
+            }
         }
 
         // for the gyn hypothesis pairs from the GenInfos 
