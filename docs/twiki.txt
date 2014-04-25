@@ -1164,6 +1164,8 @@ If you are charged to create ntuples, please ensure that this twiki is up to dat
 
 This section outlines how to checkout and compile the example CMS2 looper. Note that there is no "standard" way to build this code in this group -- the user is on his own to figure it out. This example uses SCRAM since it is supported by the CMS collaboration and you can get help via hypernews. If you decide to use something else (!ACLiC, make, cmake, boost build, IDE, etc.), then you are on your own.
 
+---+++++ checkout the code 
+
 First decide where to put the code in your file system. This example will assume that you created an directory called =cms2_project_example= folder.
 
 Create a base level project directory:
@@ -1213,6 +1215,8 @@ Compile the code one last time to make sure all the modules are compiled:
 scram b -j20
 </verbatim>
 
+---+++++ code layout
+
 There should be three directories in your analysis area:
    1 CMS2: this the CMS2 code 
       * Dictionaries: class definitions so that ROOT can understand the non-ROOT native CMS2 types.
@@ -1240,6 +1244,22 @@ There should be three directories in your analysis area:
 | |____ExampleCMS2Looper
 </verbatim>
 
+---+++++ How do I run it?
+
+There two examples of running the looper. Interactively use the ROOT non-compiled script:
+
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+cd Analysis/ExampleCMS2Looper
+root -b -q -l macros/run_sample.C 
+</verbatim>
+
+Also, there is an example of a fully compiled executable which is defined in bin/run_sample.cc:
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+run_sample
+</verbatim>
+
+This should produce a ROOT file in the output directory that contains your histogram(s).
+
 ---++++ Example CMS2 Baby Maker
 
 This builds off the concepts in the previous subsection on CMS2 Loopers.  In many cases, it may make more sense to create a small ntuple (a.k.a a "baby"), that is a more cooked and less flexible version of the original CMS2 ntuple.  These are usually very analysis specific and is usually both a skim and translation of the general CMS2 variables into more specific analysis variables.  The babies have the following advantages:
@@ -1253,6 +1273,8 @@ The main disadvantage of a baby is in when you run into a situtaion where you ne
 ---+++++ checkout the code 
 
 This is the same workflow as before for the: [[http://www.t2.ucsd.edu/twiki2/bin/view/UCSDTier2/AnalysisTutorial#Example_CMS2_Looper][CMS2 Looper]].
+
+---+++++ code layout
 
 There should be three directories in your analysis area:
    1 CMS2: this the CMS2 code 
@@ -1299,6 +1321,16 @@ https://github.com/kelleyrw/AnalysisTutorial/blob/master/cms2_examples/CMS2Proje
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 root -b -q "macros/create_baby.C(\"dyll\", \"/nfs-7/userdata/rwkelley/cms2/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12_DR53X-PU_S10_START53_V7A-v1.root\", \"babies/dyll.root\", \"json/Merged_190456-208686_8TeV_PromptReReco_Collisions12_goodruns.txt\", -1, 0.082, 0)"
 </verbatim>
+
+The arguments to create_baby.C are:
+
+    * =const std::string& sample_name=      --> sample name to allow for sample dependent logic
+    * =const std::string& input_filename=   --> input TTree files 
+    * =const std::string& output_filename=  --> output baby TTree path
+    * =const std::string& runlist_filename= --> good run list
+    * =const long num_events = -1=          --> number of events to run on
+    * =const double lumi = 1.0=             --> luminosity in fb^-1 
+    * =const bool verbose = false=          --> toggle on/off extra debugging printout
 
 ---+++++ running the code in parallel? 
 
