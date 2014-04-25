@@ -1,3 +1,15 @@
+std::vector<std::string> string_split(const std::string &str, char delim)
+{
+    std::vector<std::string> result;
+    std::stringstream ss(str);
+    std::string item;
+    while (std::getline(ss, item, delim))
+    {
+        result.push_back(item);
+    }
+    return result;
+}
+
 int create_baby
 (
     const std::string& sample_name,
@@ -6,7 +18,7 @@ int create_baby
     const std::string& runlist_filename,
     const long num_events = -1,
     const double lumi = 1.0, 
-    const bool verbose;
+    const bool verbose = false
 )
 {
     // load relevant libaries
@@ -16,7 +28,12 @@ int create_baby
     // Load TChain for the sample
     LoadFWLite();
     TChain chain("Events");
-    chain.Add(input_filename.c_str());
+    std::vector<std::string> input_files = string_split(input_filename, ',');
+    for (size_t i = 0; i < input_files.size(); ++i)
+    {
+        if (verbose) {std::cout << "adding to TChain: " << input_files[i] << std::endl;}
+        chain.Add(input_files[i].c_str());
+    }
 
     // correction factor for using subset of CMS2 events
     double nevts_corr = 1.0;
@@ -36,12 +53,12 @@ int create_baby
     // create baby maker object
     CMS2BabyMaker baby_maker
     (
-        sample_name, 
-        output_filename, 
-        runlist_filename, 
+        sample_name,
+        output_filename,
+        runlist_filename,
         lumi,
-        nevts_corr, 
-        verbose 
+        nevts_corr,
+        verbose
     );
 
     // run it

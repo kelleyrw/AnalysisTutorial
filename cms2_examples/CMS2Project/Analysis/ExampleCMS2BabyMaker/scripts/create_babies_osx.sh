@@ -15,7 +15,7 @@ function run_create_baby
 	mkdir -p babies 
 	mkdir -p logs 
 	echo $cmd
-	eval $cmd >& $log & 
+# 	eval $cmd >& $log & 
 }
 
 run_create_baby "data"     "/nfs-7/userdata/rwkelley/cms2/SingleMu_Run2012A-recover-06Aug2012-v1_AOD.root,/nfs-7/userdata/rwkelley/cms2/SingleElectron_Run2012A-recover-06Aug2012-v1_AOD.root"
