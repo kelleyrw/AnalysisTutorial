@@ -134,8 +134,6 @@ std::ostream& operator<< (std::ostream& out, const TreeInfo& info)
     return out;
 }
 
-
-
 // ------------------------------------ //
 //  Looper class 
 // ------------------------------------ //
@@ -283,10 +281,10 @@ void CMS2BabyMaker::Analyze(const long event, const std::string& current_filenam
             {
                 // only consider tau --> nu_tau + nu_lep + lep events
                 // we count neutrino's because that guarantees that 
-	            // there is a corresponding lepton and that it comes from
-	            // a leptonic tau decay. You can get electrons from converted photons
-	            // which are radiated by charged pions from the tau decay but thats
-	            // hadronic and we don't care for those 
+                // there is a corresponding lepton and that it comes from
+                // a leptonic tau decay. You can get electrons from converted photons
+                // which are radiated by charged pions from the tau decay but thats
+                // hadronic and we don't care for those 
                 int nu_count = 0;
                 for (const int id : tas::genps_lepdaughter_id().at(gen_idx))
                 {
