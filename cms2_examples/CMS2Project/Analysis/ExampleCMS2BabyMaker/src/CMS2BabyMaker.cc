@@ -205,7 +205,7 @@ bool CompareGenHyp(const GenHyp& hyp1, const GenHyp& hyp2)
     }
 
     // choose mm over ee over tau tau
-    if (hyp1_type != hyp1_type)
+    if (hyp1_type != hyp2_type)
     {
         return (hyp1_type > hyp2_type);
     }
