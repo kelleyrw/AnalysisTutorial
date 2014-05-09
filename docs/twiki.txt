@@ -1372,7 +1372,15 @@ Again, this builds off the concepts in the previous subsection on CMS2 Loopers. 
 
 ---+++++ checkout the code
 
-This is the same work flow as before for the: [[http://www.t2.ucsd.edu/twiki2/bin/view/UCSDTier2/AnalysisTutorial#Example_CMS2_Looper][CMS2 Looper]].  This time, I've added a new folder under the Analysis directory.
+This is the same work flow as before with one exception.  This was written in a newer CMSSW release area to take advantage of the newer compiler.  The instructions are the same as [[http://www.t2.ucsd.edu/twiki2/bin/view/UCSDTier2/AnalysisTutorial#checkout_the_code][here]].  Except use the following CMSSW release:
+
+Create a CMSSW release area and setup the environment:
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+export SCRAM_ARCH=slc5_amd64_gcc472
+scramv1 p -n CMSSW_6_1_2_cms2example CMSSW CMSSW_6_1_2
+cd CMSSW_6_1_2_cms2example/src
+cmsenv
+</verbatim>
 
 ---+++++ code layout
 
