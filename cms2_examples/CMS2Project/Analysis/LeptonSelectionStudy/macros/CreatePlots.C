@@ -84,7 +84,7 @@ void CreateElectronHists
     // ----------------------------- // 
 
     TCut selection = (require_prompt ? "is_prompt && is_el" : "!is_prompt && is_el");
-    const double num_entries = chain.GetEntries(selection);
+/*     const double num_entries = chain.GetEntries(selection); */
 
     SetDirectory(hm, gDirectory);
     for (const auto& s : GetElectronSelections())
@@ -92,8 +92,8 @@ void CreateElectronHists
         // cumulative selection
         selection = selection && s.cut;
         // normalizing to 100%
-        const TCut sel_scaled = Form("%1.5e*(%s)", 100.0/num_entries, selection.GetTitle());
-        std::cout << sel_scaled << std::endl;
+/*         const TCut sel_scaled = Form("%1.5e*(%s)", 100.0/num_entries, selection.GetTitle()); */
+/*         std::cout << sel_scaled << std::endl; */
 
         // fill the hists
         chain.Draw(Form("1>>h_el_count_%s"     , s.name.c_str()), sel_scaled, "goff");
