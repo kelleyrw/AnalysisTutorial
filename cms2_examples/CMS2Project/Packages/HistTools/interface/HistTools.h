@@ -49,6 +49,16 @@ void SetStyle(const std::string& option = "emrou");
 // turn on/off the stats for the histograms 
 void SetStats(TH1Map& hist_map, const bool toggle);
 
+// set statbox position
+void SetStatBoxPosition
+(
+    TH1& hist, 
+    const float x1 = 0.8, 
+    const float y1 = 0.8, 
+    const float x2 = 1.0, 
+    const float y2 = 1.0
+);
+
 // make an efficiency plot by dividing the two histograms 
 TH1* MakeEfficiencyPlot
 (

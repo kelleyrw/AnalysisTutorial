@@ -8,6 +8,8 @@
 #include "TH1.h"
 #include "TGaxis.h"
 #include "TColor.h"
+#include "TPad.h"
+#include "TPaveStats.h"
 #include <stdexcept>
 #include <iostream>
 #include <string>
@@ -171,6 +173,32 @@ void SetStats(TH1Map& hist_map, const bool toggle)
     for (TH1Map::const_iterator hm_iter = hist_map.begin(); hm_iter != hist_map.end(); hm_iter++)
     {
         hm_iter->second->SetStats(toggle);
+    }
+}
+
+// set statbox position
+void SetStatBoxPosition
+(
+    TH1& hist, 
+    const float x1, 
+    const float y1, 
+    const float x2, 
+    const float y2
+)
+{
+    hist.SetStats(true);
+    hist.Draw(); // make sure the stat box exists
+    gPad->Update();
+    if (TPaveStats* const statbox = dynamic_cast<TPaveStats*>(hist.FindObject("stats")))
+    {
+        statbox->SetLineColor(hist.GetLineColor());
+        statbox->SetLineWidth(hist.GetLineWidth());
+        statbox->SetLineStyle(hist.GetLineStyle());
+
+        statbox->SetX1NDC(x1);
+        statbox->SetY1NDC(y1);
+        statbox->SetX2NDC(x2);
+        statbox->SetY2NDC(y2);
     }
 }
 
