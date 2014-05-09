@@ -3,13 +3,27 @@
 
 #include <map>
 #include <string>
+#include "TColor.h"
+#include "TStyle.h"
+#include "TH1.h"
+#include "TDirectory.h"
 
 // forward declarations
-class TStyle;
-class TH1;
 
 // convenenice typedef for a simple histogram container
 typedef std::map<std::string, TH1*> TH1Map;
+
+// set the directory
+void SetDirectory(TH1Map& hist_map, TDirectory* const dir);
+
+// set the color
+void SetLineColor(TH1Map& hist_map, const Color_t color);
+
+// normalize hists
+void NormalizeHists(TH1Map& hist_map, const double norm = 1.0);
+
+// scale hists
+void ScaleHists(TH1Map& hist_map, const double scale);
 
 // Add a histogram to the container
 void AddHist(TH1Map& hist_map, TH1* const hist, const bool overwrite = false);

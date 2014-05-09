@@ -1,0 +1,8 @@
+<flags CPPDEFINES="CMS2_USE_CMSSW=1"/>
+<use name="boost_program_options"/>
+<use name="Packages/HistTools"/>
+<use name="Packages/LooperTools"/>
+<use name="CMS2/NtupleMacrosCore"/>
+<environment>
+  <bin name="create_singlelep_baby" file="create_singlelep_baby.cc"/>
+</environment>

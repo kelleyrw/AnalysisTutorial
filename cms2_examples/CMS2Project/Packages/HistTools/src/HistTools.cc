@@ -7,6 +7,7 @@
 #include "TStyle.h"
 #include "TH1.h"
 #include "TGaxis.h"
+#include "TColor.h"
 #include <stdexcept>
 #include <iostream>
 #include <string>
@@ -53,6 +54,43 @@ void AddHist(TH1Map& hist_map, TH1* const hist, const bool overwrite)
     return;
 }
 
+// set the directory
+void SetDirectory(TH1Map& hist_map, TDirectory* const dir)
+{
+    for (auto& hist_pair : hist_map)
+    {
+        hist_pair.second->SetDirectory(dir);
+    }
+}
+
+// set the color
+void SetLineColor(TH1Map& hist_map, const Color_t color)
+{
+    for (auto& hist_pair : hist_map)
+    {
+        hist_pair.second->SetLineColor(color);
+    }
+}
+
+// normalize hists
+void NormalizeHists(TH1Map& hist_map, const double norm)
+{
+    for (auto& hist_pair : hist_map)
+    {
+        TH1& h = *hist_pair.second;
+        const double integral = h.Integral(0, -1);
+        h.Scale(norm/integral); 
+    }
+}
+
+// scale hists
+void ScaleHists(TH1Map& hist_map, const double scale)
+{
+    for (auto& hist_pair : hist_map)
+    {
+        hist_pair.second->Scale(scale);
+    }
+}
 
 // save all the hists to a file
 void SaveHists(const TH1Map& hist_map, const std::string& filename,  const std::string& option)
