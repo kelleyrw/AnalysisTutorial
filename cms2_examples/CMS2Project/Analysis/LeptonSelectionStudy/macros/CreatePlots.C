@@ -19,22 +19,36 @@ struct Selection
     TCut cut;
 };
 
+// a list of selections that are applied cumulatively
+const std::vector<Selection>& GetElectronSelections()
+{
+    static std::vector<Selection> selections
+    {
+        {"base", "Base selections", "is_el"         },
+        {"fid" , "Passes Fiducial", "el_is_fiducial"},
+        {"pt20", "p_{T} > 20 GeV" , "p4.pt() > 20"  }
+    };
+    return selections;
+}
+
 // convenenice typedef for a simple histogram container
 typedef std::map<std::string, TH1*> TH1Map;
 
-void BookHists(TH1Map& hm, const std::vector<Selection>& selections)
+// book the histograms
+void BookHists(TH1Map& hm)
 {
     TH1::SetDefaultSumw2(true);
 
-    // gen level plots
-    for (const auto& s : selections)
+    // electron plots
+    for (const auto& s : GetElectronSelections())
     {
         AddHist(hm, new TH1D(Form("h_el_pt_%s" , s.name.c_str()), Form("Electron p_{T} (%s);p_{T} (GeV)", s.title.c_str()), 100,  0, 100));
         AddHist(hm, new TH1D(Form("h_el_eta_%s", s.name.c_str()), Form("Electron #eta (%s);#eta"        , s.title.c_str()), 100, -5,   5));
     }
 }
 
-void CreateElectronPlots
+// use TTree::Draw to create all the hists for each selection
+void CreateElectronHists
 (
     const std::string& sample,
     const bool require_prompt,
@@ -46,37 +60,30 @@ void CreateElectronPlots
 
     TChain chain("tree");
     chain.Add(Form("babies/%s_baby.root", sample.c_str()));
-
-    // selections
-    // ----------------------------- // 
-
-    // a list of selections that are applied cumulatively
-    std::vector<Selection> selections = 
-    {
-        {"base", "Base selections", (require_prompt ? "is_el && is_prompt" : "is_el && !is_prompt")},
-        {"fid" , "Passes Fiducial", "el_is_fiducial"                                               },
-        {"pt20", "p_{T} > 20 GeV" , "p4.pt() > 20"                                                 },
-    };
+    const double num_entries = chain.GetEntries();
 
     // hists
     // ----------------------------- // 
 
     TH1Map hm;
-    BookHists(hm, selections);
+    BookHists(hm);
 
     // Fill hists
     // ----------------------------- // 
 
     SetDirectory(hm, gDirectory);
-    TCut selection = "";
-    for (const auto& s : selections)
+    TCut selection = (require_prompt ? "is_prompt" : "!is_prompt");
+    for (const auto& s : GetElectronSelections())
     {
         // cumulative selection
         selection = selection && s.cut;
+        // normalizing to 100%
+/*         selection = Form("%1.5e*(%s)", 100.0/num_entries, (selection && s.cut).GetTitle()); */
+/*         std::cout << selection << std::endl; */
 
         // fill the hists
-        chain.Draw(Form("p4.pt()>>h_el_pt_%s"  , s.name.c_str()), selection, "goff", 100000);
-        chain.Draw(Form("p4.eta()>>h_el_eta_%s", s.name.c_str()), selection, "goff", 100000);
+        chain.Draw(Form("p4.pt()>>h_el_pt_%s"  , s.name.c_str()), selection, "goff");
+        chain.Draw(Form("p4.eta()>>h_el_eta_%s", s.name.c_str()), selection, "goff");
     }
     SetDirectory(hm, NULL);
 
@@ -90,9 +97,11 @@ void CreateElectronPlots
     ClearHists(hm);
 }
     
+// simple overlaying routine
 void PrintOverlays
 (
     const std::string label,
+    const std::vector<Selection>& selections,
     TH1Map& hm_sig, 
     TH1Map& hm_bkg, 
     const std::string hist_stem,
@@ -101,24 +110,16 @@ void PrintOverlays
     const std::string suffix = "png"
 )
 {
-    // a list of selections
-    std::vector<std::string> selections = 
-    {
-        "base",
-        "fid" ,
-        "pt20",
-    };
-
     for (const auto& s : selections)
     {
         // formatting
-        TH1& h_sig = *hm_sig[hist_stem + "_" + s];
+        TH1& h_sig = *hm_sig[hist_stem + "_" + s.name];
         h_sig.SetLineWidth(2);
 
-        TH1& h_bkg = *hm_bkg[hist_stem + "_" + s];
+        TH1& h_bkg = *hm_bkg[hist_stem + "_" + s.name];
         h_bkg.SetLineWidth(2);
 
-        const std::string plot_name = Form("p_%s_%s", hist_stem.substr(2, std::string::npos).c_str(), s.c_str());
+        const std::string plot_name = Form("p_%s_%s", hist_stem.substr(2, std::string::npos).c_str(), s.name.c_str());
 
         // create stack
         THStack hs(plot_name.c_str(), hist_title.c_str());
@@ -138,10 +139,11 @@ void PrintOverlays
         hs.Draw("nostack");
         legend.Draw();
         c1.SetLogy(log_plot);
-        c1.Print(Form("plots/%s/overlays/%s.%s", label.c_str(), plot_name.c_str(), suffix.c_str()));
+        c1.Print(Form("plots/%s/overlays/%s/%s.%s", label.c_str(), suffix.c_str(), plot_name.c_str(), suffix.c_str()));
     }    
 }
 
+// create the overlays for dyll and QCD samples
 void CreateOverlays(const std::string& label, const std::string& suffix = "png")
 {
     std::cout << "[CreatePlots] creating overlays plots" << std::endl;
@@ -159,18 +161,19 @@ void CreateOverlays(const std::string& label, const std::string& suffix = "png")
     NormalizeHists(hm_bkg);
 
     // create overlay
-    gSystem->Exec(Form("mkdir -p plots/%s/overlays", label.c_str()));
-    PrintOverlays(label, hm_sig, hm_bkg, "h_el_pt" , "Electron p_{T}; p_{T} (GeV)", /*log_plot=*/false, suffix);
-    PrintOverlays(label, hm_sig, hm_bkg, "h_el_eta", "Electron #eta; #eta"        , /*log_plot=*/false, suffix);
+    gSystem->Exec(Form("mkdir -p plots/%s/overlays/%s", label.c_str(), suffix.c_str()));
+    PrintOverlays(label, GetElectronSelections(), hm_sig, hm_bkg, "h_el_pt" , "Electron p_{T}; p_{T} (GeV)", /*log_plot=*/false, suffix);
+    PrintOverlays(label, GetElectronSelections(), hm_sig, hm_bkg, "h_el_eta", "Electron #eta; #eta"        , /*log_plot=*/false, suffix);
 }
 
+// Do all the plots
 void CreatePlots(const std::string& label = "test", const std::string& suffix = "png")
 {
     std::cout << "[CreatePlots] creating dyll plots" << std::endl;
-    CreateElectronPlots("dyll", /*prompt=*/true , label);
+    CreateElectronHists("dyll", /*prompt=*/true , label);
 
     std::cout << "[CreatePlots] creating QCD plots" << std::endl;
-    CreateElectronPlots("qcd" , /*prompt=*/false, label);
+    CreateElectronHists("qcd" , /*prompt=*/false, label);
 
     CreateOverlays(label, suffix);
 }

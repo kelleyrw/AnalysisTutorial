@@ -1164,7 +1164,7 @@ If you are charged to create ntuples, please ensure that this twiki is up to dat
 
 This section outlines how to checkout and compile the example CMS2 looper. Note that there is no "standard" way to build this code in this group -- the user is on his own to figure it out. This example uses SCRAM since it is supported by the CMS collaboration and you can get help via hypernews. If you decide to use something else (!ACLiC, make, cmake, boost build, IDE, etc.), then you are on your own.
 
----+++++ checkout the code 
+---+++++ checkout the code
 
 First decide where to put the code in your file system. This example will assume that you created an directory called =cms2_project_example= folder.
 
@@ -1228,7 +1228,7 @@ There should be three directories in your analysis area:
       * ... add whatever other packages you feel you need...
    1 Analysis: for the analysis specific code 
       * !ExampleCMS2Looper: the actual example looper
-      * !ExampleCMS2BabyMaker: an example baby maker (see next section) 
+      * !ExampleCMS2BabyMaker: an example baby maker (see next section)
       * ...add as many analyses as you need...
 
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
@@ -1262,7 +1262,7 @@ This should produce a ROOT file in the output directory that contains your histo
 
 ---++++ Example CMS2 Baby Maker
 
-This builds off the concepts in the previous subsection on CMS2 Loopers.  In many cases, it may make more sense to create a small ntuple (a.k.a a "baby"), that is a more cooked and less flexible version of the original CMS2 ntuple.  These are usually very analysis specific and is usually both a skim and translation of the general CMS2 variables into more specific analysis variables.  The babies have the following advantages:
+This builds off the concepts in the previous subsection on CMS2 Loopers. In many cases, it may make more sense to create a small ntuple (a.k.a a "baby"), that is a more cooked and less flexible version of the original CMS2 ntuple. These are usually very analysis specific and is usually both a skim and translation of the general CMS2 variables into more specific analysis variables. The babies have the following advantages:
    * the final variables you need for your analysis already calculated
    * small and light wait (e.g. all of my SS babies fit on my laptop)
    * remaking plots with different binning is trivial
@@ -1270,7 +1270,7 @@ This builds off the concepts in the previous subsection on CMS2 Loopers.  In man
 
 The main disadvantage of a baby is in when you run into a situtaion where you need a varaible from the CMS2 that you didn't store -- at that point you will have to re-run and re-create your baby ntuples.
 
----+++++ checkout the code 
+---+++++ checkout the code
 
 This is the same workflow as before for the: [[http://www.t2.ucsd.edu/twiki2/bin/view/UCSDTier2/AnalysisTutorial#Example_CMS2_Looper][CMS2 Looper]].
 
@@ -1304,7 +1304,7 @@ There should be three directories in your analysis area:
 | |____ExampleCMSBabyMaker
 </verbatim>
 
----+++++ how does it work? 
+---+++++ how does it work?
 
 The code for the example baby maker is located:
    * https://github.com/kelleyrw/AnalysisTutorial/tree/master/cms2_examples/CMS2Project/Analysis/ExampleCMS2BabyMaker
@@ -1313,20 +1313,19 @@ The main logic to fill the tree is in the class !CMS2BabyMaker:
    * https://github.com/kelleyrw/AnalysisTutorial/blob/master/cms2_examples/CMS2Project/Analysis/ExampleCMS2BabyMaker/interface/CMS2BabyMaker.h
    * https://github.com/kelleyrw/AnalysisTutorial/blob/master/cms2_examples/CMS2Project/Analysis/ExampleCMS2BabyMaker/src/CMS2BabyMaker.cc
 
----+++++ running the code? 
+---+++++ running the code
 
-To run interactively use the ROOT non-compiled script =create_baby.C=:
-https://github.com/kelleyrw/AnalysisTutorial/blob/master/cms2_examples/CMS2Project/Analysis/ExampleCMS2BabyMaker/macros/create_baby.C
+To run interactively use the ROOT non-compiled script =create_baby.C=: https://github.com/kelleyrw/AnalysisTutorial/blob/master/cms2_examples/CMS2Project/Analysis/ExampleCMS2BabyMaker/macros/create_baby.C
 
 The arguments to create_baby.C are:
 
-   * =const std::string& sample_name=      --> sample name to allow for sample dependent logic
-   * =const std::string& input_filename=   --> input TTree files 
-   * =const std::string& output_filename=  --> output baby TTree path
-   * =const std::string& runlist_filename= --> good run list
-   * =const long num_events = -1=          --> number of events to run on
-   * =const double lumi = 1.0=             --> luminosity in fb^-1 
-   * =const bool verbose = false=          --> toggle on/off extra debugging printout
+   * =const std::string& sample_name= --&gt; sample name to allow for sample dependent logic
+   * =const std::string& input_filename= --&gt; input TTree files
+   * =const std::string& output_filename= --&gt; output baby TTree path
+   * =const std::string& runlist_filename= --&gt; good run list
+   * =const long num_events = -1= --&gt; number of events to run on
+   * =const double lumi = 1.0= --&gt; luminosity in fb^-1
+   * =const bool verbose = false= --&gt; toggle on/off extra debugging printout
 
 The following is an example of how to run the baby maker:
 
@@ -1334,10 +1333,9 @@ The following is an example of how to run the baby maker:
 root -b -q "macros/create_baby.C(\"dyll\", \"/nfs-7/userdata/rwkelley/cms2/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12_DR53X-PU_S10_START53_V7A-v1.root\", \"babies/dyll.root\", \"json/Merged_190456-208686_8TeV_PromptReReco_Collisions12_goodruns.txt\", -1, 0.082, 0)"
 </verbatim>
 
----+++++ running the code in parallel? 
+---+++++ running the code in parallel
 
-The code can be run in parallel by using the script =create_babies_all.sh=:
-https://github.com/kelleyrw/AnalysisTutorial/blob/master/cms2_examples/CMS2Project/Analysis/ExampleCMS2BabyMaker/scripts/create_babies_all.sh
+The code can be run in parallel by using the script =create_babies_all.sh=: https://github.com/kelleyrw/AnalysisTutorial/blob/master/cms2_examples/CMS2Project/Analysis/ExampleCMS2BabyMaker/scripts/create_babies_all.sh
 
 Just call the script to execute the baby maker on all the datasets:
 
@@ -1345,7 +1343,7 @@ Just call the script to execute the baby maker on all the datasets:
 ./scripts/create_babies_all.sh
 </verbatim>
 
----+++++ examples on the ROOT interpreter 
+---+++++ examples on the ROOT interpreter
 
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 // raw 
@@ -1355,11 +1353,161 @@ root [2] cout << h1->Integral(0,-1) << endl;
 
 // scaled
 root [2] TH1D h1("h1", "dielectron mass;m_{ee} (GeV)", 150, 0, 150);
-root [3] tree->Draw("gen_p4.mass()>>h1", "0.082*scale1fb*is_gen_ee_includetau");
+root [3] tree->Draw("gen_p4.mass()>>h1", "0.082*scale1fb*is_gen_ee");
 root [4] cout << h1->Integral(0,-1) << endl;
 root [5] cout << h1->Integral(0,-1) << endl;
 99815.7
 </verbatim>
+
+---++++ Example Lepton Study
+
+Say one needs to do a study on lepton ID and isolation.  The simplest way conceptually (not necessarily from a programming standpoint) is to study the individual leptons and not necessarily the whole event.  In this sub-section, a simple skeleton single lepton study is performed.  This will be done using the following steps:
+   * Define the interesting variables.
+   * Make a simple "lepton based" baby (i.e. TTree) that hold the variables and is filled per lepton (as apposed to per event).
+   * Define a set of selections the variables and apply them one-by-one cumulatively as you observed the affect of the variables' distributions.  This is the so-called N-1 plots.
+   * Summarize the selections in a "cut-flow".
+   * Present the results in a slides (or whatever)
+
+Again, this builds off the concepts in the previous subsection on CMS2 Loopers.  The main exception is that the baby ntuple is filled per reconstructed lepton rather than per event.  This is a choice to gives us a simpler format to work with when studying per lepton quantities.  The disadvantage is you give up the ability to explore event level structure but if you need that, then you can redefine your format.
+
+---+++++ checkout the code
+
+This is the same work flow as before for the: [[http://www.t2.ucsd.edu/twiki2/bin/view/UCSDTier2/AnalysisTutorial#Example_CMS2_Looper][CMS2 Looper]].  This time, I've added a new folder under the Analysis directory.
+
+---+++++ code layout
+
+There should be three directories in your analysis area:
+   1 CMS2: this the CMS2 code 
+      * Dictionaries: class definitions so that ROOT can understand the non-ROOT native CMS2 types.
+      * !NtupleMacrosCore: the "sandbox" for the CORE common code
+      * !NtupleMacrosHeader: the "sandbox" for the CMS2.h/cc that was produced by the setup script from CORE.
+   1 Packages: this is a "starter" reusable toolkit. Feel free to run with this... 
+      * !HistTools: A set of basic ROOT histogram helper functions and classes.
+      * !LooperTools: A set of basic tools for writing a looper (not necessarily CMS2 specific)
+      * ... add whatever other packages you feel you need...
+   1 Analysis: for the analysis specific code 
+      * !ExampleCMS2Looper: an example looper (see previous sub-sections)
+      * !ExampleCMS2BabyMaker: an example baby maker (see previous sub-sections)
+      * !LeptonSelectionStudy: A single lepton analysis to study the selections.
+
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+.
+|____CMS2
+| |____Dictionaries
+| |____NtupleMacrosCore
+| |____NtupleMacrosHeader
+|____Packages
+| |____HistTools
+| |____LooperTools
+|____Analysis
+| |____ExampleCMS2Looper
+| |____ExampleCMSBabyMaker
+| |____LeptonSelectionStudy
+</verbatim>
+
+---+++++ how does it work?
+
+The code for the single lepton baby maker is located:
+   * https://github.com/kelleyrw/AnalysisTutorial/tree/master/cms2_examples/CMS2Project/Analysis/SingleLeptonSelection
+
+Rather than spread the baby making code over multiple files, it has been consolidated into one fully exectuable program:
+   * https://github.com/kelleyrw/AnalysisTutorial/blob/master/cms2_examples/CMS2Project/Analysis/LeptonSelectionStudy/bin/create_singlelep_baby.cc
+
+This will produce a program called =create_singlelep_baby=.  This was done since one is probably not going to re-use this code somewhere else.  If one does decide to make this a re-usable class, then you can always factor out the pieces into a seperate source (i.e. *.cc) and header (i.e. *.h) file.  
+
+---+++++ running the code
+
+To compile the code, you use scram:
+
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+scram b -j20
+</verbatim>
+
+This code defines an executables called =create_singlelep_baby=.  It uses [[][boost program option]] to parse command line arguments.  To see the available arguments, use =--help=.
+
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+[rwk7t@tensor LeptonSelectionStudy]$  create_singlelep_baby --help
+Allowed options:
+  --help                print this menu
+  --sample arg          REQUIRED: Sample name to run on
+  --output arg          output ROOT file
+  --nevts arg           maximum number of events to run
+  --verbose arg         verbosity toggle
+</verbatim>
+
+The following is an example of how to run the baby maker:
+
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+[rwk7t@tensor LeptonSelectionStudy]$  create_singlelep_baby --sample dyll
+[create_singlep_baby] inputs:
+sample  = dyll
+input   = /nfs-7/userdata/rwkelley/cms2/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12_DR53X-PU_S10_START53_V7A-v1.root
+output  = babies/dyll_baby.root
+nevts   = -1
+verbose = 0
+
+Loading CMSSW FWLite.
+running single lepton baby maker...
+[LeptonD0] WARNING - first good vertex index < 0.  Returning bogus value 999999
+[LeptonDz] WARNING - first good vertex index < 0.  Returning bogus value 999999
+ ---> 100.0% <---
+[SingleLeptonNtupleMaker] Saving TTree to output file: babies/dyll_baby.root
+
+62454 Events Processed
+0 Duplicate Events
+0 Bad Events
+------------------------------
+CPU  Time:	14.1
+Real Time:	14.2
+</verbatim>
+
+So far, there are only two samples defined:
+  * "dyll" &rarrow; Drell-Yan dataset
+  * "QCD" &rarrow; QCD dataset
+If you run on another, it should fail...
+
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+[rwk7t@tensor LeptonSelectionStudy]$  create_singlelep_baby --sample bogus
+[create_singlep_baby] Error: failed...
+[create_singlelp_baby] sample bogus is not valid.
+</verbatim>
+
+One can of course make this code more general, but usually this is sufficient for a specific study like this one.
+
+---+++++ running the code in parallel
+
+The code can be run in parallel by using the python script =create_babies_all.py=:
+  * https://github.com/kelleyrw/AnalysisTutorial/blob/master/cms2_examples/CMS2Project/Analysis/LeptonSelectionStudy/scripts/create_babies_all.py
+
+Just call the script to execute the baby maker on all the datasets:
+
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+./scripts/create_babies_all.py
+</verbatim>
+
+---+++++ Create the Plots 
+
+---++++++ Load Interactive !HistTools
+
+In order to maximize code-reuse and make plotting easier, use the !HistTools interactively in CINT.   To load the tools, add the following lines to your .rootlogon.C (or call it in each session): 
+<verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+    // Load HistTools
+    gROOT->ProcessLine(".x $CMSSW_BASE/src/Packages/HistTools/macros/load_histtools.C");
+</verbatim>
+
+This is a macro that loads the library and sets the include statements in a ROOT session:
+   * https://github.com/kelleyrw/AnalysisTutorial/blob/master/cms2_examples/CMS2Project/Packages/HistTools/macros/load_histtools.C
+
+---++++++ run ROOT compiled plotting script 
+
+A ROOT compiled macro is used to use TTree::Draw statements to create all the plots for a set of selections.  
+   * https://github.com/kelleyrw/AnalysisTutorial/blob/master/cms2_examples/CMS2Project/Analysis/LeptonSelectionStudy/macros/CreatePlots.C 
+
+This macro has several parts
+   * GetSelections &rarrow; a function returning a list of selections to be applied successively (i.e. a std::vector) 
+   * BookHists &rarrow; book the histograms
+
+---++++++ record results
 
 ---++++ Normalizing MC Samples
 
@@ -1414,11 +1562,11 @@ std::cout << "scaled count = lumi * scale1fb * raw_count = " << lumi*scale1fb*ra
 </verbatim>
 
 Here, I calculate the scale1fb by hand for demonstration purposes. Notice that there are other factors that went into the scalefb:
- | *variable*   | *description*                                                                                                                                   | 
- | =xsec=       | The production cross-section x BR for this MC sample.                                                                                           | 
- | =kfactor=    | Kinematically dependent factor to scale the xsec for higher order affect -- not used as much now.                                               | 
- | =filt_eff=   | The efficiency at the generator level. A non-unity value indicates that not all events that are generated are kept and then run throw sim/reco. | 
- | =nevts_file= | The number of events in this cms2 level file                                                                                                    | 
+| *variable*  | *description*  |
+| =xsec=  | The production cross-section x BR for this MC sample.  |
+| =kfactor=  | Kinematically dependent factor to scale the xsec for higher order affect -- not used as much now.  |
+| =filt_eff=  | The efficiency at the generator level. A non-unity value indicates that not all events that are generated are kept and then run throw sim/reco. |
+| =nevts_file= | The number of events in this cms2 level file  |
 
 The result of this for lumi = 0.082 pb<sup>-1</sup> is:
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
@@ -1449,13 +1597,13 @@ properly scale count = lumi * scale1fb * raw_count * cms2_filter_eff = 96369.5
 This is much more consistent.
 
 In practice, when the CMS2 ntuples are generated with the scale1fb using the N<sub>AOD</sub> and is stored in the branch called =evt_scale1fb=. This and the following related branches are added to the ntuples in the "post-processing" step of generating the ntuples:
- | *variable*      | *description*                                                     | 
- | =evt_scale1fb=  | event weight to scale to N expected for 1 fb<sup>-1</sub> of data | 
- | =evt_nEvts=     | Number of events generated N<sub>AOD</sub>                        | 
- | =evt_kfactor=   | Factor to scale LO to NLO+ -- a bit antiquated but historical     | 
- | =evt_filt_eff=  | Filter efficiency at the generator level                          | 
- | =evt_xsec_excl= | Exclusive cross-section                                           | 
- | =evt_xsec_incl= | Inclusive cross-section                                           | 
+| *variable*  | *description*  |
+| =evt_scale1fb=  | event weight to scale to N expected for 1 fb<sup>-1 of data</sup> |
+| =evt_nEvts=  | Number of events generated N<sub>AOD</sub>  |
+| =evt_kfactor=  | Factor to scale LO to NLO+ -- a bit antiquated but historical  |
+| =evt_filt_eff=  | Filter efficiency at the generator level  |
+| =evt_xsec_excl= | Exclusive cross-section  |
+| =evt_xsec_incl= | Inclusive cross-section  |
 
 Repeating the above exercise using the branches stored in the ntuple:
 
@@ -1500,9 +1648,9 @@ scale1fb_count  = 96369.6
 
 The full example code can be found [[https://github.com/kelleyrw/DrellYan/blob/master/macros/dy_scale1fb_example.C][here]].
 
----+++++ Scale1fb TTree looper example 
+---+++++ Scale1fb TTree looper example
 
-The above example is useful for quick studies on the command line.  Also, this can be done in looper code when filling histograms.
+The above example is useful for quick studies on the command line. Also, this can be done in looper code when filling histograms.
 
 <verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 void DrellYanLooper::Analyze(const long event)
@@ -1553,7 +1701,7 @@ full count   = 221.903
 subset count = 96369.6
 </verbatim>
 
-Here the "full count" is the yield assuming that the input was the full dataset.  Since we ran on a subset of the full dataset, we had to scale it.
+Here the "full count" is the yield assuming that the input was the full dataset. Since we ran on a subset of the full dataset, we had to scale it.
 
 ---+++ A full analysis example -- measuring the Z cross section
 
@@ -1598,7 +1746,8 @@ Single electron/muon data
     chain.Add("/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/SingleMu_Run2012A-recover-06Aug2012-v1_AOD/merged/*.root");
     chain.Add("/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/SingleElectron_Run2012A-recover-06Aug2012-v1_AOD/merged/*.root");
 </verbatim>
- 
+
+   * 
       * Good run list: 
          * [[%ATTACHURL%/Cert_190782-190949_8TeV_06Aug2012ReReco_Collisions12_cms2.txt][Cert_190782-190949_8TeV_06Aug2012ReReco_Collisions12_cms2.txt]]: Flat CMS2 friendly JSON
          * [[%ATTACHURL%/Cert_190782-190949_8TeV_06Aug2012ReReco_Collisions12.json][Cert_190782-190949_8TeV_06Aug2012ReReco_Collisions12.json]]: JSON file
@@ -1692,7 +1841,7 @@ ZZ &rarr; 4l
    1 Due: Friday 4/25: m_{ll} plots and table of yields: 
       * A total of 4 plots 
          * gen level ee yields and m_{ee} plot 
-            * count events with 2 true opposite-signed and same-flavor leptons (OSSF) normalized properly (luminosity*cross section) 
+            * count events with 2 true opposite-signed and same-flavor leptons (OSSF) normalized properly (luminosity*cross section)
             * only select one hypothesis per event in processes that could have more than one OSSF pair
             * numbers should be consistent with your spreadsheet numbers
          * m_{mm} same as above
@@ -1716,49 +1865,49 @@ ZZ &rarr; 4l
    1 Due Friday 5/23: Cross check results using functions from CORE
    1 Due Friday 5/30: Slides of the Results at the level of a "full status report"
 
----++++ Current Results 
+---++++ Current Results
 
-Place here your latest version of the running slides (PDF please).  Update them as often as you wish but have them updated with the above diliverables by the deadline.
+Place here your latest version of the running slides (PDF please). Update them as often as you wish but have them updated with the above diliverables by the deadline.
 
 Results slides
-   * [[%ATTACHURL%/ryan_dyslides.pdf     ][ryan_dyslides.pdf     ]]: Ryan's running slides --> updated 25 April 2013
-   * [[%ATTACHURL%/mark_dyslides.pdf     ][mark_dyslides.pdf     ]]: Mark's running slides -->
-   * [[%ATTACHURL%/liam_dyslides.pdf     ][liam_dyslides.pdf     ]]: Liam's running slides -->
-   * [[%ATTACHURL%/elizabeth_dyslides.pdf][elizabeth_dyslides.pdf]]: Elizabeth's running slides -->
-   * [[%ATTACHURL%/dan_dyslides.pdf      ][dan_dyslides.pdf      ]]: Dan's running slides -->
+   * [[%ATTACHURL%/ryan_dyslides.pdf ][ryan_dyslides.pdf ]]: Ryan's running slides --&gt; updated 25 April 2014
+   * [[%ATTACHURL%/mark_dyslides.pdf ][mark_dyslides.pdf ]]: Mark's running slides --&gt; updated 25 April 2014
+   * [[%ATTACHURL%/liam_dyslides.pdf ][liam_dyslides.pdf ]]: Liam's running slides --&gt;
+   * [[%ATTACHURL%/elizabeth_dyslides.pdf][elizabeth_dyslides.pdf]]: Elizabeth's running slides --&gt;
+   * [[%ATTACHURL%/dan_dyslides.pdf ][dan_dyslides.pdf ]]: Dan's running slides --&gt; updated 25 April 2014
 
-Place you talk slides here (PDF please).  Update them as often as you wish but have them updated before the meeting you with to present.
+Place you talk slides here (PDF please). Update them as often as you wish but have them updated before the meeting you with to present.
 
 ID/Iso talks:
 
-   * [[%ATTACHURL%/mark_muid.pdf      ][mark_muid.pdf      ]]: Mark's Muon ID slides -->
-   * [[%ATTACHURL%/dan_elid.pdf       ][dan_elid.pdf       ]]: Dan's Electron ID slides -->
-   * [[%ATTACHURL%/liam_muiso.pdf     ][liam_muiso.pdf     ]]: Liam's Isolation slides -->
-   * [[%ATTACHURL%/elizabeth_eliso.pdf][elizabeth_eliso.pdf]]: Elizabeth's Electron Isolation slides -->
+   * [[%ATTACHURL%/mark_muid.pdf ][mark_muid.pdf ]]: Mark's Muon ID slides --&gt;
+   * [[%ATTACHURL%/dan_elid.pdf ][dan_elid.pdf ]]: Dan's Electron ID slides --&gt; updated 29 April 2014
+   * [[%ATTACHURL%/elizabeth_iso1.pdf][elizabeth_iso1.pdf]]: Elizabeth's Isolation slides --&gt; updated 2 May 2014
+   * [[%ATTACHURL%/liam_iso2.pdf ][liam_iso2.pdf ]]: Liam's Isolation slides --&gt; updated 2 May 2014
 
----++++ FAQ 
+---++++ FAQ
 
 The following questions have been repeatedly asked so I wanted to write the answer down in a central place.
 
 ---+++++ Do I chain the data into one chain or keep them separate?
 
-You can of course chain them all up into one huge chain and use some logic to parse which dataset is which; however, I would advise against it.  The disadvantage to this technique is two-fold:
-   1 The job will take much longer to run.  
-   1 The analysis code has to be more complicated to handle the different cases.  More potential for bugs...
+You can of course chain them all up into one huge chain and use some logic to parse which dataset is which; however, I would advise against it. The disadvantage to this technique is two-fold:
+   1 The job will take much longer to run.
+   1 The analysis code has to be more complicated to handle the different cases. More potential for bugs...
 
-I would design the code to run on each dataset separately and produce either a set of plots and/or a baby ntuple.  This way each dataset can be a separate job and if you need to regenerate a single dataset (e.g. add more files or change the MC you use), you do not have to run all the jobs again. 
+I would design the code to run on each dataset separately and produce either a set of plots and/or a baby ntuple. This way each dataset can be a separate job and if you need to regenerate a single dataset (e.g. add more files or change the MC you use), you do not have to run all the jobs again.
 
 ---+++++ What is the most efficient work flow?
 
-This is of course user preference and there is no canonical answer.  I will describe what I like to do:
+This is of course user preference and there is no canonical answer. I will describe what I like to do:
    * Write a looper that will produce either a set of plots or a baby
-   * Write a main program that will call this looper and take as arguments dataset dependent metadata:
+   * Write a main program that will call this looper and take as arguments dataset dependent metadata: 
       * dataset to run on
       * input files
       * output files
       * number of events
-      * other dataset dependent issues... 
-   * Write a script (bash, python, or whatever), to call the jobs in parallel on the uaf.  I personally like to use python for this but whatever you are most comfortable with.  The following is a psuedo-script to illustrate my point:
+      * other dataset dependent issues...
+   * Write a script (bash, python, or whatever), to call the jobs in parallel on the uaf. I personally like to use python for this but whatever you are most comfortable with. The following is a psuedo-script to illustrate my point:
 
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 #!/bin/bash
@@ -1771,27 +1920,27 @@ root -q -b -l "macros/run_sample.C ($nevts, \"wjets\", \"output/wjets_baby.root\
 # ...
 </verbatim>
 
-   * write a ROOT compiled macro (i.e. .L macro.C++) that will make the yield tables from the output ROOT files above.  I have this script possess an option to produce latex code that i can cut and paste into !LaTex/!LaTexIt to make nice tables.	
-   * write a ROOT compiled macro (i.e. .L macro.C++) that will make the overlay plots from the output ROOT files above.  I have this script possess an option to print different plot types: png, eps, pdf.
+   * write a ROOT compiled macro (i.e. .L macro.C++) that will make the yield tables from the output ROOT files above. I have this script possess an option to produce latex code that i can cut and paste into !LaTex/!LaTexIt to make nice tables.
+   * write a ROOT compiled macro (i.e. .L macro.C++) that will make the overlay plots from the output ROOT files above. I have this script possess an option to print different plot types: png, eps, pdf. 
       * I find that eps make the nicest looking plots in ppt
-      * Most people use pdf for papers 
-      * I like png for quick plots because I want to look at them without the delay it takes OSX's finder to convert and display them. 
-   * Take the final plots and table and drop them into your ppt/paper. 
+      * Most people use pdf for papers
+      * I like png for quick plots because I want to look at them without the delay it takes OSX's finder to convert and display them.
+   * Take the final plots and table and drop them into your ppt/paper.
 
 ---+++++ How do I present the answer?
 
-I would like you to append the results to your DY slides.  The slides are meant to be a running documentation of your progress.  Please add some meaning observations and not just dumps numbers and plots on a table.  Also, you should compare them to the numbers you expect from the both the AN and the your excel exercise.
+I would like you to append the results to your DY slides. The slides are meant to be a running documentation of your progress. Please add some meaning observations and not just dumps numbers and plots on a table. Also, you should compare them to the numbers you expect from the both the AN and the your excel exercise.
 
----+++++ Where is the definition of the CMS2 branches? 
+---+++++ Where is the definition of the CMS2 branches?
 
-This is a tough question.  In an ideal world, we'd have a department to document our code and dataformats; however, this is physics code so that is never going to happen.  You will basically need to learn to read the CMS2 ntuple maker code to interpret what each branch means:
+This is a tough question. In an ideal world, we'd have a department to document our code and dataformats; however, this is physics code so that is never going to happen. You will basically need to learn to read the CMS2 ntuple maker code to interpret what each branch means:
 
 https://github.com/cmstas/NtupleMaker/tree/master/src
 
 I suggest (if you haven't already), check out this code so that you can grep it for the branches you need to look at.
 
 ---+++++ What branches should I use?
-You can see what branches are available by:
+ You can see what branches are available by:
 
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 Events->GetListOfAliases()->ls()
@@ -1802,23 +1951,23 @@ However, a the following blocks witll be important for this analysis
    * =evt_*= is the event level information such as scale1fb, run, event, etc.
    * =mus_*= reco muon information
    * =els_*= reco electron information
-   * =hyp_*= the dilepton hypothesis block.  These are convenience branches produced for every reco ee, eµ, or µµ pair in the event.
+   * =hyp_*= the dilepton hypothesis block. These are convenience branches produced for every reco ee, eµ, or µµ pair in the event.
 
 ---+++++ Should I make a baby ntuple?
 
-I would suggest making a baby to facilitate this analysis.  A baby is usually a simple ntuples with the "final" answer and high level variables to make plots of relevant variables.  It is usually not meant for details studies -- for these, you usually drop back down to CMS2 level or even AOD.
+I would suggest making a baby to facilitate this analysis. A baby is usually a simple ntuples with the "final" answer and high level variables to make plots of relevant variables. It is usually not meant for details studies -- for these, you usually drop back down to CMS2 level or even AOD.
 
 ---+++++ Should I use TTree::Draw or should I use the looper code?
 
-I would like you to at least do this with looper code.  Looper code is more complicated initially but is more efficient and more flexible.  This is why we went through it in so much detail.  With that said, it is not a bad ideal to also do this with TTree::Draw as cross-check and to gain that facility.  For quick studies, it can be much quicker to a few plots with TTree::Draw.
+I would like you to at least do this with looper code. Looper code is more complicated initially but is more efficient and more flexible. This is why we went through it in so much detail. With that said, it is not a bad ideal to also do this with TTree::Draw as cross-check and to gain that facility. For quick studies, it can be much quicker to a few plots with TTree::Draw.
 
 ---+++++ Should I include uncertainties
 
-Yes, any measured number should at least have an associated statistical uncertainty.  Systematic uncertainties are beyond the scope of this exercise and we shall ingore them.
+Yes, any measured number should at least have an associated statistical uncertainty. Systematic uncertainties are beyond the scope of this exercise and we shall ingore them.
 
 ---+++++ How I check my Gen yield?
 
-It is often a good idea (if you can), to check your results in more than one way.  You can do this on the ROOT command line doing the following:
+It is often a good idea (if you can), to check your results in more than one way. You can do this on the ROOT command line doing the following:
 
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 {
@@ -1852,6 +2001,4 @@ It is often a good idea (if you can), to check your results in more than one way
 }
 </verbatim>
 
--- Main.RyanKelley - 2015/04/25
-
-
+-- Main.RyanKelley - 2014/05/09

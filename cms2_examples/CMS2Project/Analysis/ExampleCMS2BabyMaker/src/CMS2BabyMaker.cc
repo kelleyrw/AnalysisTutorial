@@ -412,6 +412,7 @@ void CMS2BabyMaker::ScanChain(TChain& chain, const long num_events)
     const unsigned long num_events_chain = (num_events < 0 or num_events > chain.GetEntries() ? chain.GetEntries() : num_events);
 
     // count the total and duplicates events
+    int i_permille_old             = 0;
     unsigned long num_events_total = 0;
     unsigned long num_duplicates   = 0;
     unsigned long num_bad_events   = 0;
@@ -473,7 +474,13 @@ void CMS2BabyMaker::ScanChain(TChain& chain, const long num_events)
             }
 
             // Progress
-            CMS2::progress(num_events_total, num_events_chain);
+            const int i_permille = floor(1000 * num_events_total/ static_cast<float>(num_events_chain));
+            if (i_permille != i_permille_old)
+            {
+                printf("  \015\033[32m ---> \033[1m\033[31m%4.1f%%" "\033[0m\033[32m <---\033[0m\015", i_permille/10.);
+                fflush(stdout);
+                i_permille_old = i_permille;
+            }
 
             //~-~-~-~-~-~-~-//
             // Analysis Code//

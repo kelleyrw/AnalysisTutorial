@@ -5,6 +5,7 @@
 
 // ROOT
 #include "TBenchmark.h"
+#include "TSystem.h"
 #include "TChain.h"
 #include "TDirectory.h"
 #include "TFile.h"
@@ -699,6 +700,7 @@ void SingleLeptonNtupleMaker::ScanChain(TChain& chain, const long num_events)
     const unsigned long num_events_chain = (num_events < 0 or num_events > chain.GetEntries() ? chain.GetEntries() : num_events);
 
     // count the total and duplicates events
+    int i_permille_old             = 0;
     unsigned long num_events_total = 0;
     unsigned long num_duplicates   = 0;
     unsigned long num_bad_events   = 0;
@@ -760,7 +762,13 @@ void SingleLeptonNtupleMaker::ScanChain(TChain& chain, const long num_events)
             }
 
             // Progress
-            CMS2::progress(num_events_total, num_events_chain);
+            const int i_permille = floor(1000 * num_events_total/ static_cast<float>(num_events_chain));
+            if (i_permille != i_permille_old)
+            {
+                printf("  \015\033[32m ---> \033[1m\033[31m%4.1f%%" "\033[0m\033[32m <---\033[0m\015", i_permille/10.);
+                fflush(stdout);
+                i_permille_old = i_permille;
+            }
 
             //~-~-~-~-~-~-~-//
             // Analysis Code//
@@ -816,10 +824,10 @@ try
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help"       , "print this menu")
-        ("sample"     , po::value<std::string>(&sample_name)->required(), "REQUIRED: Sample name to run on" )
-        ("output"     , po::value<std::string>(&output_file)            , "output ROOT file"                )
-        ("nevts"      , po::value<long long>(&number_of_events)         , "maximum number of events to skim")
-        ("verbose"    , po::value<bool>(&verbose)                       , "verbosity toggle"                )
+        ("sample"     , po::value<std::string>(&sample_name)->required(), "REQUIRED: Sample name to run on")
+        ("output"     , po::value<std::string>(&output_file)            , "output ROOT file"               )
+        ("nevts"      , po::value<long long>(&number_of_events)         , "maximum number of events to run")
+        ("verbose"    , po::value<bool>(&verbose)                       , "verbosity toggle"               )
         ;
     try
     {
@@ -844,14 +852,6 @@ try
         std::cerr << "Unknown error!" << "\n";
         return 1;
     }
-
-    // print the inputs  
-    std::cout << "[create_singlep_baby] inputs:\n";
-    std::cout << "sample           = " << sample_name      << "\n";
-    std::cout << "output           = " << output_file      << "\n";
-    std::cout << "nevts            = " << number_of_events << "\n";
-    std::cout << "verbose          = " << verbose          << "\n";
-    std::cout << std::endl;
 
     // check inputs 
     // -------------------------------------------------------------------------------------------------//
@@ -881,8 +881,18 @@ try
     // set output file
     if (output_file.empty())
     {
+        gSystem->Exec("mkdir -p babies");
         output_file = Form("babies/%s_baby.root", sample_name.c_str());
     }
+
+    // print the inputs  
+    std::cout << "[create_singlep_baby] inputs:\n";
+    std::cout << "sample  = " << sample_name      << "\n";
+    std::cout << "input   = " << input_file       << "\n";
+    std::cout << "output  = " << output_file      << "\n";
+    std::cout << "nevts   = " << number_of_events << "\n";
+    std::cout << "verbose = " << verbose          << "\n";
+    std::cout << std::endl;
 
     // do it 
     // -------------------------------------------------------------------------------------------------//
