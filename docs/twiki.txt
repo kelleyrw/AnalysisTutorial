@@ -1514,8 +1514,34 @@ A ROOT compiled macro is used to use TTree::Draw statements to create all the pl
 This macro has several parts
    * GetSelections &rarrow; a function returning a list of selections to be applied successively (i.e. a std::vector) 
    * BookHists &rarrow; book the histograms
+   * CreateElectronHists &rarrow; fill the electron histograms using TTree::Draw
+   * PrintOverlays and PrintCutflowOverlay &rarrow; overlay the Drell-Yan and QCD plots
+   * CreatePlots &rarrow; main program of sorts
+
+Example:
+<verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
+[rwk7t@tensor LeptonSelectionStudy]$  root
+Loading CMSSW FWLite.
+Loading HistTools
+root [1] .L macros/CreatePlots.C+
+Info in <TUnixSystem::ACLiC>: creating shared library /Users/rwk7t/temp/.rootbuild//Users/rwk7t/Development/newbies/cms2_examples/CMS2Project/Analysis/LeptonSelectionStudy/./macros/CreatePlots_C.so
+root [2] CreatePlots("test", "eps")
+[CreatePlots] creating dyll plots
+[CreatePlots] creating QCD plots
+[CreatePlots] creating overlays plots
+Info in <TCanvas::Print>: eps file plots/test/overlays/eps/p_el_pt_base.eps has been created
+Info in <TCanvas::Print>: eps file plots/test/overlays/eps/p_el_pt_fid.eps has been created
+Info in <TCanvas::Print>: eps file plots/test/overlays/eps/p_el_pt_pt20.eps has been created
+Info in <TCanvas::Print>: eps file plots/test/overlays/eps/p_el_eta_base.eps has been created
+Info in <TCanvas::Print>: eps file plots/test/overlays/eps/p_el_eta_fid.eps has been created
+Info in <TCanvas::Print>: eps file plots/test/overlays/eps/p_el_eta_pt20.eps has been created
+Info in <TCanvas::Print>: eps file plots/test/overlays/eps/p_el_cutflow.eps has been created
+root [3] 
+</verbatim>
 
 ---++++++ record results
+
+Once you have the plots, record (in ppt, evernotes, whatever...) and interpret.
 
 ---++++ Normalizing MC Samples
 

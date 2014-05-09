@@ -92,6 +92,7 @@ void CreateElectronHists
         // cumulative selection
         selection = selection && s.cut;
         // normalizing to 100%
+        const TCut sel_scaled = selection;
 /*         const TCut sel_scaled = Form("%1.5e*(%s)", 100.0/num_entries, selection.GetTitle()); */
 /*         std::cout << sel_scaled << std::endl; */
 
