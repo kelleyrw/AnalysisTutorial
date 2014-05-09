@@ -1361,7 +1361,7 @@ root [5] cout << h1->Integral(0,-1) << endl;
 
 ---++++ Example Lepton Study
 
-Say one needs to do a study on lepton ID and isolation.  The simplest way conceptually (not necessarily from a programming standpoint) is to study the individual leptons and not necessarily the whole event.  In this sub-section, a simple skeleton single lepton study is performed.  This will be done using the following steps:
+Say one needs to do a study on lepton ID and isolation.  The simplest way conceptually (maybe not from a programming standpoint) is to study the individual leptons and not necessarily the whole event.  In this sub-section, a simple skeleton single lepton study is performed.  This will be done using the following steps:
    * Define the interesting variables.
    * Make a simple "lepton based" baby (i.e. TTree) that hold the variables and is filled per lepton (as apposed to per event).
    * Define a set of selections the variables and apply them one-by-one cumulatively as you observed the affect of the variables' distributions.  This is the so-called N-1 plots.
@@ -1372,9 +1372,9 @@ Again, this builds off the concepts in the previous subsection on CMS2 Loopers. 
 
 ---+++++ checkout the code
 
-This is the same work flow as before with one exception.  This was written in a newer CMSSW release area to take advantage of the newer compiler.  The instructions are the same as [[http://www.t2.ucsd.edu/twiki2/bin/view/UCSDTier2/AnalysisTutorial#checkout_the_code][here]].  Except use the following CMSSW release:
+This is the same work flow as before with one exception.  This was written in a newer CMSSW release area to take advantage of the newer compiler.  The instructions are the same as [[http://www.t2.ucsd.edu/twiki2/bin/view/UCSDTier2/AnalysisTutorial#checkout_the_code][here]] except use the following !CMSSW release:
 
-Create a CMSSW release area and setup the environment:
+Create a !CMSSW release area and setup the environment:
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 export SCRAM_ARCH=slc5_amd64_gcc472
 scramv1 p -n CMSSW_6_1_2_cms2example CMSSW CMSSW_6_1_2
@@ -1416,12 +1416,12 @@ There should be three directories in your analysis area:
 ---+++++ how does it work?
 
 The code for the single lepton baby maker is located:
-   * https://github.com/kelleyrw/AnalysisTutorial/tree/master/cms2_examples/CMS2Project/Analysis/SingleLeptonSelection
+   * https://github.com/kelleyrw/AnalysisTutorial/tree/master/cms2_examples/CMS2Project/Analysis/LeptonSelectionStudy
 
 Rather than spread the baby making code over multiple files, it has been consolidated into one fully exectuable program:
    * https://github.com/kelleyrw/AnalysisTutorial/blob/master/cms2_examples/CMS2Project/Analysis/LeptonSelectionStudy/bin/create_singlelep_baby.cc
 
-This will produce a program called =create_singlelep_baby=.  This was done since one is probably not going to re-use this code somewhere else.  If one does decide to make this a re-usable class, then you can always factor out the pieces into a seperate source (i.e. *.cc) and header (i.e. *.h) file.  
+This will produce a program called =create_singlelep_baby=.  The code was written in one file since it is probably not going to be re-used somewhere else.  If one does decide to make this a re-usable class, then you can always factor out the pieces into a separate source (i.e. *.cc), a header (i.e. *.h) file, and setup the library using the BuildFile.xml.  
 
 ---+++++ running the code
 
@@ -1431,7 +1431,7 @@ To compile the code, you use scram:
 scram b -j20
 </verbatim>
 
-This code defines an executables called =create_singlelep_baby=.  It uses [[][boost program option]] to parse command line arguments.  To see the available arguments, use =--help=.
+This code defines an executables called =create_singlelep_baby=.  It uses [[http://www.boost.org/doc/libs/1_55_0/doc/html/program_options.html][boost program option]] to parse command line arguments.  To see the available arguments, use =--help=.
 
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 [rwk7t@tensor LeptonSelectionStudy]$  create_singlelep_baby --help
@@ -1470,8 +1470,8 @@ Real Time:	14.2
 </verbatim>
 
 So far, there are only two samples defined:
-  * "dyll" &rarrow; Drell-Yan dataset
-  * "QCD" &rarrow; QCD dataset
+   * "dyll" &rarr; Drell-Yan dataset
+   * "QCD" &rarr; QCD dataset
 If you run on another, it should fail...
 
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
@@ -1485,7 +1485,7 @@ One can of course make this code more general, but usually this is sufficient fo
 ---+++++ running the code in parallel
 
 The code can be run in parallel by using the python script =create_babies_all.py=:
-  * https://github.com/kelleyrw/AnalysisTutorial/blob/master/cms2_examples/CMS2Project/Analysis/LeptonSelectionStudy/scripts/create_babies_all.py
+   * https://github.com/kelleyrw/AnalysisTutorial/blob/master/cms2_examples/CMS2Project/Analysis/LeptonSelectionStudy/scripts/create_babies_all.py
 
 Just call the script to execute the baby maker on all the datasets:
 
@@ -1512,11 +1512,11 @@ A ROOT compiled macro is used to use TTree::Draw statements to create all the pl
    * https://github.com/kelleyrw/AnalysisTutorial/blob/master/cms2_examples/CMS2Project/Analysis/LeptonSelectionStudy/macros/CreatePlots.C 
 
 This macro has several parts
-   * GetSelections &rarrow; a function returning a list of selections to be applied successively (i.e. a std::vector) 
-   * BookHists &rarrow; book the histograms
-   * CreateElectronHists &rarrow; fill the electron histograms using TTree::Draw
-   * PrintOverlays and PrintCutflowOverlay &rarrow; overlay the Drell-Yan and QCD plots
-   * CreatePlots &rarrow; main program of sorts
+   * !GetSelections &rarr; a function returning a list of selections to be applied successively (i.e. a std::vector) 
+   * !BookHists &rarr; book the histograms
+   * !CreateElectronHists &rarr; fill the electron histograms using TTree::Draw
+   * !PrintOverlays and !PrintCutflowOverlay &rarr; overlay the Drell-Yan and QCD plots
+   * !CreatePlots &rarr; main program of sorts
 
 Example:
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
@@ -1539,9 +1539,18 @@ Info in <TCanvas::Print>: eps file plots/test/overlays/eps/p_el_cutflow.eps has 
 root [3] 
 </verbatim>
 
----++++++ record results
+---+++++ study and record results
 
 Once you have the plots, record (in ppt, evernotes, whatever...) and interpret.
+
+---+++++ fill in the rest 
+
+This is a starter-kit framework to do the study.  Take this and do whatever you want with it and finish the study.
+
+To do:
+   * Fill in the missing variables in the baby (do electron isolation as an example)
+   * Add the observables to the !CreatePlots.C
+   * Add the observable to the study
 
 ---++++ Normalizing MC Samples
 
