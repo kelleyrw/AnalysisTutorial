@@ -192,7 +192,7 @@ struct GenHyp
 bool CompareGenHyp(const GenHyp& hyp1, const GenHyp& hyp2)
 {
     int hyp1_type = -1;
-    switch (hyp1.lep1.id*hyp2.lep2.id)
+    switch (hyp1.lep1.id*hyp1.lep2.id)
     {
         case -11*11: hyp1_type = 1; break; // ee
         case -13*13: hyp1_type = 2; break; // mu mu

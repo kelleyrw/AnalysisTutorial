@@ -1361,18 +1361,18 @@ root [5] cout << h1->Integral(0,-1) << endl;
 
 ---++++ Example Lepton Study
 
-Say one needs to do a study on lepton ID and isolation.  The simplest way conceptually (maybe not from a programming standpoint) is to study the individual leptons and not necessarily the whole event.  In this sub-section, a simple skeleton single lepton study is performed.  This will be done using the following steps:
+Say one needs to do a study on lepton ID and isolation. The simplest way conceptually (maybe not from a programming standpoint) is to study the individual leptons and not necessarily the whole event. In this sub-section, a simple skeleton single lepton study is performed. This will be done using the following steps:
    * Define the interesting variables.
    * Make a simple "lepton based" baby (i.e. TTree) that hold the variables and is filled per lepton (as apposed to per event).
-   * Define a set of selections the variables and apply them one-by-one cumulatively as you observed the affect of the variables' distributions.  This is the so-called N-1 plots.
+   * Define a set of selections the variables and apply them one-by-one cumulatively as you observed the affect of the variables' distributions. This is the so-called N-1 plots.
    * Summarize the selections in a "cut-flow".
    * Present the results in a slides (or whatever)
 
-Again, this builds off the concepts in the previous subsection on CMS2 Loopers.  The main exception is that the baby ntuple is filled per reconstructed lepton rather than per event.  This is a choice to gives us a simpler format to work with when studying per lepton quantities.  The disadvantage is you give up the ability to explore event level structure but if you need that, then you can redefine your format.
+Again, this builds off the concepts in the previous subsection on CMS2 Loopers. The main exception is that the baby ntuple is filled per reconstructed lepton rather than per event. This is a choice to gives us a simpler format to work with when studying per lepton quantities. The disadvantage is you give up the ability to explore event level structure but if you need that, then you can redefine your format.
 
 ---+++++ checkout the code
 
-This is the same work flow as before with one exception.  This was written in a newer CMSSW release area to take advantage of the newer compiler.  The instructions are the same as [[http://www.t2.ucsd.edu/twiki2/bin/view/UCSDTier2/AnalysisTutorial#checkout_the_code][here]] except use the following !CMSSW release:
+This is the same work flow as before with one exception. This was written in a newer CMSSW release area to take advantage of the newer compiler. The instructions are the same as [[http://www.t2.ucsd.edu/twiki2/bin/view/UCSDTier2/AnalysisTutorial#checkout_the_code][here]] except use the following !CMSSW release:
 
 Create a !CMSSW release area and setup the environment:
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
@@ -1421,7 +1421,7 @@ The code for the single lepton baby maker is located:
 Rather than spread the baby making code over multiple files, it has been consolidated into one fully exectuable program:
    * https://github.com/kelleyrw/AnalysisTutorial/blob/master/cms2_examples/CMS2Project/Analysis/LeptonSelectionStudy/bin/create_singlelep_baby.cc
 
-This will produce a program called =create_singlelep_baby=.  The code was written in one file since it is probably not going to be re-used somewhere else.  If one does decide to make this a re-usable class, then you can always factor out the pieces into a separate source (i.e. *.cc), a header (i.e. *.h) file, and setup the library using the BuildFile.xml.  
+This will produce a program called =create_singlelep_baby=. The code was written in one file since it is probably not going to be re-used somewhere else. If one does decide to make this a re-usable class, then you can always factor out the pieces into a separate source (i.e. *.cc), a header (i.e. *.h) file, and setup the library using the BuildFile.xml.
 
 ---+++++ running the code
 
@@ -1431,7 +1431,7 @@ To compile the code, you use scram:
 scram b -j20
 </verbatim>
 
-This code defines an executables called =create_singlelep_baby=.  It uses [[http://www.boost.org/doc/libs/1_55_0/doc/html/program_options.html][boost program option]] to parse command line arguments.  To see the available arguments, use =--help=.
+This code defines an executables called =create_singlelep_baby=. It uses [[http://www.boost.org/doc/libs/1_55_0/doc/html/program_options.html][boost program option]] to parse command line arguments. To see the available arguments, use =--help=.
 
 <verbatim style="padding: 10px; background-color: #d3d3d3; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
 [rwk7t@tensor LeptonSelectionStudy]$  create_singlelep_baby --help
@@ -1465,8 +1465,8 @@ running single lepton baby maker...
 0 Duplicate Events
 0 Bad Events
 ------------------------------
-CPU  Time:	14.1
-Real Time:	14.2
+CPU  Time:   14.1
+Real Time:   14.2
 </verbatim>
 
 So far, there are only two samples defined:
@@ -1493,11 +1493,11 @@ Just call the script to execute the baby maker on all the datasets:
 ./scripts/create_babies_all.py
 </verbatim>
 
----+++++ Create the Plots 
+---+++++ Create the Plots
 
 ---++++++ Load Interactive !HistTools
 
-In order to maximize code-reuse and make plotting easier, use the !HistTools interactively in CINT.   To load the tools, add the following lines to your .rootlogon.C (or call it in each session): 
+In order to maximize code-reuse and make plotting easier, use the !HistTools interactively in CINT. To load the tools, add the following lines to your .rootlogon.C (or call it in each session):
 <verbatim style="padding: 10px; background-color: #add8e6; text-align: left; margin-left: 20px; margin-right: 20px; color: black">
     // Load HistTools
     gROOT->ProcessLine(".x $CMSSW_BASE/src/Packages/HistTools/macros/load_histtools.C");
@@ -1506,13 +1506,13 @@ In order to maximize code-reuse and make plotting easier, use the !HistTools int
 This is a macro that loads the library and sets the include statements in a ROOT session:
    * https://github.com/kelleyrw/AnalysisTutorial/blob/master/cms2_examples/CMS2Project/Packages/HistTools/macros/load_histtools.C
 
----++++++ run ROOT compiled plotting script 
+---++++++ run ROOT compiled plotting script
 
-A ROOT compiled macro is used to use TTree::Draw statements to create all the plots for a set of selections.  
-   * https://github.com/kelleyrw/AnalysisTutorial/blob/master/cms2_examples/CMS2Project/Analysis/LeptonSelectionStudy/macros/CreatePlots.C 
+A ROOT compiled macro is used to use TTree::Draw statements to create all the plots for a set of selections.
+   * https://github.com/kelleyrw/AnalysisTutorial/blob/master/cms2_examples/CMS2Project/Analysis/LeptonSelectionStudy/macros/CreatePlots.C
 
 This macro has several parts
-   * !GetSelections &rarr; a function returning a list of selections to be applied successively (i.e. a std::vector) 
+   * !GetSelections &rarr; a function returning a list of selections to be applied successively (i.e. a std::vector)
    * !BookHists &rarr; book the histograms
    * !CreateElectronHists &rarr; fill the electron histograms using TTree::Draw
    * !PrintOverlays and !PrintCutflowOverlay &rarr; overlay the Drell-Yan and QCD plots
@@ -1543,9 +1543,9 @@ root [3]
 
 Once you have the plots, record (in ppt, evernotes, whatever...) and interpret.
 
----+++++ fill in the rest 
+---+++++ fill in the rest
 
-This is a starter-kit framework to do the study.  Take this and do whatever you want with it and finish the study.
+This is a starter-kit framework to do the study. Take this and do whatever you want with it and finish the study.
 
 To do:
    * Fill in the missing variables in the baby (do electron isolation as an example)
@@ -1903,10 +1903,10 @@ ZZ &rarr; 4l
          * Mark: muon identification (Tuesday)
          * Elizabeth: electron Isolation (Friday)
          * Liam: muon isolation (Friday)
-   1 Due Friday 5/9: Implement a cut flow, kinematic and N-1 plots.
-   1 Due Friday 5/16: Final results
-   1 Due Friday 5/23: Cross check results using functions from CORE
-   1 Due Friday 5/30: Slides of the Results at the level of a "full status report"
+   1 Due Friday 5/16: Implement a cut flow, kinematic and N-1 plots.
+   1 Due Friday 5/27: Implement a cut flow, kinematic and N-1 plots (2nd iteration).
+   1 Due Friday 6/3: Implement all selections 
+   1 Due Friday 6/10: Slides of the Results at the level of a "full status report"
 
 ---++++ Current Results
 
@@ -1916,7 +1916,7 @@ Results slides
    * [[%ATTACHURL%/ryan_dyslides.pdf ][ryan_dyslides.pdf ]]: Ryan's running slides --&gt; updated 25 April 2014
    * [[%ATTACHURL%/mark_dyslides.pdf ][mark_dyslides.pdf ]]: Mark's running slides --&gt; updated 25 April 2014
    * [[%ATTACHURL%/liam_dyslides.pdf ][liam_dyslides.pdf ]]: Liam's running slides --&gt;
-   * [[%ATTACHURL%/elizabeth_dyslides.pdf][elizabeth_dyslides.pdf]]: Elizabeth's running slides --&gt;
+   * [[%ATTACHURL%/CMS_drellyanslides.pdf][elizabeth_dyslides.pdf]]: Elizabeth's running slides <span style="background-color: transparent">--&gt; updated 25 April 2014</span>
    * [[%ATTACHURL%/dan_dyslides.pdf ][dan_dyslides.pdf ]]: Dan's running slides --&gt; updated 25 April 2014
 
 Place you talk slides here (PDF please). Update them as often as you wish but have them updated before the meeting you with to present.
@@ -2044,4 +2044,5 @@ It is often a good idea (if you can), to check your results in more than one way
 }
 </verbatim>
 
--- Main.RyanKelley - 2014/05/09
+-- Main.RyanKelley - 2014/05/20
+
