@@ -149,7 +149,7 @@ CMS2BabyMaker::CMS2BabyMaker
 )
     : m_sample_name(sample_name)
     , m_output_filename(output_filename)
-    , m_runlist_filename("")
+    , m_runlist_filename(runlist_filename)
     , m_nevts_corr(nevts_corr)
     , m_lumi(lumi)
     , m_verbose(verbose)
